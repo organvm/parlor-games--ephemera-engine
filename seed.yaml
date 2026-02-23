@@ -1,0 +1,27 @@
+schema_version: "1.0"
+organ: III
+organ_name: Commerce
+repo: parlor-games--ephemera-engine
+org: labores-profani-crux
+
+metadata:
+  implementation_status: DESIGN_ONLY
+  tier: standard
+  promotion_status: LOCAL
+  description: >
+    System for unrepeatable parlor/party games across three phases
+    (pre-game, game night, post-game). Four games: Murder Mystery,
+    Whose Memory?, The Confession Album, The Exquisite Corpse.
+    Procedural generation, curated content libraries, and
+    player-supplied material ensure no two evenings are alike.
+    Targeting iOS/Android mobile app with React Native.
+  tags:
+    - games
+    - social
+    - generative
+    - analog
+    - mobile
+    - react-native
+
+produces: []
+consumes: []
