@@ -1,0 +1,761 @@
+openapi: 3.1.0
+info:
+  title: Ephemera Engine — Murder Mystery API
+  description: |
+    API contracts for the Murder Mystery game module (spec 004).
+    Covers setting seed generation, character delivery, clue distribution,
+    accusation submission, awards voting, and artifact triggers.
+  version: 1.0.0
+
+servers:
+  - url: https://{project-ref}.supabase.co/functions/v1
+    description: Supabase Edge Functions
+  - url: https://{project-ref}.supabase.co/rest/v1
+    description: Supabase PostgREST (direct table access)
+
+paths:
+  /generate-seed:
+    post:
+      operationId: generateSettingSeed
+      summary: Generate a murder mystery setting seed via Claude API
+      description: |
+        Server-side proxy to the Claude API. Accepts four-axis input,
+        generates a complete scenario, validates for internal consistency,
+        and returns the result. Rate-limited to 10 generations per session
+        with a 5-second cooldown between requests.
+      tags:
+        - Setting Seed
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateSeedRequest'
+      responses:
+        '200':
+          description: Successfully generated scenario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateSeedResponse'
+        '400':
+          description: Invalid input (missing axes or invalid session_id)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded (max 10 per session, 5s cooldown)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '502':
+          description: Claude API error (timeout, unavailable)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /sessions/{session_id}/characters/assign:
+    post:
+      operationId: assignCharacters
+      summary: Assign characters to confirmed guests
+      description: |
+        Assigns characters from the session's character roster to confirmed
+        participants. Supports auto-assign (random), manual (explicit mapping),
+        and preference-based modes.
+      tags:
+        - Character Management
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignCharactersRequest'
+      responses:
+        '200':
+          description: Characters assigned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignCharactersResponse'
+        '400':
+          description: Invalid assignment (mismatched counts, invalid IDs)
+        '403':
+          description: Caller is not the session host
+        '409':
+          description: Characters already assigned (use PUT to reassign)
+
+  /sessions/{session_id}/characters/deliver:
+    post:
+      operationId: deliverCharacterPackets
+      summary: Deliver character packets to all assigned guests
+      description: |
+        Triggers delivery of character packets (character sheet, contribution brief,
+        preparation prompts) to all assigned participants via push notification
+        (app players) and email (web players).
+      tags:
+        - Character Management
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      responses:
+        '200':
+          description: Delivery initiated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  delivered_count:
+                    type: integer
+                  delivery_status:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        participant_id:
+                          type: string
+                          format: uuid
+                        channel:
+                          type: string
+                          enum: [push, email]
+                        status:
+                          type: string
+                          enum: [sent, failed, pending]
+        '403':
+          description: Caller is not the session host
+
+  /sessions/{session_id}/game-night/advance-act:
+    post:
+      operationId: advanceAct
+      summary: Advance to the next act in the three-act structure
+      description: |
+        Records the phase transition timestamp and advances the game night
+        state. Validates that the transition is valid (Acts proceed 1→2→3).
+        Primarily writes to local DB during offline game night; this endpoint
+        is used for post-game sync.
+      tags:
+        - Game Night
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - act
+                - started_at
+              properties:
+                act:
+                  type: integer
+                  minimum: 1
+                  maximum: 3
+                started_at:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: Act transition recorded
+        '400':
+          description: Invalid transition (e.g., Act 1 → Act 3)
+        '403':
+          description: Caller is not the session host
+
+  /sessions/{session_id}/game-night/distribute-clue:
+    post:
+      operationId: distributeClue
+      summary: Mark a clue as distributed
+      description: |
+        Records that the host has distributed a specific clue during game night.
+        Primarily writes to local DB during offline game night; this endpoint
+        is used for post-game sync.
+      tags:
+        - Game Night
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - clue_id
+              properties:
+                clue_id:
+                  type: string
+                  description: Clue exhibit ID (e.g., "A", "B")
+                distributed_at:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: Clue distribution recorded
+        '400':
+          description: Invalid clue_id
+        '403':
+          description: Caller is not the session host
+
+  /sessions/{session_id}/accusations:
+    post:
+      operationId: submitAccusation
+      summary: Submit a player's accusation
+      description: |
+        Records a player's accusation during Act III. The accusation is sealed
+        and not visible to other participants until the host triggers the reveal.
+        Works offline (queued locally, synced post-game).
+      tags:
+        - Accusations
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccusationRequest'
+      responses:
+        '201':
+          description: Accusation submitted and sealed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accusation_id:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    enum: [sealed]
+        '400':
+          description: Invalid accusation (missing fields, invalid character_id)
+        '403':
+          description: Caller is not a participant in this session
+        '409':
+          description: Player has already submitted an accusation
+
+    get:
+      operationId: getAccusations
+      summary: Get all accusations (host only, after reveal)
+      description: |
+        Returns all submitted accusations for the session.
+        Only accessible by the host, and only after the reveal phase
+        has been triggered.
+      tags:
+        - Accusations
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      responses:
+        '200':
+          description: List of accusations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accusations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Accusation'
+        '403':
+          description: Caller is not the host or reveal has not been triggered
+
+  /sessions/{session_id}/awards/vote:
+    post:
+      operationId: submitAwardVote
+      summary: Submit a vote for an award category
+      description: |
+        Records a player's vote for an award category.
+        Players cannot vote for themselves.
+        Works offline (queued locally, synced post-game).
+      tags:
+        - Awards
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AwardVoteRequest'
+      responses:
+        '201':
+          description: Vote recorded
+        '400':
+          description: Invalid vote (self-vote, invalid category or nominee)
+        '403':
+          description: Caller is not a participant
+        '409':
+          description: Player has already voted in this category
+
+  /sessions/{session_id}/awards/results:
+    get:
+      operationId: getAwardResults
+      summary: Get award voting results (host only)
+      tags:
+        - Awards
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      responses:
+        '200':
+          description: Award results by category
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AwardResult'
+        '403':
+          description: Caller is not the session host
+
+  /sessions/{session_id}/sealed-envelopes:
+    put:
+      operationId: saveEpilogues
+      summary: Save host-written character epilogues
+      description: |
+        Saves the host's epilogue text for each character.
+        These are queued as delayed artifacts for delivery at the
+        scheduled time (default 7 days post-game).
+      tags:
+        - Sealed Envelope
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveEpiloguesRequest'
+      responses:
+        '200':
+          description: Epilogues saved, delivery scheduled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  envelopes_count:
+                    type: integer
+                  scheduled_delivery:
+                    type: string
+                    format: date-time
+        '400':
+          description: Missing epilogues for some characters
+        '403':
+          description: Caller is not the session host
+
+  /render-artifact:
+    post:
+      operationId: renderArtifact
+      summary: Trigger artifact rendering (shared Edge Function)
+      description: |
+        Triggers server-side artifact rendering via the shared rendering pipeline.
+        Accepts session_id and artifact type, assembles the data, renders HTML
+        via Nunjucks templates, converts to PDF via Puppeteer, and uploads to
+        Supabase Storage. Used for The Dossier, Menu of the Damned, and
+        The Sealed Envelope.
+      tags:
+        - Artifacts
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenderArtifactRequest'
+      responses:
+        '200':
+          description: Artifact rendered and uploaded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RenderArtifactResponse'
+        '400':
+          description: Invalid artifact type or session not in COMPLETE state
+        '403':
+          description: Caller is not the session host
+        '500':
+          description: Rendering failed (Puppeteer error)
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Supabase JWT token
+
+  parameters:
+    SessionId:
+      name: session_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    GenerateSeedRequest:
+      type: object
+      required:
+        - session_id
+        - player_count
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        era:
+          type: string
+          description: Era selection (e.g., "1928"). Null for random.
+        location:
+          type: string
+          description: Location selection (e.g., "Riviera villa"). Null for random.
+        milieu:
+          type: string
+          description: Social milieu (e.g., "Art world"). Null for random.
+        tension:
+          type: string
+          description: Central tension (e.g., "A vanished manuscript"). Null for random.
+        player_count:
+          type: integer
+          minimum: 6
+          maximum: 12
+        mode:
+          type: string
+          enum: [generate, random]
+          default: generate
+
+    GenerateSeedResponse:
+      type: object
+      properties:
+        setting_seed:
+          type: object
+          properties:
+            source:
+              type: string
+              enum: [generated, random]
+            era:
+              type: string
+            location:
+              type: string
+            milieu:
+              type: string
+            tension:
+              type: string
+            setting_description:
+              type: string
+            crime_scene:
+              type: string
+            generated_by:
+              type: string
+              enum: [llm]
+        characters:
+          type: array
+          items:
+            $ref: '#/components/schemas/GeneratedCharacter'
+        crime:
+          type: object
+          properties:
+            victim_id:
+              type: string
+            murderer_id:
+              type: string
+            weapon:
+              type: string
+            motive:
+              type: string
+            red_herrings:
+              type: array
+              items:
+                type: object
+                properties:
+                  character_id:
+                    type: string
+                  description:
+                    type: string
+            timeline:
+              type: array
+              items:
+                type: object
+                properties:
+                  order:
+                    type: integer
+                  description:
+                    type: string
+                  act:
+                    type: integer
+        clues:
+          type: array
+          items:
+            $ref: '#/components/schemas/GeneratedClue'
+        generation_id:
+          type: string
+          format: uuid
+          description: Reference to seed_generation_log entry
+
+    GeneratedCharacter:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        occupation:
+          type: string
+        personality:
+          type: string
+        secret:
+          type: string
+        relationship:
+          type: object
+          properties:
+            target_character_id:
+              type: string
+            description:
+              type: string
+        is_murderer:
+          type: boolean
+        is_victim:
+          type: boolean
+        contribution_brief:
+          type: object
+          properties:
+            food:
+              type: string
+            dress:
+              type: string
+            prop:
+              type: string
+        preparation_prompts:
+          type: array
+          items:
+            type: string
+
+    GeneratedClue:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        type:
+          type: string
+          enum: [PHYSICAL, DOCUMENT, FINANCIAL, PERSONAL]
+        description:
+          type: string
+        found_by:
+          type: string
+        tier:
+          type: integer
+          minimum: 1
+          maximum: 3
+
+    AssignCharactersRequest:
+      type: object
+      required:
+        - mode
+      properties:
+        mode:
+          type: string
+          enum: [auto, manual, preference]
+        assignments:
+          type: array
+          description: Required for manual mode. Array of character-to-participant mappings.
+          items:
+            type: object
+            properties:
+              character_id:
+                type: string
+              participant_id:
+                type: string
+                format: uuid
+
+    AssignCharactersResponse:
+      type: object
+      properties:
+        assignments:
+          type: array
+          items:
+            type: object
+            properties:
+              character_id:
+                type: string
+              character_name:
+                type: string
+              participant_id:
+                type: string
+                format: uuid
+              participant_name:
+                type: string
+
+    AccusationRequest:
+      type: object
+      required:
+        - accused_character_id
+        - method
+        - motive
+      properties:
+        accused_character_id:
+          type: string
+          description: Character.id of the accused
+        method:
+          type: string
+          maxLength: 500
+          description: How the crime was committed (free text)
+        motive:
+          type: string
+          maxLength: 500
+          description: Why the crime was committed (free text)
+
+    Accusation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        player_id:
+          type: string
+          format: uuid
+        player_name:
+          type: string
+        accused_character_id:
+          type: string
+        accused_character_name:
+          type: string
+        method:
+          type: string
+        motive:
+          type: string
+
+    AwardVoteRequest:
+      type: object
+      required:
+        - category
+        - nominee_id
+      properties:
+        category:
+          type: string
+          enum:
+            - best_performance
+            - most_convincing_liar
+            - best_cocktail
+            - best_dressed
+            - closest_to_truth
+        nominee_id:
+          type: string
+          format: uuid
+          description: SessionParticipation.id of the nominee
+
+    AwardResult:
+      type: object
+      properties:
+        category:
+          type: string
+        winner_id:
+          type: string
+          format: uuid
+        winner_name:
+          type: string
+        votes:
+          type: integer
+
+    SaveEpiloguesRequest:
+      type: object
+      required:
+        - envelopes
+      properties:
+        envelopes:
+          type: array
+          items:
+            type: object
+            required:
+              - character_id
+              - text
+            properties:
+              character_id:
+                type: string
+              text:
+                type: string
+                maxLength: 2000
+        delivery_delay_days:
+          type: integer
+          minimum: 3
+          maximum: 14
+          default: 7
+
+    RenderArtifactRequest:
+      type: object
+      required:
+        - session_id
+        - artifact_type
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        artifact_type:
+          type: string
+          enum:
+            - mm_dossier
+            - mm_menu
+            - mm_sealed_envelope
+        personalized_for:
+          type: string
+          format: uuid
+          description: Required for mm_sealed_envelope (per-player rendering)
+
+    RenderArtifactResponse:
+      type: object
+      properties:
+        artifact_id:
+          type: string
+          format: uuid
+        file_url:
+          type: string
+          format: uri
+        file_size_bytes:
+          type: integer
+        page_count:
+          type: integer
+        status:
+          type: string
+          enum: [ready]
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        code:
+          type: string
+        details:
+          type: string

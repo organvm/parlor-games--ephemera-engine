@@ -1,0 +1,457 @@
+openapi: "3.0.3"
+info:
+  title: Ephemera Engine — Game Night Sync API
+  description: |
+    API contract for game night data synchronization. During game night (ACTIVE state),
+    all operations happen locally on the host's device. After game night ends, local
+    data is pushed to the server via these endpoints for artifact generation.
+
+    Most game night operations do NOT touch the server. This API handles only:
+    1. Pushing game night event logs after the session
+    2. Resuming a session on a different device
+    3. Emergency data recovery
+  version: "1.0.0"
+  contact:
+    name: Ephemera Engine
+    url: https://ephemera.app
+
+servers:
+  - url: https://{project-ref}.supabase.co/functions/v1
+    description: Supabase Edge Functions
+    variables:
+      project-ref:
+        default: "your-project-ref"
+
+tags:
+  - name: Sync
+    description: Game night data synchronization (local -> server)
+  - name: Resume
+    description: Session recovery and resumption
+  - name: Recovery
+    description: Emergency data recovery
+
+paths:
+  /sync-game-night:
+    post:
+      tags: [Sync]
+      operationId: syncGameNight
+      summary: Push game night data from local device to server
+      description: |
+        Receives the complete game night event log and summary from the host's device.
+        Called after the session transitions to COMPLETE state (or on reconnect if the
+        transition happened while offline). Idempotent — duplicate events (by ID) are
+        ignored.
+
+        This is the primary sync endpoint. The host's device is authoritative —
+        server data is overwritten if conflicts exist.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SyncGameNightRequest"
+            example:
+              session_id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+              events:
+                - id: "evt-001"
+                  event_type: "phase_advance"
+                  actor_id: "part-host-001"
+                  payload:
+                    from_phase: 0
+                    to_phase: 1
+                    phase_name: "The Chain"
+                  timestamp: "2026-02-23T20:15:00Z"
+                - id: "evt-002"
+                  event_type: "player_turn"
+                  actor_id: "part-002"
+                  payload:
+                    player_id: "part-002"
+                    phase: 1
+                  timestamp: "2026-02-23T20:16:00Z"
+              summary:
+                total_duration_ms: 7200000
+                phases_completed: 4
+                total_turns: 32
+                passes: 2
+                skips: 1
+                players_dropped: 0
+                players_added: 0
+                timer_used: false
+                written_answers: 0
+                game_specific:
+                  questions_answered: 28
+                  questions_remaining: 0
+                  return_round_played: true
+              written_answers: []
+      responses:
+        "200":
+          description: Sync successful. All events received and stored.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SyncGameNightResponse"
+        "207":
+          description: Partial success. Some events were duplicates (already synced).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SyncGameNightResponse"
+        "401":
+          description: Unauthorized — invalid or missing auth token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden — user is not the host of this session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Validation error — invalid event structure or session not in COMPLETE/ACTIVE state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /resume-game-night:
+    get:
+      tags: [Resume]
+      operationId: resumeGameNight
+      summary: Retrieve the most recent server-synced state for session recovery
+      description: |
+        Used when the host's device fails and they need to resume on a different device.
+        Returns the most recent game night state that was synced to the server. Any
+        un-synced local state from the failed device is lost.
+
+        Only available for sessions in ACTIVE state.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: session_id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The session to resume
+      responses:
+        "200":
+          description: Session state retrieved. Dashboard can resume.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResumeGameNightResponse"
+        "204":
+          description: No server-synced state available (game night was fully offline). Resume from PREPARING state data.
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden — user is not the host
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Session not found or not in ACTIVE state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /recover-game-night:
+    post:
+      tags: [Recovery]
+      operationId: recoverGameNight
+      summary: Emergency recovery — force sync partial game night data
+      description: |
+        Emergency endpoint for recovering partial game night data when the host
+        needs to end the session prematurely (e.g., device dying, need to switch
+        devices). Accepts partial data and marks the session as requiring manual
+        artifact review.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecoverGameNightRequest"
+      responses:
+        "200":
+          description: Partial data received. Session marked for manual review.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [recovered]
+                  events_received:
+                    type: integer
+                  requires_manual_review:
+                    type: boolean
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Supabase JWT access token
+
+  schemas:
+    SyncGameNightRequest:
+      type: object
+      required: [session_id, events, summary]
+      properties:
+        session_id:
+          type: string
+          format: uuid
+          description: The session this game night data belongs to
+        events:
+          type: array
+          items:
+            $ref: "#/components/schemas/GameNightEvent"
+          description: Complete ordered list of game night events
+        summary:
+          $ref: "#/components/schemas/GameNightSummary"
+        written_answers:
+          type: array
+          items:
+            $ref: "#/components/schemas/WrittenAnswer"
+          description: Written answers from players using written answer mode
+
+    SyncGameNightResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [synced, partial]
+          description: "'synced' if all events were new; 'partial' if some were duplicates"
+        events_received:
+          type: integer
+          description: Number of new events stored
+        events_skipped:
+          type: integer
+          description: Number of duplicate events ignored
+        summary_created:
+          type: boolean
+          description: Whether the game night summary was created/updated
+
+    GameNightEvent:
+      type: object
+      required: [id, event_type, payload, timestamp]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Locally generated event ID (used for deduplication)
+        event_type:
+          type: string
+          enum:
+            - phase_advance
+            - phase_undo
+            - player_turn
+            - player_skip
+            - player_pass
+            - player_drop
+            - player_add
+            - player_reinstate
+            - timer_start
+            - timer_pause
+            - timer_extend
+            - timer_dismiss
+            - timer_expire
+            - written_answer
+            - game_specific
+            - auto_save
+            - session_end
+        actor_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: Participant who triggered the event (null for system events)
+        payload:
+          type: object
+          additionalProperties: true
+          description: Event-specific data (schema varies by event_type)
+        timestamp:
+          type: string
+          format: date-time
+          description: When the event occurred on the host's device
+
+    GameNightSummary:
+      type: object
+      required: [phases_completed, total_turns]
+      properties:
+        total_duration_ms:
+          type: integer
+          nullable: true
+          description: Total game night duration in milliseconds
+        phases_completed:
+          type: integer
+          minimum: 0
+        total_turns:
+          type: integer
+          minimum: 0
+        passes:
+          type: integer
+          minimum: 0
+          default: 0
+        skips:
+          type: integer
+          minimum: 0
+          default: 0
+        players_dropped:
+          type: integer
+          minimum: 0
+          default: 0
+        players_added:
+          type: integer
+          minimum: 0
+          default: 0
+        timer_used:
+          type: boolean
+          default: false
+        written_answers:
+          type: integer
+          minimum: 0
+          default: 0
+        game_specific:
+          type: object
+          additionalProperties: true
+          description: Game-plugin-defined summary data
+
+    WrittenAnswer:
+      type: object
+      required: [participant_id, answer_text, timestamp]
+      properties:
+        participant_id:
+          type: string
+          format: uuid
+          description: References session_participations.id
+        question_id:
+          type: string
+          nullable: true
+          description: Game-specific question identifier
+        answer_text:
+          type: string
+          maxLength: 5000
+        timestamp:
+          type: string
+          format: date-time
+
+    ResumeGameNightResponse:
+      type: object
+      properties:
+        session:
+          type: object
+          description: Full session data (config, participants, game data)
+          properties:
+            id:
+              type: string
+              format: uuid
+            game_type:
+              type: string
+            name:
+              type: string
+            config:
+              type: object
+        participants:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+              display_name:
+                type: string
+              role:
+                type: string
+              character_name:
+                type: string
+                nullable: true
+        last_synced_state:
+          type: object
+          nullable: true
+          description: Most recent auto-save state that was synced (may be null if no sync occurred)
+          properties:
+            current_phase_index:
+              type: integer
+            turn_position:
+              type: integer
+            player_order:
+              type: array
+              items:
+                type: string
+            player_status:
+              type: object
+            game_specific_state:
+              type: object
+        events_since_last_sync:
+          type: array
+          items:
+            $ref: "#/components/schemas/GameNightEvent"
+          description: Events received after the last auto-save (if any)
+
+    RecoverGameNightRequest:
+      type: object
+      required: [session_id]
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        events:
+          type: array
+          items:
+            $ref: "#/components/schemas/GameNightEvent"
+          description: Whatever events are available (may be incomplete)
+        partial_summary:
+          $ref: "#/components/schemas/GameNightSummary"
+        reason:
+          type: string
+          description: Why recovery was needed (device failure, battery, etc.)
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error code
+          example: "FORBIDDEN"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "You are not the host of this session"
+        details:
+          type: object
+          additionalProperties: true
+          description: Additional error context

@@ -1,0 +1,94 @@
+/* tokens.css — Design tokens as CSS custom properties */
+
+/* ============================================================
+   BASE TOKENS (theme-independent)
+   ============================================================ */
+
+:root {
+  /* Spacing scale — 4px base */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-7: 28px;
+  --sp-8: 32px;
+  --sp-9: 36px;
+  --sp-10: 40px;
+  --sp-11: 44px;
+  --sp-12: 48px;
+
+  /* Type scale — 1.25 ratio */
+  --fs-xs: 0.64rem;    /* ~10px */
+  --fs-sm: 0.8rem;     /* ~13px */
+  --fs-base: 1rem;     /* 16px  */
+  --fs-md: 1.25rem;    /* 20px  */
+  --fs-lg: 1.563rem;   /* 25px  */
+  --fs-xl: 1.953rem;   /* 31px  */
+  --fs-2xl: 2.441rem;  /* 39px  */
+  --fs-3xl: 3.052rem;  /* 49px  */
+
+  /* Line heights */
+  --lh-tight: 1.2;
+  --lh-base: 1.5;
+  --lh-relaxed: 1.65;
+  --lh-letter: 1.8;
+
+  /* Border radii */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-round: 50%;
+
+  /* Shared gold — used across all themes for continuity */
+  --color-gold: #C4A95B;
+}
+
+
+/* ============================================================
+   THEME: CONFESSION ALBUM
+   Warm, intimate, nostalgic — antique cream + sage
+   ============================================================ */
+
+[data-theme="confession-album"] {
+  --color-bg: #FFFDF5;
+  --color-text: #2C2C2C;
+  --color-accent: #4A6741;
+  --color-gold: #C4A95B;
+  --color-divider: #D4C9A8;
+  --color-muted: #8A8370;
+  --color-highlight: #F5F0E0;
+}
+
+
+/* ============================================================
+   THEME: MURDER MYSTERY
+   Dark, noir, cinematic — black + crimson
+   ============================================================ */
+
+[data-theme="murder-mystery"] {
+  --color-bg: #1A1A1A;
+  --color-text: #F5F5F0;
+  --color-accent: #8B0000;
+  --color-gold: #C4A95B;
+  --color-divider: #333333;
+  --color-muted: #999999;
+  --color-highlight: #2A2A2A;
+}
+
+
+/* ============================================================
+   THEME: PERSONAL LETTER
+   Warm, handwritten-feel — cream + sepia
+   ============================================================ */
+
+[data-theme="personal-letter"] {
+  --color-bg: #FFF8F0;
+  --color-text: #3C2415;
+  --color-accent: #8B6914;
+  --color-gold: #C4A95B;
+  --color-divider: #D4C0A0;
+  --color-muted: #7A6B5A;
+  --color-highlight: #FFF0E0;
+}

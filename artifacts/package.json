@@ -1,0 +1,27 @@
+{
+  "name": "@ephemera-engine/artifacts",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Artifact template system — visual design for post-game PDFs",
+  "scripts": {
+    "render": "ts-node src/cli.ts",
+    "render:album": "ts-node src/cli.ts the-album",
+    "render:proust": "ts-node src/cli.ts prousts-answer",
+    "render:table": "ts-node src/cli.ts contributions-table",
+    "render:dossier": "ts-node src/cli.ts the-dossier",
+    "render:menu": "ts-node src/cli.ts menu-of-the-damned",
+    "render:envelope": "ts-node src/cli.ts the-sealed-envelope",
+    "render:all": "ts-node src/cli.ts --all",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "nunjucks": "^3.2.4",
+    "puppeteer": "^23.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "ts-node": "^10.9.0",
+    "@types/nunjucks": "^3.2.6",
+    "@types/node": "^22.0.0"
+  }
+}

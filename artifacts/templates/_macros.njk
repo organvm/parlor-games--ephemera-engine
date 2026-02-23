@@ -1,0 +1,266 @@
+{# ============================================================
+   _macros.njk — Shared macros for all artifact templates
+   ============================================================ #}
+
+
+{# Page header with optional subtitle and metadata line #}
+{% macro pageHeader(title, subtitle, meta) %}
+<header class="page-header avoid-break">
+  <h2>{{ title }}</h2>
+  {% if subtitle %}
+    <p class="page-header__subtitle">{{ subtitle }}</p>
+  {% endif %}
+  {% if meta %}
+    <p class="metadata page-header__meta">{{ meta }}</p>
+  {% endif %}
+</header>
+{% endmacro %}
+
+
+{# Ornamental divider — horizontal rule with optional symbol #}
+{% macro divider(symbol) %}
+<div class="divider" role="separator">
+  <span class="divider__line"></span>
+  {% if symbol %}
+    <span class="divider__symbol">{{ symbol }}</span>
+  {% endif %}
+  <span class="divider__line"></span>
+</div>
+{% endmacro %}
+
+
+{# Player card — name, optional role, optional detail #}
+{% macro playerCard(name, role, detail) %}
+<div class="player-card avoid-break">
+  <div class="player-card__initials">{{ initials(name) }}</div>
+  <div class="player-card__info">
+    <p class="player-card__name small-caps">{{ name }}</p>
+    {% if role %}
+      <p class="player-card__role text-sm">{{ role }}</p>
+    {% endif %}
+    {% if detail %}
+      <p class="player-card__detail text-xs text-mono">{{ detail }}</p>
+    {% endif %}
+  </div>
+</div>
+{% endmacro %}
+
+
+{# Ornament — decorative flourish #}
+{% macro ornament(type) %}
+{% if type == 'fleuron' %}
+  <div class="ornament ornament--fleuron" aria-hidden="true">&#10087;</div>
+{% elif type == 'asterism' %}
+  <div class="ornament ornament--asterism" aria-hidden="true">&#8258;</div>
+{% elif type == 'dots' %}
+  <div class="ornament ornament--dots" aria-hidden="true">&middot;&ensp;&middot;&ensp;&middot;</div>
+{% else %}
+  <div class="ornament ornament--rule" aria-hidden="true"></div>
+{% endif %}
+{% endmacro %}
+
+
+{# Era badge — e.g. "Ur-Proust 1886" #}
+{% macro eraBadge(era) %}
+<span class="era-badge metadata">{{ era }}</span>
+{% endmacro %}
+
+
+{# Stat card — small data display with label + value #}
+{% macro statCard(label, value) %}
+<div class="stat-card avoid-break">
+  <span class="stat-card__value">{{ value }}</span>
+  <span class="stat-card__label metadata">{{ label }}</span>
+</div>
+{% endmacro %}
+
+
+{# Question number in margin #}
+{% macro questionNumber(num) %}
+<span class="margin-note">{{ ordinal(num) }}</span>
+{% endmacro %}
+
+
+{# Wax seal graphic (CSS-only) #}
+{% macro waxSeal(text) %}
+<div class="wax-seal" aria-label="Wax seal: {{ text }}">
+  <div class="wax-seal__circle">
+    <span class="wax-seal__text">{{ text }}</span>
+  </div>
+</div>
+{% endmacro %}
+
+
+{# Evidence exhibit label #}
+{% macro exhibitLabel(id) %}
+<span class="exhibit-label metadata">EXHIBIT {{ id }}</span>
+{% endmacro %}
+
+
+{# Classified stamp #}
+{% macro classifiedStamp() %}
+<div class="classified-stamp" aria-label="Classified">
+  <span>CLASSIFIED</span>
+</div>
+{% endmacro %}
+
+
+{# ============================================================
+   INLINE STYLES for macros (injected in templates that use them)
+   ============================================================ #}
+
+{% macro macroStyles() %}
+<style>
+  /* Page header */
+  .page-header { margin-bottom: var(--sp-6); }
+  .page-header__subtitle {
+    font-size: var(--fs-md);
+    color: var(--color-muted);
+    margin-top: var(--sp-1);
+    margin-bottom: var(--sp-2);
+  }
+  .page-header__meta { margin-top: var(--sp-1); }
+
+  /* Divider */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    margin: var(--sp-6) 0;
+  }
+  .divider__line {
+    flex: 1;
+    height: 1px;
+    background-color: var(--color-divider);
+  }
+  .divider__symbol {
+    font-family: var(--ff-heading);
+    color: var(--color-gold);
+    font-size: var(--fs-md);
+  }
+
+  /* Player card */
+  .player-card {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-3);
+    border: 1px solid var(--color-divider);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--sp-3);
+  }
+  .player-card__initials {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-round);
+    background-color: var(--color-accent);
+    color: var(--color-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--ff-heading);
+    font-size: var(--fs-sm);
+    flex-shrink: 0;
+  }
+  .player-card__name { margin-bottom: 0; }
+  .player-card__role { color: var(--color-muted); margin-bottom: 0; }
+  .player-card__detail { margin-bottom: 0; }
+
+  /* Ornaments */
+  .ornament {
+    text-align: center;
+    margin: var(--sp-6) 0;
+    color: var(--color-gold);
+  }
+  .ornament--fleuron { font-size: var(--fs-lg); }
+  .ornament--asterism { font-size: var(--fs-md); }
+  .ornament--dots { font-size: var(--fs-md); letter-spacing: 0.3em; }
+  .ornament--rule {
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      var(--color-divider) 20%,
+      var(--color-divider) 80%,
+      transparent
+    );
+  }
+
+  /* Era badge */
+  .era-badge {
+    display: inline-block;
+    padding: var(--sp-1) var(--sp-2);
+    border: 1px solid var(--color-divider);
+    border-radius: var(--radius-sm);
+    font-size: var(--fs-xs);
+  }
+
+  /* Stat card */
+  .stat-card {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--sp-3) var(--sp-4);
+    border: 1px solid var(--color-divider);
+    border-radius: var(--radius-md);
+    min-width: 80px;
+  }
+  .stat-card__value {
+    font-family: var(--ff-heading);
+    font-size: var(--fs-lg);
+    color: var(--color-accent);
+  }
+  .stat-card__label { margin-top: var(--sp-1); }
+
+  /* Wax seal */
+  .wax-seal {
+    display: flex;
+    justify-content: center;
+    margin: var(--sp-8) 0;
+  }
+  .wax-seal__circle {
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius-round);
+    background: radial-gradient(circle at 35% 35%, #C0392B, #8B0000 60%, #5C0000);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.2);
+  }
+  .wax-seal__text {
+    font-family: var(--ff-heading);
+    font-size: var(--fs-xs);
+    color: #F5E6D0;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    text-align: center;
+    line-height: 1.1;
+  }
+
+  /* Exhibit label */
+  .exhibit-label {
+    display: inline-block;
+    padding: var(--sp-1) var(--sp-2);
+    border: 1px solid var(--color-accent);
+    color: var(--color-accent);
+    font-weight: 700;
+  }
+
+  /* Classified stamp */
+  .classified-stamp {
+    position: absolute;
+    top: 30mm;
+    right: 20mm;
+    transform: rotate(-15deg);
+    border: 3px solid var(--color-accent);
+    padding: var(--sp-2) var(--sp-4);
+    font-family: var(--ff-mono);
+    font-size: var(--fs-lg);
+    color: var(--color-accent);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    opacity: 0.7;
+  }
+</style>
+{% endmacro %}

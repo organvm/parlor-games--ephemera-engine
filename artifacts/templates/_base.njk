@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="{{ theme | default('confession-album') }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ title | default('Ephemera Engine Artifact') }}</title>
+
+  <link rel="stylesheet" href="../design-system/reset.css">
+  <link rel="stylesheet" href="../design-system/tokens.css">
+  <link rel="stylesheet" href="../design-system/typography.css">
+  <link rel="stylesheet" href="../design-system/layout.css">
+  <link rel="stylesheet" href="../design-system/textures.css">
+
+  <style>
+    {% block extraStyles %}{% endblock %}
+  </style>
+</head>
+<body>
+  {% block content %}{% endblock %}
+</body>
+</html>

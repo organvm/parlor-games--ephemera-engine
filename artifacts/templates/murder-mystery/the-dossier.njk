@@ -1,0 +1,262 @@
+{# the-dossier.njk — Case file, A5 portrait, 12–30 pages
+   Data: { session, setting, characters[], clues[], accusations[], reveal, votes[] }
+#}
+{% extends "../_base.njk" %}
+{% import "../_macros.njk" as m %}
+
+{% set theme = "murder-mystery" %}
+{% set title = "The Dossier — " + session.title %}
+
+{% block extraStyles %}
+{{ m.macroStyles() }}
+<style>
+  .dossier-cover {
+    height: 210mm;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background-color: var(--color-bg);
+    position: relative;
+  }
+  .dossier-cover__case-number {
+    font-family: var(--ff-mono);
+    font-size: var(--fs-sm);
+    letter-spacing: 0.15em;
+    color: var(--color-muted);
+    margin-bottom: var(--sp-4);
+  }
+  .dossier-cover__title {
+    font-family: var(--ff-heading);
+    font-size: var(--fs-3xl);
+    color: var(--color-accent);
+    margin-bottom: var(--sp-2);
+  }
+  .dossier-cover__subtitle {
+    font-size: var(--fs-md);
+    color: var(--color-muted);
+    margin-bottom: var(--sp-8);
+  }
+  .dossier-cover__meta {
+    font-family: var(--ff-mono);
+    font-size: var(--fs-xs);
+    color: var(--color-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .character-entry {
+    display: flex;
+    gap: var(--sp-4);
+    margin-bottom: var(--sp-6);
+    padding: var(--sp-4);
+    border: 1px solid var(--color-divider);
+    border-radius: var(--radius-md);
+    background-color: var(--color-highlight);
+  }
+  .character-entry__mugshot {
+    width: 60px;
+    height: 75px;
+    background-color: var(--color-divider);
+    border: 1px solid var(--color-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--ff-heading);
+    font-size: var(--fs-xl);
+    color: var(--color-muted);
+    flex-shrink: 0;
+  }
+  .character-entry__info { flex: 1; }
+  .character-entry__name {
+    font-family: var(--ff-heading);
+    font-size: var(--fs-md);
+    margin-bottom: var(--sp-1);
+  }
+  .character-entry__played-by {
+    font-family: var(--ff-mono);
+    font-size: var(--fs-xs);
+    color: var(--color-muted);
+    margin-bottom: var(--sp-2);
+  }
+  .character-entry__bio {
+    font-size: var(--fs-sm);
+    color: var(--color-text);
+  }
+  .evidence-item {
+    margin-bottom: var(--sp-4);
+    padding: var(--sp-3);
+    border-left: 3px solid var(--color-accent);
+    background-color: var(--color-highlight);
+  }
+  .evidence-item__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: var(--sp-2);
+  }
+  .evidence-item__description {
+    font-size: var(--fs-sm);
+  }
+  .accusation-block {
+    padding: var(--sp-4);
+    border: 1px solid var(--color-divider);
+    margin-bottom: var(--sp-4);
+    border-radius: var(--radius-md);
+  }
+  .accusation-block__accuser {
+    font-family: var(--ff-heading);
+    font-size: var(--fs-md);
+    margin-bottom: var(--sp-2);
+  }
+  .accusation-block__target {
+    color: var(--color-accent);
+    font-weight: 700;
+  }
+  .reveal-section {
+    text-align: center;
+    padding: var(--sp-8) var(--sp-6);
+  }
+  .reveal-section__answer {
+    font-family: var(--ff-heading);
+    font-size: var(--fs-2xl);
+    color: var(--color-accent);
+    margin: var(--sp-6) 0;
+  }
+  .vote-results {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-3);
+    justify-content: center;
+    margin-top: var(--sp-4);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+{# ── COVER ── #}
+<div class="dossier-cover page--cover texture-noir">
+  <div style="position: relative; z-index: 2;">
+    {{ m.classifiedStamp() }}
+    <p class="dossier-cover__case-number">CASE NO. {{ session.caseNumber | default('0000-00') }}</p>
+    <h1 class="dossier-cover__title">The Dossier</h1>
+    <p class="dossier-cover__subtitle">{{ session.title }}</p>
+    {{ m.divider('✦') }}
+    <p class="dossier-cover__meta">{{ session.date | dateFormat }}</p>
+    <p class="dossier-cover__meta" style="margin-top: var(--sp-2);">
+      {{ setting.location | default('Location Unknown') }}
+    </p>
+  </div>
+</div>
+
+{# ── CAST OF CHARACTERS ── #}
+<div class="page page-break texture-noir">
+  <div style="position: relative; z-index: 2;">
+    {{ m.pageHeader('Cast of Characters', setting.era | default(null), characters | length + ' suspects') }}
+
+    {% for character in characters %}
+    <div class="character-entry avoid-break">
+      <div class="character-entry__mugshot">{{ initials(character.name) }}</div>
+      <div class="character-entry__info">
+        <p class="character-entry__name">{{ character.name }}</p>
+        <p class="character-entry__played-by">Played by: {{ character.playedBy }}</p>
+        <p class="character-entry__bio">{{ character.bio }}</p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+{# ── CRIME SCENE SUMMARY ── #}
+<div class="page page-break texture-noir">
+  <div style="position: relative; z-index: 2;">
+    {{ m.pageHeader('Crime Scene Summary', null, 'CONFIDENTIAL') }}
+
+    <p>{{ setting.description }}</p>
+
+    {% if setting.crimeScene %}
+      {{ m.divider() }}
+      <h3>Scene Details</h3>
+      <p>{{ setting.crimeScene }}</p>
+    {% endif %}
+  </div>
+</div>
+
+{# ── EVIDENCE LOG ── #}
+<div class="page page-break texture-noir">
+  <div style="position: relative; z-index: 2;">
+    {{ m.pageHeader('Evidence Log', null, clues | length + ' items cataloged') }}
+
+    {% for clue in clues %}
+    <div class="evidence-item avoid-break">
+      <div class="evidence-item__header">
+        {{ m.exhibitLabel(clue.id | default(loop.index)) }}
+        <span class="metadata">{{ clue.type | default('PHYSICAL') }}</span>
+      </div>
+      <p class="evidence-item__description">{{ clue.description }}</p>
+      {% if clue.foundBy %}
+        <p class="text-mono text-xs" style="margin-top: var(--sp-1); margin-bottom: 0;">
+          Discovered by: {{ clue.foundBy }}
+        </p>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+{# ── ACCUSATION RESULTS ── #}
+<div class="page page-break texture-noir">
+  <div style="position: relative; z-index: 2;">
+    {{ m.pageHeader('Accusations', null, 'FINAL ROUND') }}
+
+    {% for accusation in accusations %}
+    <div class="accusation-block avoid-break">
+      <p class="accusation-block__accuser">{{ accusation.accuser }}</p>
+      <p>accused <span class="accusation-block__target">{{ accusation.target }}</span></p>
+      {% if accusation.reasoning %}
+        <p class="text-sm" style="margin-top: var(--sp-2); color: var(--color-muted);">
+          "{{ accusation.reasoning }}"
+        </p>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+{# ── THE REVEAL ── #}
+<div class="page page-break texture-noir">
+  <div class="reveal-section" style="position: relative; z-index: 2;">
+    {{ m.ornament('asterism') }}
+    {{ m.pageHeader('The Reveal', null, null) }}
+
+    <p class="reveal-section__answer">{{ reveal.culprit }}</p>
+    <p>{{ reveal.explanation }}</p>
+
+    {{ m.divider('✦') }}
+
+    <h3 style="margin-top: var(--sp-6);">Vote Tally</h3>
+    <div class="vote-results">
+      {% for vote in votes %}
+        {{ m.statCard(vote.character, vote.count) }}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{# ── APPENDIX: CLUE CARDS ── #}
+<div class="page page-break texture-noir">
+  <div style="position: relative; z-index: 2;">
+    {{ m.pageHeader('Appendix: Clue Cards', null, null) }}
+
+    <div class="card-grid">
+      {% for clue in clues %}
+      <div class="avoid-break" style="padding: var(--sp-3); border: 1px solid var(--color-divider); border-radius: var(--radius-md); margin-bottom: var(--sp-3);">
+        {{ m.exhibitLabel(clue.id | default(loop.index)) }}
+        <h4 style="margin-top: var(--sp-2);">{{ clue.title | default('Evidence ' + loop.index) }}</h4>
+        <p class="text-sm">{{ clue.description }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,910 @@
+openapi: "3.0.3"
+info:
+  title: Ephemera Engine — Auth & Sessions API
+  description: |
+    API contract for authentication, session management, state transitions,
+    and user settings. Most operations go through the Supabase client SDK
+    (PostgREST auto-generated endpoints + Supabase Auth). This spec documents
+    the logical API surface including both Supabase-managed and custom endpoints.
+  version: "1.0.0"
+  contact:
+    name: Ephemera Engine
+    url: https://ephemera.app
+
+servers:
+  - url: https://{project-ref}.supabase.co
+    description: Supabase project (PostgREST + Auth)
+    variables:
+      project-ref:
+        default: "your-project-ref"
+
+tags:
+  - name: Auth
+    description: Authentication and identity management
+  - name: Sessions
+    description: Session CRUD and lifecycle
+  - name: State Transitions
+    description: Session state machine operations
+  - name: Participants
+    description: Session participation and RSVP
+  - name: Settings
+    description: User preferences and configuration
+  - name: Guest
+    description: Web player guest mode
+
+paths:
+  /auth/v1/signup:
+    post:
+      tags: [Auth]
+      operationId: signUpWithEmail
+      summary: Create account with email and password
+      description: |
+        Creates a new user account with email/password authentication.
+        Sends a verification email. User profile is created in public.users
+        via a database trigger on auth.users insert.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "host@example.com"
+                password:
+                  type: string
+                  minLength: 8
+                  example: "securep4ss"
+                data:
+                  type: object
+                  properties:
+                    display_name:
+                      type: string
+                      minLength: 1
+                      maxLength: 100
+                      example: "Eleanor"
+      responses:
+        "200":
+          description: Account created. Verification email sent.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "422":
+          description: Validation error (weak password, invalid email)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/v1/token?grant_type=password:
+    post:
+      tags: [Auth]
+      operationId: signInWithEmail
+      summary: Sign in with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        "200":
+          description: Authenticated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/v1/token?grant_type=id_token:
+    post:
+      tags: [Auth]
+      operationId: signInWithIdToken
+      summary: Sign in with Apple or Google ID token
+      description: |
+        Validates the platform ID token with the identity provider and
+        creates or links a Supabase user account.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [provider, token]
+              properties:
+                provider:
+                  type: string
+                  enum: [apple, google]
+                token:
+                  type: string
+                  description: ID token from the platform sign-in flow
+                nonce:
+                  type: string
+                  description: Required for Apple Sign-In
+      responses:
+        "200":
+          description: Authenticated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid or expired ID token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/v1/signup?grant_type=anonymous:
+    post:
+      tags: [Guest]
+      operationId: signInAnonymously
+      summary: Create anonymous session for web player
+      description: |
+        Creates an anonymous Supabase user. Used for web players who join
+        via invitation link. The anonymous user_id is stored in a session cookie.
+        Can later be linked to a full account via linkIdentity.
+      responses:
+        "200":
+          description: Anonymous session created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+
+  /auth/v1/token?grant_type=refresh_token:
+    post:
+      tags: [Auth]
+      operationId: refreshToken
+      summary: Refresh an expired access token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refresh_token]
+              properties:
+                refresh_token:
+                  type: string
+      responses:
+        "200":
+          description: New access and refresh tokens
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid or expired refresh token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/v1/logout:
+    post:
+      tags: [Auth]
+      operationId: signOut
+      summary: Sign out and invalidate session
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: Signed out successfully
+
+  /auth/v1/recover:
+    post:
+      tags: [Auth]
+      operationId: resetPassword
+      summary: Request password reset email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        "200":
+          description: Reset email sent (if account exists)
+
+  /rest/v1/users:
+    get:
+      tags: [Auth]
+      operationId: getProfile
+      summary: Get current user profile
+      description: Returns the authenticated user's profile. RLS ensures only own profile is returned.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: select
+          in: query
+          schema:
+            type: string
+            default: "*"
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+    patch:
+      tags: [Settings]
+      operationId: updateProfile
+      summary: Update user profile or preferences
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                display_name:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                avatar_url:
+                  type: string
+                  format: uri
+                notification_preferences:
+                  $ref: "#/components/schemas/NotificationPreferences"
+                accessibility_preferences:
+                  $ref: "#/components/schemas/AccessibilityPreferences"
+      responses:
+        "200":
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+
+  /rest/v1/sessions:
+    get:
+      tags: [Sessions]
+      operationId: listSessions
+      summary: List sessions for the authenticated user
+      description: |
+        Returns sessions where the user is host or participant.
+        Filterable by state. RLS enforces visibility.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: state
+          in: query
+          description: Filter by session state
+          schema:
+            type: string
+            enum: [DRAFT, INVITING, PREPARING, ACTIVE, COMPLETE, ARCHIVED, CANCELED]
+        - name: host_id
+          in: query
+          description: Filter by host (eq.{user_id})
+          schema:
+            type: string
+        - name: order
+          in: query
+          schema:
+            type: string
+            default: date_time.asc
+        - name: select
+          in: query
+          schema:
+            type: string
+            default: "*,session_participations(count)"
+      responses:
+        "200":
+          description: List of sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Session"
+    post:
+      tags: [Sessions]
+      operationId: createSession
+      summary: Create a new game session
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [game_type, name, date_time]
+              properties:
+                game_type:
+                  $ref: "#/components/schemas/GameType"
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 200
+                  example: "A Midsummer Confession"
+                date_time:
+                  type: string
+                  format: date-time
+                  example: "2026-03-15T19:00:00Z"
+                config:
+                  type: object
+                  description: Game-specific configuration (schema varies by game_type)
+                  example:
+                    guest_count: 8
+                    question_lineage: "classic_proust"
+      responses:
+        "201":
+          description: Session created in DRAFT state
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Session"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /rest/v1/sessions?id=eq.{session_id}:
+    get:
+      tags: [Sessions]
+      operationId: getSession
+      summary: Get session by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: select
+          in: query
+          schema:
+            type: string
+            default: "*,session_participations(*)"
+      responses:
+        "200":
+          description: Session details with participants
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Session"
+        "404":
+          description: Session not found or not visible to user
+    patch:
+      tags: [Sessions]
+      operationId: updateSession
+      summary: Update session configuration
+      description: |
+        Host can update session fields. State changes use the state
+        transition endpoint. RLS enforces host-only write access.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                date_time:
+                  type: string
+                  format: date-time
+                config:
+                  type: object
+      responses:
+        "200":
+          description: Session updated
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Session"
+
+  /rest/v1/rpc/transition_session_state:
+    post:
+      tags: [State Transitions]
+      operationId: transitionSessionState
+      summary: Transition session to a new state
+      description: |
+        Validates the transition against the state machine, updates the session
+        state, logs the transition, and returns the updated session. Uses a
+        PostgreSQL function to ensure atomicity and validation.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session_id, new_state]
+              properties:
+                session_id:
+                  type: string
+                  format: uuid
+                new_state:
+                  $ref: "#/components/schemas/SessionState"
+                metadata:
+                  type: object
+                  description: Optional context (e.g., cancellation reason)
+      responses:
+        "200":
+          description: State transition successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+        "400":
+          description: Invalid state transition
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Not the session host
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Concurrent transition conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /rest/v1/sessions?invite_code=eq.{invite_code}:
+    get:
+      tags: [Guest]
+      operationId: getSessionByInviteCode
+      summary: Look up session by invitation code
+      description: |
+        Used by deep link resolution to fetch session details for the
+        invitation page. Available to unauthenticated and anonymous users
+        for sessions in INVITING or PREPARING state.
+      parameters:
+        - name: invite_code
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 8
+            maxLength: 8
+        - name: select
+          in: query
+          schema:
+            type: string
+            default: "id,game_type,name,date_time,state,host_id,users!sessions_host_id_fkey(display_name)"
+      responses:
+        "200":
+          description: Session invitation details
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SessionInviteView"
+        "404":
+          description: Invalid invite code or session not in joinable state
+
+  /rest/v1/session_participations:
+    post:
+      tags: [Participants]
+      operationId: joinSession
+      summary: RSVP to a session (join as participant)
+      description: |
+        Creates a session participation record. For app players, user_id is
+        set from auth. For web players, user_id comes from anonymous auth.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session_id, display_name, role, rsvp_status]
+              properties:
+                session_id:
+                  type: string
+                  format: uuid
+                display_name:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                email:
+                  type: string
+                  format: email
+                  description: Required for web players (artifact delivery)
+                role:
+                  $ref: "#/components/schemas/ParticipantRole"
+                rsvp_status:
+                  $ref: "#/components/schemas/RsvpStatus"
+      responses:
+        "201":
+          description: Participation created
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SessionParticipation"
+    patch:
+      tags: [Participants]
+      operationId: updateRsvp
+      summary: Update RSVP status
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rsvp_status:
+                  $ref: "#/components/schemas/RsvpStatus"
+                email:
+                  type: string
+                  format: email
+      responses:
+        "200":
+          description: RSVP updated
+
+  /rest/v1/session_state_log:
+    get:
+      tags: [State Transitions]
+      operationId: getSessionStateLog
+      summary: Get state transition history for a session
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: session_id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: order
+          in: query
+          schema:
+            type: string
+            default: timestamp.asc
+      responses:
+        "200":
+          description: State transition log
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SessionStateLogEntry"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Supabase JWT access token
+
+  schemas:
+    AuthResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        token_type:
+          type: string
+          example: bearer
+        expires_in:
+          type: integer
+          example: 3600
+        user:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            email:
+              type: string
+              format: email
+            is_anonymous:
+              type: boolean
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        display_name:
+          type: string
+        email:
+          type: string
+          format: email
+        auth_provider:
+          type: string
+          enum: [email, apple, google]
+        avatar_url:
+          type: string
+          format: uri
+          nullable: true
+        is_host:
+          type: boolean
+        notification_preferences:
+          $ref: "#/components/schemas/NotificationPreferences"
+        accessibility_preferences:
+          $ref: "#/components/schemas/AccessibilityPreferences"
+        created_at:
+          type: string
+          format: date-time
+        last_active_at:
+          type: string
+          format: date-time
+
+    Session:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        game_type:
+          $ref: "#/components/schemas/GameType"
+        name:
+          type: string
+        date_time:
+          type: string
+          format: date-time
+        state:
+          $ref: "#/components/schemas/SessionState"
+        host_id:
+          type: string
+          format: uuid
+        config:
+          type: object
+        invite_code:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    SessionInviteView:
+      type: object
+      description: Minimal session info for the invitation page (no sensitive data)
+      properties:
+        id:
+          type: string
+          format: uuid
+        game_type:
+          $ref: "#/components/schemas/GameType"
+        name:
+          type: string
+        date_time:
+          type: string
+          format: date-time
+        state:
+          $ref: "#/components/schemas/SessionState"
+        host_name:
+          type: string
+          description: Host display name (joined from users table)
+
+    SessionParticipation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        session_id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+          nullable: true
+        display_name:
+          type: string
+        email:
+          type: string
+          format: email
+          nullable: true
+        role:
+          $ref: "#/components/schemas/ParticipantRole"
+        rsvp_status:
+          $ref: "#/components/schemas/RsvpStatus"
+        character_id:
+          type: string
+          format: uuid
+          nullable: true
+        joined_at:
+          type: string
+          format: date-time
+
+    SessionStateLogEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        session_id:
+          type: string
+          format: uuid
+        from_state:
+          $ref: "#/components/schemas/SessionState"
+        to_state:
+          $ref: "#/components/schemas/SessionState"
+        triggered_by:
+          type: string
+          format: uuid
+          nullable: true
+        timestamp:
+          type: string
+          format: date-time
+        metadata:
+          type: object
+          nullable: true
+
+    GameType:
+      type: string
+      enum:
+        - confession_album
+        - murder_mystery
+        - whose_memory
+        - exquisite_corpse
+
+    SessionState:
+      type: string
+      enum:
+        - DRAFT
+        - INVITING
+        - PREPARING
+        - ACTIVE
+        - COMPLETE
+        - ARCHIVED
+        - CANCELED
+
+    ParticipantRole:
+      type: string
+      enum:
+        - host
+        - app_player
+        - web_player
+
+    RsvpStatus:
+      type: string
+      enum:
+        - pending
+        - accepted
+        - declined
+        - maybe
+
+    NotificationPreferences:
+      type: object
+      properties:
+        invitations:
+          type: boolean
+          default: true
+        contribution_reminders:
+          type: boolean
+          default: true
+        game_night:
+          type: boolean
+          default: true
+        artifacts:
+          type: boolean
+          default: true
+        delayed_artifacts:
+          type: boolean
+          default: true
+        email_notifications:
+          type: boolean
+          default: true
+        quiet_hours:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+              default: true
+            start:
+              type: string
+              pattern: "^\\d{2}:\\d{2}$"
+              default: "22:00"
+            end:
+              type: string
+              pattern: "^\\d{2}:\\d{2}$"
+              default: "08:00"
+
+    AccessibilityPreferences:
+      type: object
+      properties:
+        text_size:
+          type: string
+          enum: [system, large, extra_large]
+          default: system
+        high_contrast:
+          type: boolean
+          default: false
+        reduce_motion:
+          type: string
+          enum: [system, "on", "off"]
+          default: system
+        screen_reader:
+          type: string
+          enum: [auto]
+          default: auto
+        written_answer_mode:
+          type: boolean
+          default: false
+        theme:
+          type: string
+          enum: [system, warm, dark]
+          default: system
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Machine-readable error code
+        message:
+          type: string
+          description: Human-readable error description
+        details:
+          type: object
+          description: Additional error context
+          nullable: true

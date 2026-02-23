@@ -1,0 +1,164 @@
+{# menu-of-the-damned.njk — Recipe cards, 5×7 portrait, 1 page per recipe
+   Data: { session, recipes[{contributor, name, ingredients[], steps[], type}] }
+#}
+{% extends "../_base.njk" %}
+{% import "../_macros.njk" as m %}
+
+{% set theme = "murder-mystery" %}
+{% set title = "Menu of the Damned — " + session.title %}
+
+{% block extraStyles %}
+{{ m.macroStyles() }}
+<style>
+  .recipe-card {
+    width: 127mm;
+    min-height: 178mm;
+    padding: 12mm;
+    background-color: var(--color-bg);
+    position: relative;
+  }
+  .recipe-card__border {
+    position: absolute;
+    top: 8mm;
+    left: 8mm;
+    right: 8mm;
+    bottom: 8mm;
+    border: 2px solid var(--color-accent);
+    pointer-events: none;
+  }
+  .recipe-card__inner-border {
+    position: absolute;
+    top: 10mm;
+    left: 10mm;
+    right: 10mm;
+    bottom: 10mm;
+    border: 1px solid var(--color-divider);
+    pointer-events: none;
+  }
+  .recipe-card__header {
+    text-align: center;
+    margin-bottom: var(--sp-6);
+    padding-bottom: var(--sp-4);
+    border-bottom: 1px solid var(--color-divider);
+  }
+  .recipe-card__type {
+    font-family: var(--ff-mono);
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--color-accent);
+    margin-bottom: var(--sp-2);
+  }
+  .recipe-card__name {
+    font-family: var(--ff-heading);
+    font-size: var(--fs-xl);
+    color: var(--color-text);
+    margin-bottom: var(--sp-2);
+  }
+  .recipe-card__contributor {
+    font-size: var(--fs-sm);
+    color: var(--color-muted);
+    font-style: italic;
+  }
+  .recipe-section-title {
+    font-family: var(--ff-heading);
+    font-size: var(--fs-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-gold);
+    margin-bottom: var(--sp-3);
+  }
+  .ingredients-list {
+    margin-bottom: var(--sp-6);
+  }
+  .ingredient {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-2);
+    padding: var(--sp-1) 0;
+    font-size: var(--fs-sm);
+  }
+  .ingredient__bullet {
+    width: 6px;
+    height: 6px;
+    background-color: var(--color-accent);
+    border-radius: var(--radius-round);
+    flex-shrink: 0;
+    margin-top: 6px;
+  }
+  .steps-list {
+    margin-bottom: var(--sp-6);
+  }
+  .step {
+    display: flex;
+    gap: var(--sp-3);
+    margin-bottom: var(--sp-3);
+    font-size: var(--fs-sm);
+  }
+  .step__number {
+    font-family: var(--ff-heading);
+    font-size: var(--fs-md);
+    color: var(--color-accent);
+    flex-shrink: 0;
+    width: 24px;
+    text-align: center;
+  }
+  .recipe-card__footer {
+    position: absolute;
+    bottom: 14mm;
+    left: 14mm;
+    right: 14mm;
+    text-align: center;
+    font-family: var(--ff-mono);
+    font-size: 8px;
+    color: var(--color-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding-top: var(--sp-3);
+    border-top: 1px solid var(--color-divider);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+{% for recipe in recipes %}
+<div class="recipe-card page--recipe texture-noir{% if not loop.first %} page-break{% endif %}">
+  <div class="recipe-card__border"></div>
+  <div class="recipe-card__inner-border"></div>
+
+  <div style="position: relative; z-index: 2;">
+    <div class="recipe-card__header">
+      {% if recipe.type %}
+        <p class="recipe-card__type">{{ recipe.type }}</p>
+      {% endif %}
+      <h2 class="recipe-card__name">{{ recipe.name }}</h2>
+      <p class="recipe-card__contributor">contributed by {{ recipe.contributor }}</p>
+    </div>
+
+    <p class="recipe-section-title">Ingredients</p>
+    <div class="ingredients-list">
+      {% for ingredient in recipe.ingredients %}
+      <div class="ingredient">
+        <span class="ingredient__bullet"></span>
+        <span>{{ ingredient }}</span>
+      </div>
+      {% endfor %}
+    </div>
+
+    <p class="recipe-section-title">Instructions</p>
+    <div class="steps-list">
+      {% for step in recipe.steps %}
+      <div class="step">
+        <span class="step__number">{{ loop.index }}</span>
+        <span>{{ step }}</span>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="recipe-card__footer">
+      Served at {{ session.title }} &middot; {{ session.date | dateFormat }}
+    </div>
+  </div>
+</div>
+{% endfor %}
+{% endblock %}

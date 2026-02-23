@@ -1,0 +1,1156 @@
+openapi: 3.0.3
+info:
+  title: Ephemera Engine — Pre-Game Lifecycle API
+  description: |
+    API for the pre-game lifecycle of the Ephemera Engine app.
+    Covers invitation management, RSVP tracking, contribution pipeline,
+    notification infrastructure, content store, and role assignment.
+
+    Authentication: Supabase Auth JWT in Authorization header.
+    Web players use session-scoped JWT tokens (no account required).
+  version: 0.1.0
+  contact:
+    name: Ephemera Engine
+    url: https://ephemera.app
+
+servers:
+  - url: https://{project-ref}.supabase.co/rest/v1
+    description: Supabase REST API (PostgREST)
+  - url: https://{project-ref}.supabase.co/functions/v1
+    description: Supabase Edge Functions
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Invitations
+    description: Deep link invitation management
+  - name: RSVP
+    description: RSVP tracking and management
+  - name: Contributions
+    description: Pre-game contribution pipeline
+  - name: Notifications
+    description: Push and email notification management
+  - name: Content Store
+    description: Content pack browsing and purchase
+  - name: Role Assignment
+    description: Murder Mystery character assignment
+
+paths:
+  # ──────────────────────────────────────────────
+  # INVITATIONS
+  # ──────────────────────────────────────────────
+
+  /invitation_tokens:
+    post:
+      tags: [Invitations]
+      operationId: createInvitationToken
+      summary: Generate an invitation token for a session
+      description: |
+        Creates a new invitation token (deep link) for the given session.
+        Only the session host can create tokens. Returns the token value
+        which is used to construct the deep link URL.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session_id]
+              properties:
+                session_id:
+                  type: string
+                  format: uuid
+                  description: The session to create an invitation for
+                is_shared:
+                  type: boolean
+                  default: true
+                  description: Whether this is a shared link (any recipient) or per-invitee
+                participant_id:
+                  type: string
+                  format: uuid
+                  description: If not shared, the specific invitee this token is for
+      responses:
+        '201':
+          description: Invitation token created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationToken'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: User is not the host of this session
+
+    get:
+      tags: [Invitations]
+      operationId: listInvitationTokens
+      summary: List invitation tokens for a session
+      description: Returns all invitation tokens for a session. Host only.
+      parameters:
+        - name: session_id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of invitation tokens
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InvitationToken'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /invitation_tokens/resolve:
+    get:
+      tags: [Invitations]
+      operationId: resolveInvitationToken
+      summary: Resolve an invitation token to session details
+      description: |
+        Given a token value, returns the associated session details for
+        rendering the invitation screen. This endpoint does not require
+        authentication (web players can resolve tokens).
+      security: []
+      parameters:
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+            pattern: '^[A-Za-z0-9]{22}$'
+      responses:
+        '200':
+          description: Session invitation details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationDetails'
+        '404':
+          description: Token not found or expired
+
+  # ──────────────────────────────────────────────
+  # RSVP
+  # ──────────────────────────────────────────────
+
+  /rpc/submit_rsvp:
+    post:
+      tags: [RSVP]
+      operationId: submitRsvp
+      summary: Submit or update an RSVP for a session
+      description: |
+        Creates or updates a session participation record with the given
+        RSVP status. For web players, creates a guest participation record
+        using display_name and email instead of user_id.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session_id, token, status]
+              properties:
+                session_id:
+                  type: string
+                  format: uuid
+                token:
+                  type: string
+                  description: Invitation token used to access the session
+                status:
+                  type: string
+                  enum: [accepted, declined, maybe]
+                display_name:
+                  type: string
+                  description: Required for web players (no account)
+                email:
+                  type: string
+                  format: email
+                  description: Required for web players (for email notifications)
+      responses:
+        '200':
+          description: RSVP recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionParticipation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: Session or token not found
+        '409':
+          description: Session not in a state that accepts RSVPs
+
+  /rpc/get_rsvp_dashboard:
+    post:
+      tags: [RSVP]
+      operationId: getRsvpDashboard
+      summary: Get RSVP dashboard data for a session
+      description: Returns RSVP counts and guest list with statuses. Host only.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session_id]
+              properties:
+                session_id:
+                  type: string
+                  format: uuid
+      responses:
+        '200':
+          description: RSVP dashboard data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RsvpDashboard'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: User is not the host of this session
+
+  # ──────────────────────────────────────────────
+  # CONTRIBUTIONS
+  # ──────────────────────────────────────────────
+
+  /contributions:
+    get:
+      tags: [Contributions]
+      operationId: listContributions
+      summary: List contributions for a session
+      description: |
+        For hosts: returns all contributions for the session.
+        For players: returns only their own contributions.
+        RLS enforces access control.
+      parameters:
+        - name: session_id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [draft, submitted, reviewed, excused]
+        - name: type
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of contributions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Contribution'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [Contributions]
+      operationId: createContribution
+      summary: Create a new contribution (draft)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContributionCreate'
+      responses:
+        '201':
+          description: Contribution created as draft
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contribution'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Contribution of this type already exists for this participant in this session
+
+  /contributions/{id}:
+    get:
+      tags: [Contributions]
+      operationId: getContribution
+      summary: Get a single contribution
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Contribution details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contribution'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Contribution not found
+
+    patch:
+      tags: [Contributions]
+      operationId: updateContribution
+      summary: Update a contribution (content or status)
+      description: |
+        Players can update content and submit (status: submitted).
+        Hosts can update status to reviewed, flag submissions, or mark as excused.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContributionUpdate'
+      responses:
+        '200':
+          description: Contribution updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contribution'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Not authorized to update this contribution
+        '404':
+          description: Contribution not found
+
+  /rpc/get_contribution_dashboard:
+    post:
+      tags: [Contributions]
+      operationId: getContributionDashboard
+      summary: Get contribution matrix for host dashboard
+      description: Returns the contribution matrix (guest x type x status) for host review.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session_id]
+              properties:
+                session_id:
+                  type: string
+                  format: uuid
+      responses:
+        '200':
+          description: Contribution dashboard data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContributionDashboard'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: User is not the host of this session
+
+  /rpc/upload_contribution_photo:
+    post:
+      tags: [Contributions]
+      operationId: uploadContributionPhoto
+      summary: Upload a photo for a contribution
+      description: |
+        Uploads a photo to Supabase Storage and returns the URL.
+        The URL should be added to the contribution's photo_urls array
+        via a subsequent PATCH to /contributions/{id}.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file, session_id]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: JPEG, PNG, or WebP image (max 2MB)
+                session_id:
+                  type: string
+                  format: uuid
+      responses:
+        '200':
+          description: Photo uploaded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    format: uri
+                    description: Supabase Storage URL for the uploaded photo
+        '400':
+          description: Invalid file type or size exceeds 2MB
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ──────────────────────────────────────────────
+  # NOTIFICATIONS
+  # ──────────────────────────────────────────────
+
+  /notification_preferences:
+    get:
+      tags: [Notifications]
+      operationId: getNotificationPreferences
+      summary: Get user's notification preferences
+      responses:
+        '200':
+          description: Notification preferences
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NotificationPreference'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    put:
+      tags: [Notifications]
+      operationId: updateNotificationPreferences
+      summary: Update notification preferences
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/NotificationPreferenceUpdate'
+      responses:
+        '200':
+          description: Preferences updated
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /push_tokens:
+    post:
+      tags: [Notifications]
+      operationId: registerPushToken
+      summary: Register or update an Expo push token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, platform]
+              properties:
+                token:
+                  type: string
+                  description: Expo push token (format ExponentPushToken[xxx])
+                platform:
+                  type: string
+                  enum: [ios, android]
+                device_id:
+                  type: string
+                  description: Optional device identifier for multi-device tracking
+      responses:
+        '201':
+          description: Token registered
+        '200':
+          description: Token already registered (updated)
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /rpc/send_manual_reminder:
+    post:
+      tags: [Notifications]
+      operationId: sendManualReminder
+      summary: Host sends a manual reminder to specific players
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session_id, participant_ids]
+              properties:
+                session_id:
+                  type: string
+                  format: uuid
+                participant_ids:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  description: List of participant IDs to remind
+                custom_message:
+                  type: string
+                  maxLength: 500
+                  description: Optional custom message text
+      responses:
+        '200':
+          description: Reminders queued for delivery
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  queued_count:
+                    type: integer
+                    description: Number of reminders queued
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: User is not the host of this session
+
+  # ──────────────────────────────────────────────
+  # CONTENT STORE
+  # ──────────────────────────────────────────────
+
+  /content_packs:
+    get:
+      tags: [Content Store]
+      operationId: listContentPacks
+      summary: Browse available content packs
+      description: |
+        Returns published content packs. Can be filtered by game type and pack type.
+        Does not require authentication for browsing (but ownership data requires auth).
+      security: []
+      parameters:
+        - name: game_type
+          in: query
+          schema:
+            type: string
+            enum: [confession-album, murder-mystery, whose-memory, exquisite-corpse]
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [question-lineage, setting-seed, era-packet, theme, template, game-unlock]
+        - name: select
+          in: query
+          schema:
+            type: string
+            default: 'id,name,game_type,type,price_tier,description,preview_items,item_count,tags'
+      responses:
+        '200':
+          description: List of content packs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ContentPack'
+
+  /content_packs/{id}:
+    get:
+      tags: [Content Store]
+      operationId: getContentPack
+      summary: Get content pack details with preview items
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Content pack details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentPackDetail'
+        '404':
+          description: Pack not found
+
+  /rpc/get_owned_packs:
+    post:
+      tags: [Content Store]
+      operationId: getOwnedPacks
+      summary: Get list of content packs owned by the current user
+      responses:
+        '200':
+          description: List of owned pack IDs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    pack_id:
+                      type: string
+                    purchased_at:
+                      type: string
+                      format: date-time
+                    downloaded_at:
+                      type: string
+                      format: date-time
+                      nullable: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /functions/v1/process-iap-receipt:
+    post:
+      tags: [Content Store]
+      operationId: processIapReceipt
+      summary: Validate an IAP receipt and record the purchase
+      description: |
+        Edge Function that validates a purchase receipt with Apple/Google
+        servers and records the ownership in the database.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [pack_id, platform, receipt_data]
+              properties:
+                pack_id:
+                  type: string
+                  description: The content pack ID being purchased
+                platform:
+                  type: string
+                  enum: [ios, android]
+                receipt_data:
+                  type: object
+                  description: Platform-specific receipt data (JWS for Apple, purchase token for Google)
+      responses:
+        '200':
+          description: Purchase validated and recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:
+                    type: boolean
+                  pack_id:
+                    type: string
+                  download_url:
+                    type: string
+                    format: uri
+                    description: Signed URL to download pack content
+        '400':
+          description: Invalid receipt
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ──────────────────────────────────────────────
+  # ROLE ASSIGNMENT
+  # ──────────────────────────────────────────────
+
+  /rpc/assign_characters:
+    post:
+      tags: [Role Assignment]
+      operationId: assignCharacters
+      summary: Assign characters to confirmed guests
+      description: |
+        Assigns Murder Mystery characters to confirmed guests. Supports
+        auto-assign, manual, and preference-based modes.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session_id, mode]
+              properties:
+                session_id:
+                  type: string
+                  format: uuid
+                mode:
+                  type: string
+                  enum: [auto, manual, preference]
+                  description: Assignment mode
+                assignments:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      participant_id:
+                        type: string
+                        format: uuid
+                      character_id:
+                        type: string
+                  description: Required for manual mode. Ignored for auto/preference.
+      responses:
+        '200':
+          description: Characters assigned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    participant_id:
+                      type: string
+                      format: uuid
+                    character_id:
+                      type: string
+                    character_name:
+                      type: string
+                    display_name:
+                      type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: User is not the host of this session
+        '409':
+          description: Session is not in a state that allows character assignment
+
+  /character_preferences:
+    post:
+      tags: [Role Assignment]
+      operationId: submitCharacterPreferences
+      summary: Submit character archetype preferences
+      description: Player submits their ranked archetype preferences for preference-based assignment.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session_id, rankings]
+              properties:
+                session_id:
+                  type: string
+                  format: uuid
+                rankings:
+                  type: array
+                  items:
+                    type: object
+                    required: [archetype_id, rank]
+                    properties:
+                      archetype_id:
+                        type: string
+                      rank:
+                        type: integer
+                        minimum: 1
+                        maximum: 3
+      responses:
+        '201':
+          description: Preferences submitted
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /rpc/deliver_character_packets:
+    post:
+      tags: [Role Assignment]
+      operationId: deliverCharacterPackets
+      summary: Deliver character packets to assigned guests
+      description: |
+        Triggers push notification delivery of character packets to all
+        assigned guests. Host confirms assignments, then calls this endpoint.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session_id]
+              properties:
+                session_id:
+                  type: string
+                  format: uuid
+      responses:
+        '200':
+          description: Character packets queued for delivery
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  delivered_count:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: User is not the host of this session
+
+# ══════════════════════════════════════════════
+# COMPONENTS
+# ══════════════════════════════════════════════
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Supabase Auth JWT token
+
+  responses:
+    BadRequest:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              code:
+                type: string
+    Unauthorized:
+      description: Missing or invalid authentication token
+
+  schemas:
+    InvitationToken:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        session_id:
+          type: string
+          format: uuid
+        token:
+          type: string
+          description: 22-character token for deep link URL
+        is_shared:
+          type: boolean
+        participant_id:
+          type: string
+          format: uuid
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        deep_link_url:
+          type: string
+          format: uri
+          description: Full deep link URL (computed, not stored)
+
+    InvitationDetails:
+      type: object
+      description: Session details returned when resolving an invitation token
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        game_type:
+          type: string
+        session_name:
+          type: string
+        date_time:
+          type: string
+          format: date-time
+        host_name:
+          type: string
+        atmosphere_text:
+          type: string
+          description: Narratively-framed session description
+        contribution_brief_summary:
+          type: string
+          nullable: true
+          description: Brief summary of what the player will be asked to contribute
+        rsvp_deadline:
+          type: string
+          format: date-time
+          nullable: true
+        current_rsvp_status:
+          type: string
+          enum: [pending, accepted, declined, maybe]
+          nullable: true
+          description: Current RSVP status if the user has already responded
+
+    SessionParticipation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        session_id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+          nullable: true
+        display_name:
+          type: string
+        email:
+          type: string
+          format: email
+          nullable: true
+        role:
+          type: string
+          enum: [host, app_player, web_player]
+        rsvp_status:
+          type: string
+          enum: [pending, accepted, declined, maybe]
+        character_data:
+          type: object
+          nullable: true
+        joined_at:
+          type: string
+          format: date-time
+
+    RsvpDashboard:
+      type: object
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        counts:
+          type: object
+          properties:
+            accepted:
+              type: integer
+            declined:
+              type: integer
+            maybe:
+              type: integer
+            pending:
+              type: integer
+            total:
+              type: integer
+        participants:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+              display_name:
+                type: string
+              role:
+                type: string
+              rsvp_status:
+                type: string
+              rsvp_updated_at:
+                type: string
+                format: date-time
+                nullable: true
+              has_submitted_contributions:
+                type: boolean
+
+    Contribution:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        session_id:
+          type: string
+          format: uuid
+        participant_id:
+          type: string
+          format: uuid
+        type:
+          type: string
+        content:
+          type: object
+          description: Structured content (schema varies by type)
+        status:
+          type: string
+          enum: [draft, submitted, reviewed, excused]
+        photo_urls:
+          type: array
+          items:
+            type: string
+            format: uri
+        submitted_at:
+          type: string
+          format: date-time
+          nullable: true
+        flagged:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    ContributionCreate:
+      type: object
+      required: [session_id, participant_id, type]
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        participant_id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum:
+            - contribution_description
+            - character_preparation
+            - cocktail_description
+            - dish_description
+            - character_preference
+            - story_submission
+            - fragment_submission
+        content:
+          type: object
+          default: {}
+
+    ContributionUpdate:
+      type: object
+      properties:
+        content:
+          type: object
+          description: Updated structured content
+        status:
+          type: string
+          enum: [draft, submitted, reviewed, excused]
+        photo_urls:
+          type: array
+          items:
+            type: string
+            format: uri
+        flagged:
+          type: boolean
+        flag_reason:
+          type: string
+
+    ContributionDashboard:
+      type: object
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        summary:
+          type: object
+          properties:
+            total_expected:
+              type: integer
+            total_submitted:
+              type: integer
+            days_until_deadline:
+              type: integer
+              nullable: true
+        matrix:
+          type: array
+          description: One entry per participant
+          items:
+            type: object
+            properties:
+              participant_id:
+                type: string
+                format: uuid
+              display_name:
+                type: string
+              contributions:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                    status:
+                      type: string
+                      enum: [not_started, draft, submitted, reviewed, excused]
+                    contribution_id:
+                      type: string
+                      format: uuid
+                      nullable: true
+                    flagged:
+                      type: boolean
+
+    NotificationPreference:
+      type: object
+      properties:
+        category:
+          type: string
+          enum:
+            - invitations
+            - contribution_reminders
+            - game_night
+            - artifacts
+            - delayed_artifacts
+            - email
+        enabled:
+          type: boolean
+
+    NotificationPreferenceUpdate:
+      type: object
+      required: [category, enabled]
+      properties:
+        category:
+          type: string
+        enabled:
+          type: boolean
+
+    ContentPack:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        game_type:
+          type: string
+        type:
+          type: string
+        price_tier:
+          type: string
+          enum: [free, standard, premium]
+        description:
+          type: string
+        item_count:
+          type: integer
+        tags:
+          type: array
+          items:
+            type: string
+        is_bundled:
+          type: boolean
+
+    ContentPackDetail:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/ContentPack'
+        - type: object
+          properties:
+            long_description:
+              type: string
+            version:
+              type: string
+            author:
+              type: string
+            preview_items:
+              type: integer
+            preview_content:
+              type: array
+              description: First N items from the pack (N = preview_items)
+              items:
+                type: object
+            platform_sku_ios:
+              type: string
+              nullable: true
+            platform_sku_android:
+              type: string
+              nullable: true

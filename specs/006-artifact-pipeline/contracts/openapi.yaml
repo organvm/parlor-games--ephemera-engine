@@ -1,0 +1,711 @@
+openapi: 3.1.0
+info:
+  title: Ephemera Engine — Artifact Pipeline API
+  version: 1.0.0
+  description: |
+    API contracts for artifact generation, delivery, preview, and library management.
+
+    Two services expose these endpoints:
+    - **Supabase Edge Function** (`/functions/v1/generate-artifacts`): Trigger and orchestration
+    - **Cloud Run Service** (`/render`): Internal rendering endpoint (not directly client-facing)
+
+    Client-facing endpoints go through Supabase. The Cloud Run render endpoint is called
+    only by the Edge Function.
+
+servers:
+  - url: https://{project-ref}.supabase.co/functions/v1
+    description: Supabase Edge Functions (client-facing)
+  - url: https://artifact-generator-{hash}.run.app
+    description: Cloud Run rendering service (internal)
+
+paths:
+  /generate-artifacts:
+    post:
+      operationId: triggerGeneration
+      summary: Trigger artifact generation for a completed session
+      description: |
+        Called by the host after game night ends. Creates artifact records in the database,
+        dispatches rendering jobs to Cloud Run, and returns immediately with artifact IDs
+        and a "queued" status. The client polls for completion or subscribes to Supabase
+        Realtime for status updates.
+      tags: [Generation]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session_id]
+              properties:
+                session_id:
+                  type: string
+                  format: uuid
+                  description: ID of the session in COMPLETE state
+                artifact_types:
+                  type: array
+                  items:
+                    type: string
+                    enum: [A01, A02, A03, A04, A05, A07]
+                  description: |
+                    Specific artifact catalog IDs to generate. If omitted, generates all
+                    applicable artifacts for the session's game type.
+                delayed_delivery_days:
+                  type: integer
+                  minimum: 3
+                  maximum: 14
+                  default: 7
+                  description: Days after game night for delayed artifact delivery
+            example:
+              session_id: "550e8400-e29b-41d4-a716-446655440000"
+              artifact_types: ["A01", "A02", "A03"]
+              delayed_delivery_days: 7
+      responses:
+        "202":
+          description: Generation jobs accepted and queued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  artifacts:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ArtifactSummary"
+                  message:
+                    type: string
+              example:
+                artifacts:
+                  - id: "artifact-uuid-001"
+                    catalog_id: "A01"
+                    name: "The Album"
+                    status: "queued"
+                    delivery_type: "immediate"
+                  - id: "artifact-uuid-002"
+                    catalog_id: "A02"
+                    name: "Contributions Table"
+                    status: "queued"
+                    delivery_type: "immediate"
+                  - id: "artifact-uuid-003"
+                    catalog_id: "A03"
+                    name: "Proust's Answer"
+                    status: "queued"
+                    delivery_type: "delayed"
+                    scheduled_delivery_at: "2026-03-22T10:00:00Z"
+                message: "3 artifacts queued for generation"
+        "400":
+          description: Invalid request (session not in COMPLETE state, invalid artifact types)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Not the session host
+        "404":
+          description: Session not found
+        "409":
+          description: Generation already in progress for this session
+
+  /generate-artifacts/status/{session_id}:
+    get:
+      operationId: getGenerationStatus
+      summary: Get artifact generation status for a session
+      description: |
+        Returns the current status of all artifacts for the session. The client can poll
+        this endpoint or subscribe to Supabase Realtime on the `artifacts` table for
+        real-time status updates.
+      tags: [Generation]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Current status of all artifacts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session_id:
+                    type: string
+                    format: uuid
+                  artifacts:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Artifact"
+                  overall_status:
+                    type: string
+                    enum: [queued, generating, ready, partially_ready, failed]
+              example:
+                session_id: "550e8400-e29b-41d4-a716-446655440000"
+                overall_status: "ready"
+                artifacts:
+                  - id: "artifact-uuid-001"
+                    catalog_id: "A01"
+                    name: "The Album"
+                    status: "ready"
+                    file_url: "https://cdn.supabase.co/artifacts/sess-001/the-album.pdf"
+                    file_size: 524288
+                    page_count: 12
+                    generated_at: "2026-03-15T21:30:45Z"
+        "403":
+          description: Not a session participant
+        "404":
+          description: Session not found
+
+  /generate-artifacts/retry/{artifact_id}:
+    post:
+      operationId: retryGeneration
+      summary: Retry a failed artifact generation
+      tags: [Generation]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: artifact_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "202":
+          description: Retry accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArtifactSummary"
+        "400":
+          description: Artifact is not in "failed" status or max retries exceeded
+        "403":
+          description: Not the session host
+        "404":
+          description: Artifact not found
+
+  /generate-artifacts/distribute/{session_id}:
+    post:
+      operationId: distributeArtifacts
+      summary: Distribute ready artifacts to all session participants
+      description: |
+        Triggers delivery of all "ready" immediate artifacts to session participants.
+        App players receive push notifications; web players receive email.
+      tags: [Delivery]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                artifact_ids:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  description: Specific artifacts to distribute. If omitted, distributes all ready immediate artifacts.
+      responses:
+        "200":
+          description: Distribution initiated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deliveries:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/DeliverySummary"
+                  total_recipients:
+                    type: integer
+              example:
+                total_recipients: 5
+                deliveries:
+                  - participant_name: "James Harrington"
+                    channel: "push"
+                    status: "sent"
+                  - participant_name: "Suki Nakamura"
+                    channel: "email"
+                    status: "sent"
+        "400":
+          description: No ready artifacts to distribute
+        "403":
+          description: Not the session host
+
+  /generate-artifacts/deliveries/{session_id}:
+    get:
+      operationId: getDeliveryStatus
+      summary: Get delivery status matrix for a session's artifacts
+      tags: [Delivery]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: session_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Delivery status matrix
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deliveries:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/DeliveryDetail"
+
+  /generate-artifacts/deliveries/{delivery_id}/resend:
+    post:
+      operationId: resendDelivery
+      summary: Resend a failed delivery
+      tags: [Delivery]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: delivery_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "202":
+          description: Resend queued
+        "400":
+          description: Delivery not in "failed" status
+
+  /generate-artifacts/writing-prompts:
+    get:
+      operationId: getWritingPrompts
+      summary: Get pending writing prompts for the authenticated host
+      tags: [Writing Prompts]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of pending writing prompts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  prompts:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/WritingPrompt"
+
+  /generate-artifacts/writing-prompts/{prompt_id}:
+    put:
+      operationId: submitWritingPrompt
+      summary: Submit host-written content for a delayed artifact
+      tags: [Writing Prompts]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: prompt_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content]
+              properties:
+                content:
+                  type: string
+                  maxLength: 5000
+                  description: Host's reflection or per-character message
+            example:
+              content: "What surprised me most was how quickly the table fractured into alliances..."
+      responses:
+        "200":
+          description: Content saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WritingPrompt"
+        "400":
+          description: Prompt already submitted and past edit window
+        "403":
+          description: Not the prompt's host
+
+  /generate-artifacts/library:
+    get:
+      operationId: getArtifactLibrary
+      summary: Get the authenticated user's personal artifact library
+      tags: [Library]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: game_type
+          in: query
+          schema:
+            type: string
+            enum: [confession_album, murder_mystery, whose_memory, exquisite_corpse]
+          description: Filter by game type
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: Artifact library entries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  artifacts:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/LibraryEntry"
+                  total:
+                    type: integer
+              example:
+                total: 3
+                artifacts:
+                  - artifact_id: "artifact-uuid-001"
+                    name: "The Album"
+                    session_name: "The Sunday Confessions"
+                    game_type: "confession_album"
+                    session_date: "2026-03-15"
+                    file_url: "https://cdn.supabase.co/artifacts/sess-001/the-album.pdf"
+                    page_count: 12
+                    received_at: "2026-03-15T21:35:00Z"
+
+  /generate-artifacts/download/{artifact_id}:
+    get:
+      operationId: getArtifactDownloadUrl
+      summary: Get a signed download URL for an artifact
+      description: |
+        Returns a time-limited signed URL for downloading the artifact PDF.
+        For app players, this is called when tapping an artifact in the library or notification.
+        For web players, the URL is included in the delivery email.
+      tags: [Library]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: artifact_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Signed download URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  download_url:
+                    type: string
+                    format: uri
+                  expires_at:
+                    type: string
+                    format: date-time
+              example:
+                download_url: "https://cdn.supabase.co/artifacts/sess-001/the-album.pdf?token=abc123" # allow-secret
+                expires_at: "2026-04-14T21:35:00Z"
+        "403":
+          description: Not a session participant
+        "404":
+          description: Artifact not found or not yet generated
+
+  # --- Internal Cloud Run endpoint (not client-facing) ---
+  /render:
+    post:
+      operationId: renderArtifact
+      summary: "[Internal] Render a single artifact PDF"
+      description: |
+        Internal endpoint called by the Supabase Edge Function. Not directly accessible
+        by clients. Accepts template data and returns the rendered PDF uploaded to storage.
+      tags: [Internal]
+      security:
+        - serviceKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [template_name, data]
+              properties:
+                template_name:
+                  type: string
+                  enum: [the-album, prousts-answer, contributions-table, the-dossier, menu-of-the-damned, the-sealed-envelope]
+                data:
+                  type: object
+                  description: Template-specific data payload matching the Nunjucks template variables
+                storage_path:
+                  type: string
+                  description: Destination path in Supabase Storage
+            example:
+              template_name: "the-album"
+              data:
+                session:
+                  id: "sess-ca-001"
+                  title: "The Sunday Confessions"
+                  date: "2026-03-15"
+                  host: "Eleanor Voss"
+                  location: "The Bramley House, London"
+                questionSet: "Ur-Proust 1886"
+                players:
+                  - { id: "p1", name: "Eleanor Voss" }
+                questions:
+                  - { id: "q1", text: "What is your idea of perfect happiness?" }
+                answers:
+                  - { playerId: "p1", questionId: "q1", text: "A long afternoon..." }
+              storage_path: "artifacts/sess-ca-001/the-album.pdf"
+      responses:
+        "200":
+          description: Artifact rendered and uploaded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  file_url:
+                    type: string
+                    format: uri
+                  file_path:
+                    type: string
+                  file_size:
+                    type: integer
+                  page_count:
+                    type: integer
+              example:
+                file_url: "https://cdn.supabase.co/artifacts/sess-ca-001/the-album.pdf"
+                file_path: "artifacts/sess-ca-001/the-album.pdf"
+                file_size: 524288
+                page_count: 12
+        "400":
+          description: Invalid template name or data
+        "500":
+          description: Rendering failed (Puppeteer error)
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Supabase Auth JWT token
+    serviceKey:
+      type: apiKey
+      in: header
+      name: x-service-key
+      description: Internal service-to-service authentication key
+
+  schemas:
+    ArtifactSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        catalog_id:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+          enum: [queued, generating, ready, delivered, failed]
+        delivery_type:
+          type: string
+          enum: [immediate, delayed]
+        scheduled_delivery_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    Artifact:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        catalog_id:
+          type: string
+        template_name:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+          enum: [queued, generating, ready, delivered, failed]
+        delivery_type:
+          type: string
+          enum: [immediate, delayed]
+        file_url:
+          type: string
+          format: uri
+          nullable: true
+        file_size:
+          type: integer
+          nullable: true
+        page_count:
+          type: integer
+          nullable: true
+        personalized_for:
+          type: string
+          format: uuid
+          nullable: true
+        scheduled_delivery_at:
+          type: string
+          format: date-time
+          nullable: true
+        error_message:
+          type: string
+          nullable: true
+        retry_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        generated_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    DeliverySummary:
+      type: object
+      properties:
+        participant_name:
+          type: string
+        channel:
+          type: string
+          enum: [push, email]
+        status:
+          type: string
+          enum: [pending, sent, delivered, opened, failed]
+
+    DeliveryDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        artifact_id:
+          type: string
+          format: uuid
+        artifact_name:
+          type: string
+        participant_name:
+          type: string
+        channel:
+          type: string
+          enum: [push, email]
+        status:
+          type: string
+          enum: [pending, sent, delivered, opened, failed]
+        sent_at:
+          type: string
+          format: date-time
+          nullable: true
+        delivered_at:
+          type: string
+          format: date-time
+          nullable: true
+        opened_at:
+          type: string
+          format: date-time
+          nullable: true
+        error_message:
+          type: string
+          nullable: true
+
+    WritingPrompt:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        artifact_id:
+          type: string
+          format: uuid
+        prompt_type:
+          type: string
+          enum: [sealed_envelope, afterword]
+        prompt_text:
+          type: string
+        target_participant_name:
+          type: string
+          nullable: true
+        submitted_content:
+          type: string
+          nullable: true
+        submitted_at:
+          type: string
+          format: date-time
+          nullable: true
+        deadline:
+          type: string
+          format: date-time
+          description: When the delayed artifact is scheduled for delivery
+
+    LibraryEntry:
+      type: object
+      properties:
+        artifact_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        session_name:
+          type: string
+        game_type:
+          type: string
+        session_date:
+          type: string
+          format: date
+        file_url:
+          type: string
+          format: uri
+        page_count:
+          type: integer
+          nullable: true
+        received_at:
+          type: string
+          format: date-time
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        details:
+          type: object

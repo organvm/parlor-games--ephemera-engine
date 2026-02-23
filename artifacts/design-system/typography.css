@@ -1,0 +1,126 @@
+/* typography.css — Font faces and type hierarchy */
+
+/* ============================================================
+   FONT IMPORTS
+   Playfair Display (headings), Lora (body), JetBrains Mono (meta)
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lora:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono&display=swap');
+
+
+/* ============================================================
+   FONT FAMILIES
+   ============================================================ */
+
+:root {
+  --ff-heading: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --ff-body: 'Lora', Georgia, 'Times New Roman', serif;
+  --ff-mono: 'JetBrains Mono', 'Courier New', Courier, monospace;
+}
+
+
+/* ============================================================
+   TYPE HIERARCHY
+   ============================================================ */
+
+body {
+  font-family: var(--ff-body);
+  font-size: var(--fs-base);
+  line-height: var(--lh-base);
+  color: var(--color-text);
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--ff-heading);
+  font-weight: 700;
+  line-height: var(--lh-tight);
+  color: var(--color-text);
+}
+
+h1 {
+  font-size: var(--fs-3xl);
+  margin-bottom: var(--sp-6);
+}
+
+h2 {
+  font-size: var(--fs-xl);
+  margin-bottom: var(--sp-4);
+}
+
+h3 {
+  font-size: var(--fs-lg);
+  margin-bottom: var(--sp-3);
+}
+
+h4 {
+  font-size: var(--fs-md);
+  margin-bottom: var(--sp-2);
+}
+
+p {
+  margin-bottom: var(--sp-4);
+  line-height: var(--lh-relaxed);
+}
+
+small, .text-sm {
+  font-size: var(--fs-sm);
+}
+
+.text-xs {
+  font-size: var(--fs-xs);
+}
+
+.text-mono {
+  font-family: var(--ff-mono);
+  font-size: var(--fs-sm);
+}
+
+
+/* ============================================================
+   SPECIAL TEXT STYLES
+   ============================================================ */
+
+/* Small caps for attributions */
+.small-caps {
+  font-variant: small-caps;
+  letter-spacing: 0.05em;
+}
+
+/* Drop cap for first letter of answers/sections */
+.drop-cap::first-letter {
+  font-family: var(--ff-heading);
+  font-size: 3.5em;
+  float: left;
+  line-height: 0.8;
+  margin-right: var(--sp-2);
+  margin-top: var(--sp-1);
+  color: var(--color-accent);
+}
+
+/* Italics for historical/quoted text */
+.historical-text {
+  font-style: italic;
+  color: var(--color-muted);
+}
+
+/* Monospace metadata */
+.metadata {
+  font-family: var(--ff-mono);
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-muted);
+}
+
+/* Gold accent text */
+.text-gold {
+  color: var(--color-gold);
+}
+
+/* Redacted text effect */
+.redacted {
+  background-color: var(--color-text);
+  color: var(--color-text);
+  padding: 0 var(--sp-1);
+  user-select: none;
+}

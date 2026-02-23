@@ -1,0 +1,1130 @@
+openapi: 3.0.3
+info:
+  title: Ephemera Engine — Confession Album API
+  description: |
+    API contracts for the Confession Album game module (SDD-003).
+    Covers question set CRUD, board configuration, chain state management,
+    and artifact generation triggers.
+
+    All endpoints require authentication via Supabase Auth (JWT Bearer token).
+    Game night endpoints operate locally (no server calls); these contracts
+    define the sync protocol for pre-game and post-game phases.
+  version: 1.0.0
+  contact:
+    name: Ephemera Engine
+    url: https://github.com/labores-profani-crux/parlor-games--ephemera-engine
+
+servers:
+  - url: https://{project-ref}.supabase.co/rest/v1
+    description: Supabase REST API (PostgREST)
+    variables:
+      project-ref:
+        default: placeholder
+        description: Supabase project reference ID
+  - url: https://{project-ref}.supabase.co/functions/v1
+    description: Supabase Edge Functions
+    variables:
+      project-ref:
+        default: placeholder
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Question Set
+    description: Question set curation and management (pre-game)
+  - name: Board Configuration
+    description: Board display settings (pre-game)
+  - name: Contributions
+    description: Contribution archetype assignment and submission
+  - name: Player Order
+    description: Chain turn order configuration
+  - name: Chain State
+    description: Chain mechanic tracking (game night sync)
+  - name: The Return
+    description: Optional Return variant tracking
+  - name: Artifacts
+    description: Artifact generation and delivery triggers
+
+paths:
+  # ──────────────────────────────────────────
+  # QUESTION SET
+  # ──────────────────────────────────────────
+
+  /confession_album_question_items:
+    get:
+      tags: [Question Set]
+      operationId: listQuestionItems
+      summary: List question items for a session
+      description: |
+        Returns all question items in the session's board.
+        Used during pre-game curation and post-game sync.
+      parameters:
+        - name: session_id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [on-board, removed]
+        - name: order
+          in: query
+          required: false
+          schema:
+            type: string
+            default: board_position.asc
+      responses:
+        '200':
+          description: List of question items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuestionItem'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    post:
+      tags: [Question Set]
+      operationId: addQuestionItem
+      summary: Add a question to the session's board
+      description: |
+        Copies a question from the content library into the session's
+        question set. Sets initial board_position and status='on-board'.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuestionItemCreate'
+      responses:
+        '201':
+          description: Question item created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionItem'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    patch:
+      tags: [Question Set]
+      operationId: updateQuestionItem
+      summary: Update a question item (reorder, change status)
+      description: |
+        Updates board_position (reorder) or status (remove from board).
+        Used during pre-game curation and game night sync.
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuestionItemUpdate'
+      responses:
+        '200':
+          description: Question item updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionItem'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags: [Question Set]
+      operationId: removeQuestionItem
+      summary: Remove a question from the session's set
+      description: |
+        Permanently removes a question during pre-game curation.
+        Not used during game night (use PATCH status='removed' instead).
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Question item deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /confession_album_question_items/bulk:
+    post:
+      tags: [Question Set]
+      operationId: bulkAddQuestionItems
+      summary: Add multiple questions from a lineage
+      description: |
+        Bulk-adds all questions from a selected lineage to the session's
+        question set. Used when the host selects a base lineage.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session_id, lineage]
+              properties:
+                session_id:
+                  type: string
+                  format: uuid
+                lineage:
+                  type: string
+                  enum: [classic-proust, vanity-fair, pivot-lipton, thematic-remix]
+      responses:
+        '201':
+          description: Questions added
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    description: Number of questions added
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/QuestionItem'
+
+  /confession_album_question_items/reorder:
+    post:
+      tags: [Question Set]
+      operationId: reorderQuestionItems
+      summary: Reorder all questions on the board
+      description: |
+        Accepts an ordered array of question item IDs and updates
+        board_position for each. Used after drag-and-drop reordering.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session_id, ordered_ids]
+              properties:
+                session_id:
+                  type: string
+                  format: uuid
+                ordered_ids:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  description: Question item IDs in desired order
+      responses:
+        '200':
+          description: Reorder complete
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  updated:
+                    type: integer
+
+  # ──────────────────────────────────────────
+  # CONTENT LIBRARY
+  # ──────────────────────────────────────────
+
+  /content_questions:
+    get:
+      tags: [Question Set]
+      operationId: listContentQuestions
+      summary: Browse the content library
+      description: |
+        Returns questions from the content library, filtered by lineage,
+        register, domain, or search text. Used during pre-game curation
+        when the host adds questions from other lineages.
+      parameters:
+        - name: lineage
+          in: query
+          schema:
+            type: string
+            enum: [classic-proust, vanity-fair, pivot-lipton, thematic-remix]
+        - name: register
+          in: query
+          schema:
+            type: string
+            enum: [light, medium, deep]
+        - name: domain
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Full-text search against question text
+        - name: is_bundled
+          in: query
+          schema:
+            type: boolean
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Content questions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ContentQuestion'
+
+  # ──────────────────────────────────────────
+  # BOARD CONFIGURATION
+  # ──────────────────────────────────────────
+
+  /sessions/{session_id}/confession-album-config:
+    get:
+      tags: [Board Configuration]
+      operationId: getConfessionAlbumConfig
+      summary: Get session configuration
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      responses:
+        '200':
+          description: Session configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfessionAlbumConfig'
+
+    patch:
+      tags: [Board Configuration]
+      operationId: updateConfessionAlbumConfig
+      summary: Update session configuration
+      description: |
+        Updates board format, layout, The Return toggle, timer settings,
+        archetype assignment mode, or Proust's Answer delay.
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfessionAlbumConfigUpdate'
+      responses:
+        '200':
+          description: Configuration updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfessionAlbumConfig'
+
+  # ──────────────────────────────────────────
+  # CONTRIBUTIONS (ARCHETYPES)
+  # ──────────────────────────────────────────
+
+  /confession_album_contributions:
+    get:
+      tags: [Contributions]
+      operationId: listContributions
+      summary: List contribution assignments for a session
+      parameters:
+        - name: session_id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Contribution assignments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ContributionItem'
+
+    post:
+      tags: [Contributions]
+      operationId: assignContribution
+      summary: Assign an archetype to a player
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContributionItemCreate'
+      responses:
+        '201':
+          description: Contribution assigned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContributionItem'
+
+    patch:
+      tags: [Contributions]
+      operationId: updateContribution
+      summary: Submit or update contribution description
+      description: |
+        Guest submits their description of what they are bringing.
+        Sets submitted=true and submitted_at.
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+                  maxLength: 500
+                submitted:
+                  type: boolean
+      responses:
+        '200':
+          description: Contribution updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContributionItem'
+
+  /confession_album_contributions/auto-assign:
+    post:
+      tags: [Contributions]
+      operationId: autoAssignContributions
+      summary: Auto-assign archetypes to all players
+      description: |
+        Evenly distributes the 5 archetypes across all session participants.
+        No archetype assigned to more than ceil(guests/5) players.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session_id]
+              properties:
+                session_id:
+                  type: string
+                  format: uuid
+      responses:
+        '201':
+          description: Archetypes assigned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ContributionItem'
+
+  # ──────────────────────────────────────────
+  # PLAYER ORDER
+  # ──────────────────────────────────────────
+
+  /sessions/{session_id}/player-order:
+    get:
+      tags: [Player Order]
+      operationId: getPlayerOrder
+      summary: Get the chain turn order
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      responses:
+        '200':
+          description: Ordered player IDs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  player_order:
+                    type: array
+                    items:
+                      type: string
+                      format: uuid
+                  mode:
+                    type: string
+                    enum: [seating, random, manual]
+
+    put:
+      tags: [Player Order]
+      operationId: setPlayerOrder
+      summary: Set or update the chain turn order
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [player_order, mode]
+              properties:
+                player_order:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  description: Ordered player IDs (host excluded)
+                mode:
+                  type: string
+                  enum: [seating, random, manual]
+      responses:
+        '200':
+          description: Player order set
+        '400':
+          description: Invalid player order (e.g., includes host, missing players)
+
+  # ──────────────────────────────────────────
+  # CHAIN STATE (post-game sync)
+  # ──────────────────────────────────────────
+
+  /confession_album_chain_entries:
+    get:
+      tags: [Chain State]
+      operationId: listChainEntries
+      summary: List all chain entries for a session
+      parameters:
+        - name: session_id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: order
+          in: query
+          schema:
+            type: string
+            default: turn_number.asc
+      responses:
+        '200':
+          description: Chain entries in turn order
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChainEntry'
+
+    post:
+      tags: [Chain State]
+      operationId: syncChainEntries
+      summary: Sync chain entries from local to server
+      description: |
+        Bulk-upserts chain entries after game night. Called during the
+        post-game sync when the host's device reconnects. Uses turn_number
+        as the natural key for upsert (one entry per turn per session).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session_id, entries]
+              properties:
+                session_id:
+                  type: string
+                  format: uuid
+                entries:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ChainEntryCreate'
+      responses:
+        '200':
+          description: Chain entries synced
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  synced:
+                    type: integer
+                    description: Number of entries synced
+
+  # ──────────────────────────────────────────
+  # THE RETURN (post-game sync)
+  # ──────────────────────────────────────────
+
+  /confession_album_return_entries:
+    get:
+      tags: [The Return]
+      operationId: listReturnEntries
+      summary: List return entries for a session
+      parameters:
+        - name: session_id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Return entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReturnEntry'
+
+    post:
+      tags: [The Return]
+      operationId: syncReturnEntries
+      summary: Sync return entries from local to server
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session_id, entries]
+              properties:
+                session_id:
+                  type: string
+                  format: uuid
+                entries:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ReturnEntryCreate'
+      responses:
+        '200':
+          description: Return entries synced
+
+  # ──────────────────────────────────────────
+  # ARTIFACT GENERATION
+  # ──────────────────────────────────────────
+
+  /generate-artifact:
+    post:
+      tags: [Artifacts]
+      operationId: generateArtifact
+      summary: Trigger artifact generation
+      description: |
+        Supabase Edge Function. Triggers server-side generation of
+        The Album (A01) and Contributions Table (A02).
+        Returns an artifact record with status='generating'.
+        Client polls the artifact status endpoint until status='ready'.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session_id, artifact_type]
+              properties:
+                session_id:
+                  type: string
+                  format: uuid
+                artifact_type:
+                  type: string
+                  enum: [the-album, prousts-answer]
+                  description: |
+                    'the-album': generates A01 (Album) + A02 (Contributions Table).
+                    'prousts-answer': generates A03 (per-player letters).
+      responses:
+        '202':
+          description: Generation started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  artifact_id:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    enum: [generating]
+                  estimated_seconds:
+                    type: integer
+                    description: Estimated generation time
+        '400':
+          description: Session not in COMPLETE state or missing chain data
+
+  /artifacts/{artifact_id}:
+    get:
+      tags: [Artifacts]
+      operationId: getArtifactStatus
+      summary: Get artifact generation status
+      parameters:
+        - name: artifact_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Artifact status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Artifact'
+
+  /artifacts/{artifact_id}/download:
+    get:
+      tags: [Artifacts]
+      operationId: downloadArtifact
+      summary: Get a time-limited download URL
+      parameters:
+        - name: artifact_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Download URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    format: uri
+                    description: Pre-signed URL, valid for 1 hour
+                  expires_at:
+                    type: string
+                    format: date-time
+
+# ──────────────────────────────────────────
+# COMPONENTS
+# ──────────────────────────────────────────
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Supabase Auth JWT token
+
+  parameters:
+    SessionId:
+      name: session_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  responses:
+    Unauthorized:
+      description: Missing or invalid authentication token
+    Forbidden:
+      description: User does not have access to this resource
+    NotFound:
+      description: Resource not found
+    BadRequest:
+      description: Invalid request body or parameters
+
+  schemas:
+    QuestionItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        session_id:
+          type: string
+          format: uuid
+        question_id:
+          type: string
+          description: Source content question ID
+        text:
+          type: string
+        lineage:
+          type: string
+          enum: [classic-proust, vanity-fair, pivot-lipton, thematic-remix]
+        register:
+          type: string
+          enum: [light, medium, deep]
+        domain:
+          type: string
+        proust_response_1886:
+          type: string
+          nullable: true
+        proust_response_1892:
+          type: string
+          nullable: true
+        proust_adjacent_question_id:
+          type: string
+          nullable: true
+        board_position:
+          type: integer
+        status:
+          type: string
+          enum: [on-board, removed]
+        created_at:
+          type: string
+          format: date-time
+
+    QuestionItemCreate:
+      type: object
+      required: [session_id, question_id, text, lineage, register, domain]
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        question_id:
+          type: string
+        text:
+          type: string
+        lineage:
+          type: string
+          enum: [classic-proust, vanity-fair, pivot-lipton, thematic-remix]
+        register:
+          type: string
+          enum: [light, medium, deep]
+        domain:
+          type: string
+        proust_response_1886:
+          type: string
+          nullable: true
+        proust_response_1892:
+          type: string
+          nullable: true
+        proust_adjacent_question_id:
+          type: string
+          nullable: true
+        board_position:
+          type: integer
+          default: 0
+
+    QuestionItemUpdate:
+      type: object
+      properties:
+        board_position:
+          type: integer
+        status:
+          type: string
+          enum: [on-board, removed]
+
+    ContentQuestion:
+      type: object
+      properties:
+        id:
+          type: string
+        text:
+          type: string
+        lineage:
+          type: string
+          enum: [classic-proust, vanity-fair, pivot-lipton, thematic-remix]
+        register:
+          type: string
+          enum: [light, medium, deep]
+        domain:
+          type: string
+        proust_response_1886:
+          type: string
+          nullable: true
+        proust_response_1892:
+          type: string
+          nullable: true
+        proust_adjacent:
+          type: string
+          nullable: true
+        lineage_context:
+          type: string
+          nullable: true
+        content_pack_id:
+          type: string
+          nullable: true
+        is_bundled:
+          type: boolean
+        tags:
+          type: array
+          items:
+            type: string
+
+    ConfessionAlbumConfig:
+      type: object
+      properties:
+        board_format:
+          type: string
+          enum: [digital, physical, hybrid]
+          default: digital
+        board_layout:
+          type: string
+          enum: [grid, list, scattered]
+          default: grid
+        board_background:
+          type: string
+          enum: [warm-neutral, dark, custom]
+          default: warm-neutral
+        board_background_color:
+          type: string
+          nullable: true
+          description: Hex color, used when board_background is 'custom'
+        board_font_size:
+          type: string
+          enum: [auto, manual]
+          default: auto
+        board_font_size_value:
+          type: integer
+          nullable: true
+        return_enabled:
+          type: boolean
+          default: false
+        timer_enabled:
+          type: boolean
+          default: false
+        timer_duration:
+          type: integer
+          nullable: true
+          description: Seconds
+        archetype_assignment:
+          type: string
+          enum: [auto-assign, manual, player-choice]
+          default: auto-assign
+        prousts_answer_delay_days:
+          type: integer
+          default: 7
+          minimum: 3
+          maximum: 14
+
+    ConfessionAlbumConfigUpdate:
+      type: object
+      description: Partial update -- include only fields to change
+      properties:
+        board_format:
+          type: string
+          enum: [digital, physical, hybrid]
+        board_layout:
+          type: string
+          enum: [grid, list, scattered]
+        board_background:
+          type: string
+          enum: [warm-neutral, dark, custom]
+        board_background_color:
+          type: string
+          nullable: true
+        return_enabled:
+          type: boolean
+        timer_enabled:
+          type: boolean
+        timer_duration:
+          type: integer
+          nullable: true
+        archetype_assignment:
+          type: string
+          enum: [auto-assign, manual, player-choice]
+        prousts_answer_delay_days:
+          type: integer
+          minimum: 3
+          maximum: 14
+
+    ContributionItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        session_id:
+          type: string
+          format: uuid
+        player_id:
+          type: string
+          format: uuid
+        archetype:
+          type: string
+          enum: [happiness, food, possession, word, quality]
+        archetype_label:
+          type: string
+        archetype_instruction:
+          type: string
+        description:
+          type: string
+        submitted:
+          type: boolean
+        submitted_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    ContributionItemCreate:
+      type: object
+      required: [session_id, player_id, archetype]
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        player_id:
+          type: string
+          format: uuid
+        archetype:
+          type: string
+          enum: [happiness, food, possession, word, quality]
+
+    ChainEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        session_id:
+          type: string
+          format: uuid
+        turn_number:
+          type: integer
+        player_id:
+          type: string
+          format: uuid
+        inherited_question_id:
+          type: string
+          format: uuid
+          nullable: true
+        inherited_answer:
+          type: string
+        chosen_question_id:
+          type: string
+          format: uuid
+        chosen_answer:
+          type: string
+        bookmarked:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    ChainEntryCreate:
+      type: object
+      required: [turn_number, player_id, chosen_question_id]
+      properties:
+        turn_number:
+          type: integer
+          minimum: 1
+        player_id:
+          type: string
+          format: uuid
+        inherited_question_id:
+          type: string
+          format: uuid
+          nullable: true
+        inherited_answer:
+          type: string
+          default: ''
+        chosen_question_id:
+          type: string
+          format: uuid
+        chosen_answer:
+          type: string
+          default: ''
+        bookmarked:
+          type: boolean
+          default: false
+
+    ReturnEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        session_id:
+          type: string
+          format: uuid
+        asker_id:
+          type: string
+          format: uuid
+        target_id:
+          type: string
+          format: uuid
+        question_id:
+          type: string
+          format: uuid
+        answer:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+
+    ReturnEntryCreate:
+      type: object
+      required: [asker_id, target_id, question_id]
+      properties:
+        asker_id:
+          type: string
+          format: uuid
+        target_id:
+          type: string
+          format: uuid
+        question_id:
+          type: string
+          format: uuid
+        answer:
+          type: string
+          nullable: true
+
+    Artifact:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        session_id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [the-album, contributions-table, prousts-answer]
+        name:
+          type: string
+        status:
+          type: string
+          enum: [pending, generating, ready, delivered, failed]
+        file_url:
+          type: string
+          format: uri
+          nullable: true
+        file_size:
+          type: integer
+          nullable: true
+          description: File size in bytes
+        personalized_for:
+          type: string
+          format: uuid
+          nullable: true
+          description: Null for shared artifacts, player_id for personalized
+        scheduled_delivery:
+          type: string
+          format: date-time
+          nullable: true
+        delivered_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time

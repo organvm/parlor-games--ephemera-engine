@@ -1,0 +1,241 @@
+{
+  "session": {
+    "id": "sess-mm-001",
+    "title": "Death at the Gilded Vine",
+    "date": "2026-04-05",
+    "host": "Marcus Webb",
+    "location": "Heirloom Supper Club, Brooklyn",
+    "caseNumber": "2026-0405"
+  },
+  "setting": {
+    "era": "Prohibition-Era New York, 1928",
+    "location": "The Gilded Vine speakeasy, beneath a florist shop on Mulberry Street",
+    "description": "On the evening of April 5th, 1928, six guests gathered in the private cellar of The Gilded Vine — a speakeasy known only to Manhattan's most connected. The host, Salvatore 'Sal' Moretti, had promised a tasting of rare French wines smuggled through the St. Lawrence. He never made it to the second course. At 9:47 PM, between the consommé and the coq au vin, Sal was found slumped in his chair, a half-empty glass of Château Margaux in his hand and a look of mild surprise frozen on his face.",
+    "crimeScene": "The private dining room: an oval table set for seven, gas lamps converted to electric, walls lined with wine racks. Sal's chair faces the kitchen entrance. His wine glass is half-full, the bottle two-thirds empty. A handwritten note is partially visible under his left hand. The kitchen door is ajar. A trail of wet footprints leads from the kitchen to the wine cellar stairs."
+  },
+  "characters": [
+    {
+      "id": "c1",
+      "name": "Vivienne LaRoux",
+      "playedBy": "Sarah Kim",
+      "bio": "French-born chanteuse and rumored informant for the Bureau of Prohibition. Arrived in New York six months ago under unclear circumstances. Known to Sal through his brother, who she may or may not have been involved with romantically."
+    },
+    {
+      "id": "c2",
+      "name": "Tommy 'Two-Step' Malone",
+      "playedBy": "Ravi Patel",
+      "bio": "Sal's business partner and the Vine's floor manager. A former dancer turned bootlegger who handles the supply chain. Has been skimming profits — or so the rumors say."
+    },
+    {
+      "id": "c3",
+      "name": "Dr. Henrietta Voss",
+      "playedBy": "Eleanor Voss",
+      "bio": "A physician and toxicologist who treats the speakeasy crowd discreetly. Owes Sal a significant gambling debt. Was seen arguing with him earlier that evening about 'the arrangement.'"
+    },
+    {
+      "id": "c4",
+      "name": "Father Domenico Bianchi",
+      "playedBy": "James Harrington",
+      "bio": "Sal's childhood priest and confessor, recently arrived from Palermo. Claims he's in New York for a religious conference, but was spotted at the harbor receiving an unmarked crate."
+    },
+    {
+      "id": "c5",
+      "name": "Pearl Washington",
+      "playedBy": "Anya Petrov",
+      "bio": "Jazz pianist at the Vine and Sal's oldest friend. She wrote him a letter last month that he refused to discuss. Pearl has been playing nightly for three years — she knows every secret this cellar holds."
+    },
+    {
+      "id": "c6",
+      "name": "Inspector Alistair Finch",
+      "playedBy": "David Chen",
+      "bio": "Off-duty police inspector who was 'invited' to dinner — though Sal kept no written record of the invitation. Known to be investigating the speakeasy circuit, but also known to accept certain courtesies."
+    }
+  ],
+  "clues": [
+    {
+      "id": "A",
+      "title": "The Wine Bottle",
+      "type": "PHYSICAL",
+      "description": "The Château Margaux bottle served at dinner. Laboratory analysis reveals trace amounts of antimony trioxide dissolved in the wine — a slow-acting poison that mimics cardiac arrest.",
+      "foundBy": "Dr. Henrietta Voss"
+    },
+    {
+      "id": "B",
+      "title": "The Handwritten Note",
+      "type": "DOCUMENT",
+      "description": "Found under Sal's left hand: 'I know what you did in Palermo. Meet me in the cellar at 10 or I tell everyone.' Written in blue ink on Gilded Vine stationery. Handwriting analysis is inconclusive.",
+      "foundBy": "Inspector Alistair Finch"
+    },
+    {
+      "id": "C",
+      "title": "Kitchen Footprints",
+      "type": "PHYSICAL",
+      "description": "Wet footprints leading from the kitchen to the wine cellar stairs. Men's dress shoes, approximately size 10. The kitchen floor was mopped at 9:30 PM according to staff.",
+      "foundBy": "Tommy 'Two-Step' Malone"
+    },
+    {
+      "id": "D",
+      "title": "Pearl's Letter",
+      "type": "DOCUMENT",
+      "description": "A sealed letter in Pearl's handwriting found in Sal's jacket pocket. Contents: a confession that she had been feeding information about Sal's operations to Inspector Finch in exchange for her brother's release from Sing Sing.",
+      "foundBy": "Vivienne LaRoux"
+    },
+    {
+      "id": "E",
+      "title": "The Unmarked Crate",
+      "type": "PHYSICAL",
+      "description": "A crate in the wine cellar stamped with Sicilian customs markings. Contains six bottles of Château Margaux — one of which is missing. Also contains a velvet pouch with a glass vial, now empty, labeled 'Sb₂O₃' in a pharmacist's hand.",
+      "foundBy": "Father Domenico Bianchi"
+    },
+    {
+      "id": "F",
+      "title": "The Ledger Entry",
+      "type": "FINANCIAL",
+      "description": "Tommy's private ledger shows a $3,000 payment to 'V.L.' dated two weeks before the dinner. The entry is marked with a small cross symbol — the same symbol Father Bianchi uses as a signature.",
+      "foundBy": "Pearl Washington"
+    },
+    {
+      "id": "G",
+      "title": "Vivienne's Bureau Badge",
+      "type": "PERSONAL",
+      "description": "A Bureau of Prohibition identification card found in Vivienne's handbag. Issue date: three months ago. Her cover name: 'Marie Fontaine.' The badge is real.",
+      "foundBy": "Dr. Henrietta Voss"
+    }
+  ],
+  "accusations": [
+    {
+      "accuser": "Sarah Kim (as Vivienne)",
+      "target": "Father Domenico Bianchi",
+      "reasoning": "He brought the crate from Palermo. The poison vial was inside. He had both the means and a secret worth killing to protect — whatever Sal knew about Palermo."
+    },
+    {
+      "accuser": "Ravi Patel (as Tommy)",
+      "target": "Dr. Henrietta Voss",
+      "reasoning": "She's a toxicologist who owed Sal money. She identified the poison awfully fast. A doctor would know exactly how to dose antimony to mimic a heart attack."
+    },
+    {
+      "accuser": "Eleanor Voss (as Dr. Voss)",
+      "target": "Tommy 'Two-Step' Malone",
+      "reasoning": "The footprints are his size. The ledger shows unexplained payments. He's been skimming, and Sal was about to find out."
+    },
+    {
+      "accuser": "James Harrington (as Father Bianchi)",
+      "target": "Vivienne LaRoux",
+      "reasoning": "She's a federal agent. She had every reason to silence Sal before he discovered her identity and fled. The $3,000 was her payment for the poison — arranged through Tommy."
+    },
+    {
+      "accuser": "Anya Petrov (as Pearl)",
+      "target": "Inspector Alistair Finch",
+      "reasoning": "An uninvited cop at a speakeasy dinner? He's been playing both sides. Maybe Sal threatened to expose him, and Finch decided to close the case permanently."
+    },
+    {
+      "accuser": "David Chen (as Inspector Finch)",
+      "target": "Father Domenico Bianchi",
+      "reasoning": "A priest who receives unmarked crates at the harbor? The poison came from that crate. He's no man of God — he's a courier for the Palermo families."
+    }
+  ],
+  "reveal": {
+    "culprit": "Father Domenico Bianchi",
+    "explanation": "Father Bianchi was not, in fact, a priest. He was Enzo Moretti — Sal's estranged brother, long believed dead in a Palermo warehouse fire. Enzo had been living under a false identity for twelve years, serving as a go-between for Sicilian wine smugglers and their American distributors. Sal discovered the truth two weeks before the dinner and threatened to expose him. The crate from Palermo contained both the wine and the poison — Enzo's insurance policy. He dosed the Château Margaux before it was served, knowing Sal always drank first. The handwritten note was Enzo's own threat, planted to suggest Sal had enemies. The $3,000 payment in Tommy's ledger was Enzo's fee for the wine shipment, routed through Tommy to avoid suspicion. The cross symbol was Enzo's old habit — a remnant of the identity he'd built. In the end, the brother Sal mourned for twelve years was the one who killed him."
+  },
+  "votes": [
+    { "character": "Father Bianchi", "count": 3 },
+    { "character": "Dr. Voss", "count": 1 },
+    { "character": "Tommy Malone", "count": 1 },
+    { "character": "Vivienne LaRoux", "count": 1 }
+  ],
+  "host": {
+    "id": "h1",
+    "name": "Marcus Webb"
+  },
+  "reflection": "What surprised me most was how quickly the table fractured into alliances. By the second course, Ravi and Sarah had formed an unofficial detective team, while James committed so fully to his priestly accent that even I forgot he was acting. The moment Eleanor identified the poison, the room went electric — everyone turned to look at her, and she played it beautifully, deflecting suspicion with exactly the right amount of medical authority. Pearl's letter was the turning point. When Anya read it aloud, you could hear a pin drop. David's face — the betrayal his character felt — was genuinely moving. I think the best murder mysteries work because they give people permission to be suspicious, to ask the hard questions, to accuse someone they like. For three hours, we weren't polite dinner guests. We were detectives, liars, and one very convincing murderer.",
+  "stats": {
+    "accuracy": 50,
+    "mostSuspected": "Father Bianchi",
+    "biggestSurprise": "Pearl's Letter",
+    "totalClues": 7,
+    "totalPlayers": 6
+  },
+  "recipes": [
+    {
+      "contributor": "Marcus Webb (Host)",
+      "name": "Consommé Brunoise à la Moretti",
+      "type": "First Course",
+      "ingredients": [
+        "2 lbs beef bones, roasted",
+        "1 lb ground beef (lean)",
+        "2 egg whites, lightly beaten",
+        "1 carrot, finely diced",
+        "1 celery stalk, finely diced",
+        "1 leek, white part only, finely diced",
+        "2 tomatoes, chopped",
+        "1 bouquet garni (thyme, bay, parsley)",
+        "8 cups beef stock, defatted",
+        "Salt, white pepper"
+      ],
+      "steps": [
+        "Combine ground beef, egg whites, carrot, celery, leek, and tomatoes in a large pot. This is your clarification raft.",
+        "Pour cold stock over the raft mixture. Set over medium heat, stirring occasionally until the raft begins to form.",
+        "Once the raft solidifies, stop stirring. Reduce to a bare simmer and cook for 90 minutes.",
+        "Ladle the clear consommé through the raft into a clean pot using a ladle. Do not disturb the raft.",
+        "Season to taste. The result should be crystal-clear with a deep amber color.",
+        "Serve in warmed bowls with a precise brunoise of carrot, celery, and turnip."
+      ]
+    },
+    {
+      "contributor": "Sarah Kim (Vivienne)",
+      "name": "Coq au Vin Noir",
+      "type": "Main Course",
+      "ingredients": [
+        "1 whole chicken, cut into 8 pieces",
+        "1 bottle red Burgundy wine",
+        "6 oz salt pork, cubed",
+        "20 pearl onions, peeled",
+        "8 oz cremini mushrooms, quartered",
+        "2 cloves garlic, crushed",
+        "2 tbsp tomato paste",
+        "2 tbsp flour",
+        "2 tbsp butter",
+        "Fresh thyme, bay leaf, parsley",
+        "Cognac for flambé"
+      ],
+      "steps": [
+        "Marinate chicken in wine with herbs overnight in the refrigerator.",
+        "Remove chicken, pat dry, reserve marinade. Season with salt and pepper.",
+        "In a heavy Dutch oven, render salt pork until crisp. Remove and reserve.",
+        "Brown chicken pieces in the rendered fat. Remove and set aside.",
+        "Add pearl onions and mushrooms, cook until golden.",
+        "Add garlic and tomato paste, cook one minute. Sprinkle with flour.",
+        "Pour cognac and carefully flambé. Add reserved marinade, bring to a simmer.",
+        "Return chicken and pork, cover and cook at 325°F for 90 minutes.",
+        "Adjust seasoning. The sauce should coat the back of a spoon."
+      ]
+    },
+    {
+      "contributor": "Anya Petrov (Pearl)",
+      "name": "Jazz Club Bourbon Pecan Pie",
+      "type": "Dessert",
+      "ingredients": [
+        "1 unbaked 9-inch pie crust",
+        "3 eggs, beaten",
+        "1 cup dark corn syrup",
+        "⅓ cup brown sugar, packed",
+        "⅓ cup melted butter",
+        "2 tbsp bourbon",
+        "1 tsp vanilla extract",
+        "¼ tsp salt",
+        "1½ cups pecan halves",
+        "Flaky sea salt for finishing"
+      ],
+      "steps": [
+        "Preheat oven to 350°F. Place pie crust in a 9-inch pie pan, crimp edges.",
+        "Whisk together eggs, corn syrup, brown sugar, melted butter, bourbon, vanilla, and salt.",
+        "Arrange pecan halves in the bottom of the crust in concentric circles.",
+        "Pour the filling over the pecans slowly, allowing it to settle between the nuts.",
+        "Bake for 50-60 minutes until the center is set but still slightly jiggly.",
+        "Cool completely before slicing. Finish each slice with a pinch of flaky sea salt.",
+        "Best served with unsweetened whipped cream and a measure of the same bourbon."
+      ]
+    }
+  ]
+}

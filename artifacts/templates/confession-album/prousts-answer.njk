@@ -1,0 +1,162 @@
+{# prousts-answer.njk — Personal letter, A5 portrait, 2–4 pages
+   Data: { player, question, playerAnswer, proustAnswer, questionLineage, sessionDate }
+#}
+{% extends "../_base.njk" %}
+{% import "../_macros.njk" as m %}
+
+{% set theme = "personal-letter" %}
+{% set title = "Proust's Answer — " + player.name %}
+
+{% block extraStyles %}
+{{ m.macroStyles() }}
+<style>
+  .letter {
+    padding: 24mm 22mm 18mm 22mm;
+    line-height: var(--lh-letter);
+    min-height: 210mm;
+  }
+  .letterhead {
+    text-align: center;
+    margin-bottom: var(--sp-8);
+    padding-bottom: var(--sp-6);
+    border-bottom: 1px solid var(--color-divider);
+  }
+  .letterhead__name {
+    font-family: var(--ff-heading);
+    font-size: var(--fs-xl);
+    color: var(--color-accent);
+  }
+  .letterhead__date {
+    font-family: var(--ff-mono);
+    font-size: var(--fs-xs);
+    color: var(--color-muted);
+    margin-top: var(--sp-2);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .greeting {
+    font-family: var(--ff-body);
+    font-style: italic;
+    font-size: var(--fs-md);
+    color: var(--color-muted);
+    margin-bottom: var(--sp-6);
+  }
+  .question-label {
+    font-family: var(--ff-mono);
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-muted);
+    margin-bottom: var(--sp-2);
+  }
+  .the-question {
+    font-family: var(--ff-heading);
+    font-size: var(--fs-lg);
+    color: var(--color-accent);
+    margin-bottom: var(--sp-6);
+    font-style: italic;
+  }
+  .answer-section {
+    margin-bottom: var(--sp-6);
+  }
+  .answer-section__label {
+    font-family: var(--ff-heading);
+    font-size: var(--fs-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-gold);
+    margin-bottom: var(--sp-2);
+  }
+  .proust-answer {
+    font-style: italic;
+    color: var(--color-muted);
+    padding-left: var(--sp-4);
+    border-left: 2px solid var(--color-gold);
+  }
+  .player-answer {
+    padding-left: var(--sp-4);
+    border-left: 2px solid var(--color-accent);
+  }
+  .signoff {
+    margin-top: var(--sp-8);
+    text-align: right;
+    font-style: italic;
+    color: var(--color-muted);
+  }
+  .postscript {
+    margin-top: var(--sp-8);
+    padding-top: var(--sp-4);
+    border-top: 1px solid var(--color-divider);
+    font-size: var(--fs-sm);
+    color: var(--color-muted);
+  }
+  .postscript__label {
+    font-family: var(--ff-mono);
+    font-weight: 700;
+    font-size: var(--fs-xs);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="letter texture-aged">
+  <div style="position: relative; z-index: 2;">
+    {# ── LETTERHEAD ── #}
+    <div class="letterhead">
+      {{ m.ornament('fleuron') }}
+      <p class="letterhead__name">{{ player.name }}</p>
+      <p class="letterhead__date">{{ sessionDate | dateFormat }}</p>
+    </div>
+
+    {# ── GREETING ── #}
+    <p class="greeting">Dear {{ player.name }},</p>
+
+    <p>
+      During the salon, you were asked a question with a long and storied lineage.
+      Below, your answer is paired with that of Marcel Proust himself — the original
+      confessor — so you may see how hearts separated by more than a century still
+      beat to familiar rhythms.
+    </p>
+
+    {{ m.divider() }}
+
+    {# ── THE QUESTION ── #}
+    <p class="question-label">The Question</p>
+    <p class="the-question">"{{ question.text }}"</p>
+
+    {# ── YOUR ANSWER ── #}
+    <div class="answer-section">
+      <p class="answer-section__label">Your Answer</p>
+      <div class="player-answer">
+        <p>{{ playerAnswer }}</p>
+      </div>
+    </div>
+
+    {# ── PROUST'S ANSWER ── #}
+    <div class="answer-section">
+      <p class="answer-section__label">Proust's Answer</p>
+      <div class="proust-answer">
+        <p class="historical-text">{{ proustAnswer }}</p>
+      </div>
+    </div>
+
+    {{ m.ornament('dots') }}
+
+    {# ── SIGN-OFF ── #}
+    <div class="signoff">
+      <p>Until the next confession,</p>
+      <p style="margin-top: var(--sp-2);">The Ephemera Engine</p>
+    </div>
+
+    {# ── POSTSCRIPT ── #}
+    {% if questionLineage %}
+    <div class="postscript">
+      <p>
+        <span class="postscript__label">P.S.</span>
+        {{ questionLineage }}
+      </p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

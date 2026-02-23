@@ -1,0 +1,162 @@
+/* layout.css — Page geometry, margins, grids */
+
+/* ============================================================
+   PAGE DEFINITIONS
+   ============================================================ */
+
+/* Default: A5 portrait (148×210mm) */
+@page {
+  size: 148mm 210mm;
+  margin: 18mm 18mm 18mm 22mm; /* extra gutter-left for saddle-stitch */
+}
+
+/* Full-bleed covers */
+@page cover {
+  margin: 0;
+}
+
+/* Recipe cards: 5×7 portrait (127×178mm) */
+@page recipe {
+  size: 127mm 178mm;
+  margin: 12mm;
+}
+
+/* Landscape for contribution tables */
+@page landscape {
+  size: 210mm 148mm;
+  margin: 14mm 18mm;
+}
+
+
+/* ============================================================
+   PAGE CONTAINER
+   ============================================================ */
+
+.page {
+  width: 100%;
+  min-height: 100%;
+  padding: 18mm 18mm 18mm 22mm;
+  background-color: var(--color-bg);
+  position: relative;
+}
+
+.page--cover {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  page: cover;
+}
+
+.page--recipe {
+  padding: 12mm;
+  page: recipe;
+}
+
+.page--landscape {
+  page: landscape;
+}
+
+
+/* ============================================================
+   BREAK RULES
+   ============================================================ */
+
+.page-break {
+  break-before: page;
+}
+
+.page-break-after {
+  break-after: page;
+}
+
+.avoid-break {
+  break-inside: avoid;
+}
+
+h2, h3 {
+  break-after: avoid;
+}
+
+
+/* ============================================================
+   CONTENT LAYOUT
+   ============================================================ */
+
+.content {
+  max-width: 100%;
+}
+
+/* Two-column layout for spreads */
+.spread {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-6);
+}
+
+/* Card grid (for character cards, clue cards) */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--sp-4);
+}
+
+/* Single column centered (for letters) */
+.column-narrow {
+  max-width: 85%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+/* ============================================================
+   TABLE LAYOUT
+   ============================================================ */
+
+.table-container {
+  width: 100%;
+  overflow: hidden;
+}
+
+table {
+  width: 100%;
+  font-size: var(--fs-sm);
+}
+
+th {
+  font-family: var(--ff-heading);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  text-align: left;
+  padding: var(--sp-2) var(--sp-3);
+  border-bottom: 2px solid var(--color-divider);
+  color: var(--color-accent);
+}
+
+td {
+  padding: var(--sp-2) var(--sp-3);
+  border-bottom: 1px solid var(--color-divider);
+  vertical-align: top;
+}
+
+/* Zebra striping */
+tr:nth-child(even) td {
+  background-color: var(--color-highlight);
+}
+
+
+/* ============================================================
+   MARGINS & GUTTERS
+   ============================================================ */
+
+.margin-note {
+  position: absolute;
+  left: var(--sp-2);
+  width: 16mm;
+  font-family: var(--ff-mono);
+  font-size: var(--fs-xs);
+  color: var(--color-muted);
+  text-align: right;
+}
