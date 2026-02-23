@@ -161,9 +161,17 @@ Rationale:
 
 ### Recommended Model: Premium App + Content Packs
 
-- **Base app**: $9.99 one-time purchase. Includes the full framework + one game (The Confession Album — lowest host burden, broadest audience, fastest to experience value)
-- **Game packs**: $4.99–$6.99 each (Murder Mystery, Whose Memory?, The Exquisite Corpse, future games)
+#### V1 Launch (Scope Cut — 2026-02-23)
+
+- **Base app**: $9.99 one-time purchase. Includes 2 games (The Confession Album + Murder Mystery) with curated content library (5 murder mystery seeds, 4 question lineages). No IAP at launch.
+- **LLM generation**: Deferred to V1.1. V1 ships with hand-authored curated seeds only. This validates the game mechanics before adding procedural generation.
+- **Content packs and IAP**: Deferred to V1.1. iOS StoreKit 2 + Android BillingClient integration is a multi-week effort that would delay launch.
+
+#### V1.1+ Monetization (Post-Launch)
+
+- **Game packs**: $4.99–$6.99 each (Whose Memory?, The Exquisite Corpse, future games)
 - **Content expansions**: $2.99–$3.99 (new question lineages, new murder mystery setting seeds, new story themes, new structural templates)
+- **LLM generation**: Claude API for procedural murder mystery seeds (included in base app, not paid)
 - **Season pass / subscription**: $14.99/year for all new content as released
 - **Premium artifacts**: $4.99–$9.99 per print-on-demand physical album/dossier (stretch goal — real revenue, real delight)
 
@@ -215,11 +223,12 @@ Rationale:
 - Original questions for the Ephemera Engine are owned IP and a competitive moat
 - The *game mechanics* are not patentable, but the content library, artifact templates, and brand are protectable
 
-### 7. Educator & Facilitator Market
+### 7. Educator & Facilitator Market (V2 Scope)
 
 - Originally run as a college course icebreaker — there is a clear B2B/institutional angle
 - Corporate team building, retreat facilitation, therapy groups, religious communities, writing workshops
 - An "Educator Edition" or "Facilitator License" with bulk pricing, custom branding, and reporting
+- **V1 scope**: Consumer-only. The Educator Edition requires a dedicated privacy impact assessment to reconcile organization-wide content libraries with the Privacy Gate (no public profiles, no cross-session data). Deferred to V2 with its own specification.
 
 ---
 
@@ -265,7 +274,9 @@ The chanoyu (tea ceremony) is the clearest analog for the Ephemera Engine's desi
 
 ---
 
-## Deep Dive B: Educator & Facilitator Market
+## Deep Dive B: Educator & Facilitator Market (V2 Roadmap)
+
+> **Note (2026-02-23)**: This section describes a V2 opportunity. V1 is consumer-only. The Educator Edition requires a privacy impact assessment to reconcile organization-wide content libraries with the Privacy Gate. See §8.7 above.
 
 ### Market Size
 

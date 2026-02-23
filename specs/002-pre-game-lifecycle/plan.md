@@ -5,6 +5,8 @@
 **Stack**: TypeScript 5.x, React Native + Expo, Supabase, PostgreSQL
 **Depends on**: 001-auth-and-sessions (User, Session, SessionParticipation tables and auth flows)
 
+> **Split Notice (2026-02-23)**: Content store and IAP functionality have been extracted to spec `002b-monetization` (deferred to V1.1). This spec now covers: invitations, RSVPs, contributions, notifications, role assignment, and bundled content library only. The `process-iap-receipt` Edge Function and content store UI are in 002b.
+
 ---
 
 ## Constitution Gate Check
@@ -13,7 +15,7 @@ Every implementation decision must pass all four gates. Failures are blockers.
 
 | Gate | Principle | This Spec's Compliance |
 |------|-----------|----------------------|
-| **Simplicity** | <=3 Edge Functions | This spec uses 2 Edge Functions: `send-notification` and `process-iap-receipt`. Deadline scheduling handled by pg_cron, not a third function. |
+| **Simplicity** | <=5 Edge Functions | This spec uses 1 Edge Function: `send-notification`. IAP receipt processing (`process-iap-receipt`) deferred to spec 002b (V1.1). Deadline scheduling handled by pg_cron, not an Edge Function. |
 | **Offline** | Core flows work without connectivity | Contribution drafts saved locally (Expo SQLite/MMKV). RSVP queued offline, synced on reconnect. Content library cached locally. |
 | **Privacy** | No tracking, no social, minimal data | No invitation open-tracking. Contribution content encrypted at rest. No public profiles. Notification preferences per-user. |
 | **Analog** | Screen supports, doesn't replace | Invitation is a link shared via existing messaging. Contribution brief is narratively framed. Pre-game builds anticipation for in-person play. |
@@ -331,6 +333,37 @@ Trigger Event ──▶ Insert notification_queue row
             Update delivery_status    │
                   │                   │
 ```
+
+---
+
+## Implementation Phases
+
+**Total estimated effort**: 19 tasks, ~22–28 working days (solo developer)
+
+> **Note (2026-02-23)**: This spec is recommended for splitting into 002a (core: invitations, contributions, notifications, role assignment — ~14 tasks, ~16-20 days) and 002b (monetization: content store, IAP — ~5 tasks, deferred to V1.1). See evaluation report R6.
+
+### Phase 1: Database Foundation (Tasks 1-6) — ~6 days
+- Migrations: invitation_tokens, contributions, notification_queue, content_packs, role_assignments
+- Seed bundled content data
+
+### Phase 2: Server Functions (Tasks 7-9) — ~5 days
+- send-notification Edge Function
+- process-iap-receipt Edge Function (V1.1 — defer)
+- Supabase Storage bucket setup
+
+### Phase 3: Client UI (Tasks 10-15) — ~8 days
+- Deep link configuration and resolution
+- Invitation and RSVP UI
+- Contribution form and dashboard
+- Push notification client
+- Content store UI (V1.1 — defer)
+- Role assignment UI
+
+### Phase 4: Integration (Tasks 16-19) — ~5 days
+- Email notification templates
+- Offline contribution support
+- Web player pages
+- E2E integration tests
 
 ---
 

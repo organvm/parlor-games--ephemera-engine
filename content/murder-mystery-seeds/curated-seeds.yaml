@@ -1,0 +1,935 @@
+# Curated Murder Mystery Setting Seeds
+# Hand-authored for Ephemera Engine V1 launch
+# These replace LLM generation for the initial content library.
+#
+# Schema: SettingSeed + Characters + Crime + DramaticBeats
+# See: specs/004-murder-mystery/data-model.md
+# See: docs/DESIGN.md §II (Game 1: Murder Mystery)
+
+schema_version: "1.0"
+game: murder_mystery
+content_type: curated_seeds
+generated_by: human
+
+seeds:
+
+  # ---------------------------------------------------------------------------
+  # SEED 1 — Jazz Age Manhattan, 1926
+  # Murder mechanic: Poison (slow-acting, administered during performance)
+  # ---------------------------------------------------------------------------
+  - id: curated-mm-001
+    name: "The Last Note at the Alhambra"
+    era: "1926"
+    location: "The Alhambra — a private jazz club occupying the top two floors of a former Masonic lodge on West 133rd Street, Harlem, New York City"
+    milieu: "The overlapping worlds of Harlem Renaissance artists, downtown gallery owners, Prohibition bootleggers, and the Black intelligentsia — a room where painters argue with poets, where a numbers runner sits beside a Barnard professor, where the only currency that matters is whether you can hold the room's attention"
+    tension: "The announcement of a landmark gallery exhibition that would bring Harlem's avant-garde to downtown white audiences — and the question of who controls the narrative, the money, and the legacy when Black art crosses 110th Street"
+
+    setting_description: |
+      On the evening of October 14th, 1926, the Alhambra is dressed for an occasion. Gardenias float in cut-glass bowls. The piano has been tuned twice. Cora Delacroix — singer, impresario, and the woman who turned the Alhambra from a rent-party basement into Harlem's most coveted invitation — has gathered eight guests for what she calls a "summit of the beautiful and the dangerous."
+
+      The occasion is the announcement of "The New Meridian," a juried exhibition at the Whitfield Gallery on 57th Street — the first major downtown show dedicated entirely to Harlem artists. The Whitfield's owner, Gerald Whitfield, is here tonight as Cora's guest. So are the artists competing for inclusion, the critics who will decide their reputations, and the money men who expect a return on their patronage. Cora has promised that by the end of the evening, the exhibition roster will be settled.
+
+      But the Alhambra keeps secrets the way old buildings keep drafts — you feel them before you find them. Three of the guests owe Cora money. Two of them owe each other worse. And someone in this room has been selling forged paintings under real names, a scheme that the exhibition's scrutiny will inevitably expose. By midnight, the gardenias will have wilted, the piano will fall silent, and Cora Delacroix will be dead in her chair with a champagne coupe still balanced in her hand — the last sip laced with antimony, administered sometime between the second song and the third toast.
+
+    player_count:
+      min: 6
+      max: 10
+
+    characters:
+      - id: c1
+        name: "Cora Delacroix"
+        occupation: "Singer and proprietress of the Alhambra"
+        personality: "Magnetic, imperious, and tender in private. Cora built the Alhambra on charm and iron will. She remembers every slight, repays every kindness, and has never forgiven anyone who underestimated her. She laughs too loud and means every decibel of it."
+        secret: "Cora has been laundering money for Dutch Schultz's numbers operation through the Alhambra's books. The club's elegance is financed by the ugliest money in Harlem. If the exhibition brings scrutiny, the books won't survive an audit."
+        relationships:
+          - target: c2
+            type: obligation
+            description: "Gerald owes you — you made his gallery relevant by introducing him to every artist worth knowing. But lately he's been making promises to downtown collectors that cut you out of the commission."
+          - target: c5
+            type: kin
+            description: "Langston is your younger brother. You raised him after your mother died. You love him desperately and trust him not at all."
+        contribution_brief:
+          food: "You are the hostess. Your table is legendary — think Creole, think champagne, think excess disguised as effortlessness. Bring something that says 'I own this room.'"
+          dress: "Gold and black. Something with fringe that moves when you move. Your signature gardenia, always fresh, always behind the left ear."
+          prop: "A leather-bound guest ledger — the Alhambra's book of names. Everyone who has ever mattered in Harlem signed this book. Some of them wish they hadn't."
+
+      - id: c2
+        name: "Gerald Whitfield"
+        occupation: "Owner of the Whitfield Gallery, 57th Street"
+        personality: "Cultured, calculating, and genuinely passionate about art — but passion has never stopped him from turning a profit. Gerald speaks softly, dresses expensively, and has the collector's habit of touching things he intends to own."
+        secret: "Gerald has been knowingly selling forged paintings attributed to a Harlem artist who died two years ago. The forgeries are painted by someone in this room. The exhibition will bring expert scrutiny that will expose the fraud — and Gerald intends to let the forger take the fall."
+        relationships:
+          - target: c1
+            type: professional
+            description: "Cora opened every door in Harlem for you. Without her introductions, your gallery would still be showing mediocre Impressionist copies. You repaid her by cutting her commission on the last three sales."
+          - target: c4
+            type: secret
+            description: "Minerva is the forger. She paints the dead artist's work better than he ever did. You've sold eleven of her forgeries at $500 apiece. She doesn't know you've been charging $2,000."
+        contribution_brief:
+          food: "You are a man of imported tastes who pretends to love simplicity. Bring something French — a pate, a terrine, a cheese that requires explanation. Present it as though you discovered it personally."
+          dress: "Charcoal three-piece suit, ivory pocket square, art deco cufflinks. You dress like money that has always been there, even though yours arrived last Tuesday."
+          prop: "A gallery catalog from a recent auction — dog-eared, annotated in pencil. You consult it the way a priest consults scripture."
+
+      - id: c3
+        name: "Dr. Josephine Vickers"
+        occupation: "Physician and toxicologist, Harlem Hospital"
+        personality: "Precise, dry-witted, and burdened by the weight of what she knows about the neighborhood's health. Josephine treats the famous and the anonymous with identical briskness. She does not suffer fools, but she will set their broken bones."
+        secret: "Josephine has been providing Cora with sleeping draughts — laudanum compounds — for the past year. Cora's insomnia has become dependency. Josephine knows the dosages are dangerous and has continued prescribing anyway, because Cora pays triple and Josephine's clinic needs the money."
+        relationships:
+          - target: c1
+            type: obligation
+            description: "Cora is your most lucrative private patient. The money she pays for her 'prescriptions' funds your free clinic on Lenox Avenue. If she stops paying — or stops breathing — the clinic closes."
+          - target: c7
+            type: rival
+            description: "Reverend Sykes has been publicly campaigning against your clinic's distribution of birth control pamphlets. He calls it 'ungodly.' You call it 'medicine.' The war is personal now."
+        contribution_brief:
+          food: "You eat for fuel, not pleasure, but you have an unexpected weakness for baked goods. Bring something homemade and unpretentious — a pound cake, a sweet potato pie — that betrays the warmth you hide behind your stethoscope."
+          dress: "Navy blue. Clean lines. A cameo brooch at the collar that belonged to your mother. You look like authority and you know it."
+          prop: "Your medical bag — battered black leather, brass clasp. You bring it everywhere. Inside: stethoscope, laudanum tincture (for Cora), and a folded newspaper clipping about a poisoning case in Philadelphia."
+
+      - id: c4
+        name: "Minerva Cole"
+        occupation: "Painter and art restorer"
+        personality: "Quiet, watchful, ferociously talented, and tired of being overlooked. Minerva paints with a precision that borders on forgery — which is, in fact, exactly what it is. She resents the artists who receive acclaim for work less skilled than hers, and she resents herself for caring."
+        secret: "Minerva has been painting forgeries of the late artist Solomon Page's work for Gerald Whitfield. She believes Gerald sells them for $500 each and pays her $200. She does not know he charges four times that. The exhibition will include a 'posthumous' Solomon Page — and it is her brushwork."
+        relationships:
+          - target: c2
+            type: professional
+            description: "Gerald is your patron and your handler. He sells your forgeries and pays you a fraction of their worth. You suspect this but cannot prove it. Without his sales, you cannot afford paint."
+          - target: c6
+            type: ally
+            description: "Vivian is your closest friend and the only person who knows you paint the forgeries. She thinks you should stop. You think she doesn't understand what it's like to be brilliant and invisible."
+        contribution_brief:
+          food: "You cook the way you paint — with startling precision and hidden warmth. Bring something Southern and exact. Deviled eggs with your grandmother's recipe. Pickled okra. Something that looks simple and isn't."
+          dress: "Earth tones — umber, ochre, raw sienna. A painter's palette worn as a wardrobe. A smock-like blouse with paint under the fingernails that you didn't quite scrub away. You wear your work."
+          prop: "A set of fine sable brushes in a rolled canvas case. You carry them like a surgeon carries instruments — because to you, they are."
+
+      - id: c5
+        name: "Langston Delacroix"
+        occupation: "Poet and numbers runner"
+        personality: "Charismatic, reckless, and burning with ambition he can't quite direct. Langston writes verse that makes people weep and runs numbers that make people broke. He loves his sister Cora with the complicated devotion of someone who has been both saved and suffocated by family."
+        secret: "Langston has been skimming from the numbers operation that Cora launders through the Alhambra. He's stolen nearly $800 — enough to fund a chapbook of his poetry and disappear to Paris. If Dutch Schultz's people discover the shortage, they won't come for Langston first. They'll come for Cora."
+        relationships:
+          - target: c1
+            type: kin
+            description: "Cora is your older sister. She raised you. She gave you a job, a roof, and a purpose. She also controls your life with the quiet ferocity of someone who believes love and authority are the same thing."
+          - target: c8
+            type: secret
+            description: "You've been meeting privately with Felix. He's promised to publish your chapbook through his press in exchange for inside information about the Alhambra's finances. You've told him more than you should have."
+        contribution_brief:
+          food: "You don't cook — you procure. Bring a bottle of something you shouldn't have, acquired from somewhere you shouldn't have been. Bathtub gin in a crystal decanter. Jamaican rum from a ship that never cleared customs. The story matters more than the spirit."
+          dress: "You dress above your station and you know it. A borrowed dinner jacket, a silk tie in electric blue, shoes polished to a mirror. You look like the future and you're terrified it won't arrive."
+          prop: "A slim notebook of handwritten poetry — your own. The pages are stained with ink and bourbon. You read from it when you're nervous, which is more often than anyone suspects."
+
+      - id: c6
+        name: "Vivian St. Clair"
+        occupation: "Arts columnist for the Amsterdam News"
+        personality: "Sharp-tongued, deeply principled, and haunted by the compromises her profession demands. Vivian writes the column that can make or break a Harlem artist's career. She wields this power with visible discomfort and invisible relish."
+        secret: "Vivian has been offered a staff position at The New Yorker — a career-defining move that would make her the first Black woman on their masthead. The condition: she must write a piece exposing the Alhambra's financial ties to the numbers racket. Her editor wants a 'colorful expose.' Vivian wants the job. She hates herself for wanting it."
+        relationships:
+          - target: c4
+            type: ally
+            description: "Minerva is your dearest friend. You've been urging her to stop the forgeries before they destroy her. You've also been considering whether the forgery story would make a better article than the numbers story."
+          - target: c1
+            type: rival
+            description: "Cora controls access to Harlem's art world, and you control the press that covers it. Your power is equal and opposite. You respect each other deeply and trust each other not at all."
+        contribution_brief:
+          food: "You are a woman of strong opinions about cocktails. Bring one — invented, perfected, and named. Something with gin and bitters and a story about the night you first made it."
+          dress: "Deep burgundy or forest green. A column of silk with architectural shoulders. A hat that enters the room before you do. You dress like your byline — impossible to ignore."
+          prop: "A reporter's notepad — the spiral-bound kind, small enough to fit in a clutch. You write in a personal shorthand no one else can read. Tonight, you're writing everything down."
+
+      - id: c7
+        name: "Reverend Augustus Sykes"
+        occupation: "Pastor of Mount Carmel Baptist Church"
+        personality: "Sonorous, politically shrewd, and wrestling with a faith that no longer answers his questions. The Reverend built Mount Carmel into Harlem's most powerful congregation. He preaches liberation on Sunday and makes deals with Tammany Hall on Monday. He is genuinely devout and genuinely corrupt, and he does not experience this as a contradiction."
+        secret: "The Reverend has been accepting payments from a downtown real estate syndicate to quietly discourage his congregation from opposing a rezoning plan that will displace three blocks of Black-owned businesses near the church. The exhibition's publicity will bring journalists to Harlem — journalists who might notice the rezoning."
+        relationships:
+          - target: c3
+            type: rival
+            description: "Dr. Vickers and her clinic represent everything you fear about modernity — women making decisions about their bodies without consulting God or their pastor. But you also know she's the best doctor in Harlem, and your wife sees her privately."
+          - target: c2
+            type: professional
+            description: "Gerald has been donating generously to Mount Carmel's building fund. In exchange, you've introduced him to collectors in your congregation. The arrangement is profitable for both of you and pure for neither."
+        contribution_brief:
+          food: "You eat like a man who grew up hungry and never forgot it. Bring something abundant and Southern — a cast-iron cornbread, a pot of greens, something your mother taught you before you left Alabama. Serve it with the authority of a man accustomed to feeding multitudes."
+          dress: "Black suit, clerical collar, gold watch chain. The uniform of moral authority. But tonight — a concession to the occasion — a silk pocket square in deep purple. Even prophets appreciate beauty."
+          prop: "A well-worn Bible with marginalia in three colors of ink. The annotations are theological arguments with yourself. Some of them, you're losing."
+
+      - id: c8
+        name: "Felix Marquand"
+        occupation: "Publisher and literary impresario"
+        personality: "Urbane, generous with other people's secrets, and possessed of the expatriate's conviction that everywhere is more interesting than where he came from. Felix publishes a small literary magazine that loses money beautifully. He collects artists the way some men collect stamps — with acquisitive tenderness."
+        secret: "Felix is a Bureau of Investigation informant. He was recruited six months ago after an arrest for public indecency — a charge that would ruin him if it became public. His handler wants intelligence on Harlem's financial networks. Felix has been filing reports on the Alhambra. Tonight's 'summit' is an intelligence-gathering operation he did not choose."
+        relationships:
+          - target: c5
+            type: secret
+            description: "Langston has been feeding you financial information about the Alhambra in exchange for publishing his poetry. The information goes straight to your Bureau handler. Langston doesn't know this. If he finds out, you'll lose your best source — and possibly your life."
+          - target: c6
+            type: professional
+            description: "Vivian is the sharpest writer in Harlem and you've been trying to poach her for your magazine. She's too smart to accept, but she's also too polite to refuse outright. You enjoy the courtship."
+        contribution_brief:
+          food: "You are a man who has lived in Paris and will not let anyone forget it. Bring something continental — a tray of canapes, a wedge of Brie that you describe with the specificity of a sommelier. You are performing sophistication, and you're very good at it."
+          dress: "Cream linen suit, open collar, a silk scarf knotted at the throat in the French manner. You look like you arrived from a cafe on the Left Bank. You arrived from a boarding house on 139th Street."
+          prop: "A copy of your literary magazine, Meridian Review — the latest issue, still smelling of ink. You've inscribed it to Cora. The inscription is affectionate and carefully calculated."
+
+    crime:
+      victim_character: c1  # Cora Delacroix
+      murderer_character: c2  # Gerald Whitfield
+      weapon: "Antimony trioxide dissolved in champagne — a slow-acting metalite poison that mimics cardiac arrest, administered by swapping Cora's personal champagne coupe during her second performance of the evening"
+      motive: "Cora discovered that Gerald was selling Minerva's forgeries at four times the price he reported. She confronted him privately before the party and threatened to expose the scheme at the exhibition announcement — which would destroy his gallery, his reputation, and his freedom. Gerald poisoned her champagne during the only moment all eyes were on the piano player: Cora's own performance."
+      red_herrings:
+        - character_id: c3
+          description: "Dr. Vickers has been supplying Cora with laudanum in dangerous doses. Her medical bag contains toxicological compounds. She had financial motive (the clinic) and pharmacological means — and she identified the poison suspiciously quickly."
+        - character_id: c5
+          description: "Langston has been stealing from the numbers operation Cora launders. If Cora discovered the theft, she would have cut him off — or worse, reported him to Schultz's people. His poetry notebook contains a half-finished elegy titled 'For C.' dated three days before the party."
+        - character_id: c8
+          description: "Felix is a federal informant gathering intelligence on the Alhambra. If Cora learned he was Bureau, she would have exposed him to protect her laundering operation. His interest in the club's finances looks predatory in hindsight."
+
+    dramatic_beats:
+      - order: 1
+        timing: "Act II, immediately after the crime announcement"
+        description: "The lights flicker and go out for exactly eight seconds (the host orchestrates this). When they return, Cora's champagne coupe has been moved from the piano to the table — and no one will admit to touching it."
+      - order: 2
+        timing: "Act II, 10 minutes in"
+        description: "A messenger arrives at the Alhambra's door with a telegram from Dutch Schultz's organization: 'THE BOOKS DON'T BALANCE. EXPECTING AN ANSWER BY FRIDAY.' The host hands it to the room. Everyone watches who flinches."
+      - order: 3
+        timing: "Act II, 20 minutes in"
+        description: "Vivian St. Clair's notepad is found open on the bar. The visible page reads: 'Ask C. about the forgeries — G. won't talk but M. might.' Anyone can read it. The question is who tells Vivian it was found."
+      - order: 4
+        timing: "Act II, 30 minutes in"
+        description: "A painting on the Alhambra's wall — attributed to the late Solomon Page — is discovered to have a second signature hidden beneath the frame edge. The host reveals this by 'accidentally' knocking the frame askew. The signature is Minerva Cole's."
+      - order: 5
+        timing: "Act II, 40 minutes in, just before Act III"
+        description: "Gerald receives a telephone call (the host narrates it). When he returns, his face is ashen. He announces that the Whitfield Gallery has been contacted by an insurance investigator regarding 'irregularities in provenance documentation.' He does not say which paintings."
+
+
+  # ---------------------------------------------------------------------------
+  # SEED 2 — Victorian England, 1883
+  # Murder mechanic: Staged hunting accident (rifle sabotage)
+  # ---------------------------------------------------------------------------
+  - id: curated-mm-002
+    name: "The Ashworth Shoot"
+    era: "1883"
+    location: "Ashworth Hall — a Jacobean country house in the Derbyshire Peaks, three hours by rail from London, surrounded by 2,000 acres of grouse moor and ancient oakwood"
+    milieu: "The English country house weekend — aristocrats, industrialists, and the professional class thrown together by social obligation, where the shooting party is political theatre and the dinner table is a battlefield fought with fish forks and insinuation"
+    tension: "The reading of a new will by the ailing Lord Ashworth, who has summoned his heirs and their rivals to announce which of his fractured family will inherit the estate — and which will be cut off entirely"
+
+    setting_description: |
+      Lord Reginald Ashworth is dying, and he wants everyone to know it. At seventy-three, riddled with gout and disappointment, he has summoned seven guests to Ashworth Hall for what his solicitor delicately calls "a weekend of clarification." What it actually is: a public reading of his revised will, to be conducted after Saturday's grouse shoot, followed by a dinner at which the winners will toast and the losers will swallow their fury with the port.
+
+      Ashworth Hall is the kind of house that makes visitors feel temporary. Jacobean stone, leaded glass, corridors that turn without reason, a great hall hung with antlers and the portraits of Ashworths who all seem to share the same expression of hereditary disapproval. The grounds stretch from formal gardens to working farms to the moor, where the grouse season is underway and the beaters have been walking the heather since dawn. The house smells of beeswax, coal smoke, and old money.
+
+      The guests have arrived by Friday evening. By Saturday afternoon, during the second drive of the grouse shoot, Lord Ashworth's eldest son — the presumptive heir — will be found dead in a ditch at the far edge of the moor with a shattered Purdey shotgun beside him and a wound that looks, at first glance, like a terrible accident. It is not an accident. Someone tampered with the firing mechanism of his gun. The question is not merely who did it, but who among the assembled had both the means and the knowledge — because modifying a Purdey requires either a gunsmith's skill or a saboteur's patience.
+
+    player_count:
+      min: 6
+      max: 10
+
+    characters:
+      - id: c1
+        name: "Lord Reginald Ashworth"
+        occupation: "Baron Ashworth, landowner and former MP"
+        personality: "Imperious, embittered, and sharper than his decaying body suggests. Reginald has spent fifty years accumulating enemies and sorting them by usefulness. He treats his family like employees and his employees like furniture. He is cruel in the way that only men who were once kind can be."
+        secret: "Reginald's revised will disinherits his eldest son entirely. The estate goes to his younger son, with a life tenancy for his ward, Miss Elspeth Trevane. The reason: Reginald discovered that his eldest has been selling parcels of the estate's farmland to a Manchester cotton syndicate without his knowledge — land that has been Ashworth property since the Dissolution."
+        relationships:
+          - target: c2
+            type: kin
+            description: "Your eldest son and former heir. You loved him once. You discovered his land sales six months ago and have not spoken to him privately since. Tonight, you intend to destroy him in public."
+          - target: c5
+            type: obligation
+            description: "Elspeth is your ward — the daughter of your late business partner. You promised her father you'd provide for her. You've done more than that: you've made her the will's hidden beneficiary. She doesn't know yet."
+        contribution_brief:
+          food: "You are the host and a traditionalist. Think game — potted grouse, a venison terrine, something that came off your own land. Present it with the proprietary satisfaction of a man who owns the earth it grew on."
+          dress: "Tweed shooting suit for the day. For dinner: black tails, white waistcoat, the Ashworth signet ring. You dress as if the century will not dare to change."
+          prop: "A walking stick with a silver wolf's-head handle — your father's, and his father's before. You use it for emphasis as much as support."
+
+      - id: c2
+        name: "The Honourable Charles Ashworth"
+        occupation: "Lord Ashworth's eldest son, gentleman farmer and speculator"
+        personality: "Handsome, charming on the surface, and hollow with resentment underneath. Charles has spent his life waiting to inherit and has grown impatient with the waiting. He is generous with money he doesn't have and careless with loyalties he didn't earn."
+        secret: "Charles has been secretly selling parcels of Ashworth farmland to the Bradshaw Cotton Syndicate to cover gambling debts. He's already sold 400 acres. If his father's will cuts him off, the syndicate will demand repayment for land Charles no longer has authority to sell — and they are not gentle creditors."
+        relationships:
+          - target: c1
+            type: kin
+            description: "Your father, who you suspect has discovered the land sales. His invitation to this weekend feels less like hospitality and more like a tribunal. You've come because not coming would be worse."
+          - target: c3
+            type: rival
+            description: "Your younger brother Edward — the dutiful one, the quiet one, the one Father always preferred when he thought no one was watching. If the will changes, Edward inherits everything you've spent your life expecting."
+        contribution_brief:
+          food: "You are a man who enjoys London dining more than country fare. Bring something urbane — an oyster dish, a smoked fish, something that suggests you'd rather be at Rules than on the moor."
+          dress: "Impeccable country tweeds for the shoot — Savile Row, of course. For dinner: tails with a hint of Bohemian flair. A burgundy cravat where convention calls for white. Small rebellions are your specialty."
+          prop: "A silver cigarette case, monogrammed, containing Turkish cigarettes. You offer them to everyone. It is the most generous thing about you."
+
+      - id: c3
+        name: "Edward Ashworth"
+        occupation: "Lord Ashworth's younger son, antiquarian and estate steward"
+        personality: "Quiet, methodical, and possessed of a moral seriousness that his family mistakes for dullness. Edward catalogues the estate's library, manages the tenants, and has never asked for recognition. He is the son Lord Ashworth trusts and the son Charles resents — which amounts to the same curse from different directions."
+        secret: "Edward discovered Charles's land sales three months ago and reported them to his father. He did this knowing it would likely result in Charles's disinheritance — and his own elevation to heir. He tells himself it was duty. He is not entirely sure."
+        relationships:
+          - target: c2
+            type: rival
+            description: "Your elder brother, whose charm has always eclipsed your competence. You reported his land sales to Father. If Charles discovers this, the fraternal cold war becomes something worse."
+          - target: c6
+            type: ally
+            description: "Mrs. Calder is the housekeeper who has run Ashworth Hall for twenty years. She knows every secret this house holds — and she told you about the land sales before anyone else knew. You trust her judgment more than your own."
+        contribution_brief:
+          food: "You appreciate the provenance of food the way you appreciate the provenance of a first edition. Bring something local and seasonal — a game pie, a preserved chutney, something from the estate's own orchards or kitchens. Label it precisely."
+          dress: "Conservative country wear, well-maintained but not new. Brown brogues polished to a dull gleam. You look like the estate itself — handsome, solid, and overlooked by people dazzled by shinier things."
+          prop: "A small leather-bound notebook in which you record estate observations — crop yields, tenant complaints, roof repairs. It also contains, on the last page, a sketch of the Ashworth moor with the sold parcels marked in red ink."
+
+      - id: c4
+        name: "Mr. Horace Bradshaw"
+        occupation: "Manchester industrialist and principal of the Bradshaw Cotton Syndicate"
+        personality: "Blunt, self-made, and contemptuous of inherited privilege while desperate to join it. Horace built his fortune in cotton mills and has the calloused hands and hard vowels to prove it. He respects competence and despises pretension, which makes the country house weekend a special kind of purgatory."
+        secret: "Horace has been buying Ashworth land from Charles at below-market prices, knowing Charles is desperate and in no position to negotiate. He intends to build a cotton mill on the Ashworth water meadows — a plan that would industrialize the valley and destroy the estate's pastoral character. He has planning applications already filed with the county council."
+        relationships:
+          - target: c2
+            type: professional
+            description: "Charles is your debtor and your dupe. You've been buying his land cheaply, and you hold promissory notes for another 200 acres. If the old lord discovers the sales, you lose your leverage — unless you can secure the land transfers before the will is read."
+          - target: c1
+            type: rival
+            description: "Lord Ashworth represents everything you've spent your life fighting against: inherited wealth, unearned authority, the presumption that breeding trumps enterprise. You want his land. You want it specifically because it's his."
+        contribution_brief:
+          food: "You eat heartily and without apology. Bring something industrial in its abundance — a Lancashire hotpot, a meat pie, something that feeds a table without asking permission. You cook the way you do business: in volume."
+          dress: "Your best suit, which is expensive and slightly wrong for the setting. A watch chain heavy enough to moor a boat. You know you don't quite fit here, and you've decided that's their problem."
+          prop: "A set of architectural drawings, rolled in a leather tube. The drawings show a cotton mill superimposed on a pastoral landscape that is, unmistakably, the Ashworth water meadows."
+
+      - id: c5
+        name: "Miss Elspeth Trevane"
+        occupation: "Lord Ashworth's ward, amateur botanist and illustrator"
+        personality: "Intelligent, watchful, and accustomed to the particular invisibility of being a dependent woman in a house full of men arguing about property. Elspeth draws wildflowers, manages Lord Ashworth's correspondence, and misses nothing. She has learned to be useful because being interesting was never enough."
+        secret: "Elspeth is in love with Edward Ashworth and has been for three years. She has never spoken of it because her position as Lord Ashworth's ward makes any romantic attachment to his son look like fortune-hunting. She does not yet know that the new will names her as a beneficiary — but she fears that when it does, it will make her love for Edward look calculating rather than genuine."
+        relationships:
+          - target: c3
+            type: secret
+            description: "Edward. You love him quietly and completely. You've watched him manage this estate with a care that no one else appreciates. If you inherit alongside him, will he believe you loved him before you knew about the money?"
+          - target: c7
+            type: professional
+            description: "Inspector Graves arrived yesterday on 'social' pretenses, but you've noticed him examining the gunroom and asking the gamekeeper questions about ammunition. Something is wrong beyond the family drama."
+        contribution_brief:
+          food: "You are a botanist with an instinct for hedgerow cookery. Bring something foraged or floral — elderflower cordial, a blackberry fool, a salad of wild herbs. Something that says you know this land more intimately than anyone who merely owns it."
+          dress: "Muted greens and creams — the palette of the moor itself. A high collar, practical boots, a cameo at the throat. You dress for the landscape, not the drawing room, and the drawing room notices."
+          prop: "A botanical sketchbook, half-filled with precise watercolours of Derbyshire wildflowers. Between the pages of heather and saxifrage, there are also detailed drawings of the estate's drainage systems and field boundaries — the work of someone who pays attention to what she's told to ignore."
+
+      - id: c6
+        name: "Mrs. Agnes Calder"
+        occupation: "Housekeeper of Ashworth Hall"
+        personality: "Controlled, perceptive, and quietly furious about a lifetime of service to people who confuse deference with devotion. Agnes has managed the household for twenty years. She knows every passageway, every locked drawer, every whispered conversation that floated through a cracked door. She is loyal to the house, not to the family — and there is a difference."
+        secret: "Agnes's late husband was the estate's head gamekeeper. He died in a shooting accident on the moor twelve years ago — an accident that Agnes has never believed was accidental. She suspects Lord Ashworth was responsible and has spent twelve years gathering evidence. This weekend, she intends to confront him — but she wants the will read first, because the will determines who she tells."
+        relationships:
+          - target: c1
+            type: obligation
+            description: "Lord Ashworth has been your employer for twenty years. He trusted your late husband. You believe he killed your husband. The pension he provides you is either generosity or guilt money, and you've never been able to decide which."
+          - target: c3
+            type: ally
+            description: "Edward is the only Ashworth who treats you as a person rather than a function. You told him about the land sales because he deserved to know — and because the estate deserves a steward who cares."
+        contribution_brief:
+          food: "You run the kitchen. Everything on this table ultimately answers to you. Bring the dish that defines Ashworth hospitality — the recipe passed down through three housekeepers before you. Something robust, unpretentious, and impossible to improve upon."
+          dress: "Black silk, white collar, chatelaine at the waist with the household keys. You dress in the uniform of your authority, and everyone in this house knows what those keys mean."
+          prop: "A ring of household keys — heavy, iron, clinking softly when you move. They open every door in Ashworth Hall. One of them opens a drawer in the gunroom that no one else knows about."
+
+      - id: c7
+        name: "Inspector Arthur Graves"
+        occupation: "Detective Inspector, Derbyshire Constabulary"
+        personality: "Patient, observant, and possessed of the country policeman's talent for appearing simpler than he is. Arthur has been invited to the weekend as a 'social guest' — a fiction that fools no one. He watches. He remembers. He asks questions that seem idle until you realize, three conversations later, that he's been building a case."
+        secret: "Inspector Graves was not invited socially. He is investigating an anonymous tip that Ashworth estate firearms have been modified and sold illegally to Irish Republican sympathisers. The tip came from someone inside the house. He does not yet know who — but someone at this party is an arms dealer, an informant, or both."
+        relationships:
+          - target: c4
+            type: professional
+            description: "Bradshaw's cotton syndicate has been flagged by the Home Office for links to labour radicals. You're watching him as much as you're watching the Ashworths. Manchester money always has a second ledger."
+          - target: c5
+            type: ally
+            description: "Miss Trevane is observant and discreet. She noticed your interest in the gunroom before anyone else did. You're not sure if she's an ally or a suspect, but she's certainly the most perceptive person in the house."
+        contribution_brief:
+          food: "You are a practical man who eats what's put in front of him. But you have a private fondness for pickled things — pickled walnuts, piccalilli, chutney. Bring a jar of something preserved and sharp. It suits your temperament."
+          dress: "Tweed, but not country tweed — town tweed. The suit of a man who visits country houses but does not belong to them. A plain gold watch, regulation boots, no affectation. You are the least decorated person in the room and the most dangerous."
+          prop: "A magnifying glass — small, brass-rimmed, carried in the breast pocket. You use it to examine things closely while appearing to examine them casually. It is not an affectation. It is a tool."
+
+      - id: c8
+        name: "Lady Constance Pemberton"
+        occupation: "Charles Ashworth's estranged wife, society hostess"
+        personality: "Brilliant, bitter, and beautifully composed. Constance married Charles for love and discovered too late that love and solvency are not the same thing. She has spent five years watching her husband gamble away their future while maintaining a public facade of marital contentment. The facade is cracking."
+        secret: "Constance has retained a solicitor in London to pursue a legal separation — scandalous, but she no longer cares. She has also discovered that Charles forged her signature on three of the land sale contracts, making her technically complicit in the fraud. If the sales are exposed, she will be implicated unless she can prove the forgery — and the only evidence is in Charles's study at Ashworth Hall."
+        relationships:
+          - target: c2
+            type: kin
+            description: "Your husband, who you once loved and now regard with the cold precision of a woman counting losses. He forged your name. He sold your future. You came this weekend to find the evidence in his study."
+          - target: c1
+            type: obligation
+            description: "Lord Ashworth was kind to you when you married Charles. He saw through his son before you did. You suspect the new will punishes Charles — and you want to be in the room when it happens."
+        contribution_brief:
+          food: "You are a London hostess stranded in the country. Bring something that reminds you of civilization — a syllabub, a trifle, an elaborate cold dessert that requires three kinds of cream and the certainty that someone else will wash the dishes."
+          dress: "Evening: midnight blue velvet, pearl choker, hair precisely dressed. You are performing composure. Every pin is a deliberate act of war against the chaos of your private life."
+          prop: "A small leather writing case containing correspondence — letters from your solicitor, carefully folded and locked inside. The key hangs on a chain around your neck, beneath the pearls."
+
+    crime:
+      victim_character: c2  # Charles Ashworth
+      murderer_character: c4  # Horace Bradshaw
+      weapon: "A deliberately weakened firing pin in Charles's Purdey shotgun — modified the previous night in the gunroom using Mrs. Calder's keys (obtained by bribing a footman), causing the gun to misfire catastrophically during the second drive, propelling barrel fragments into the shooter at close range"
+      motive: "Charles had threatened to void the land sale contracts and report Bradshaw to the county council unless Bradshaw forgave his debts and doubled the purchase price retroactively. Bradshaw, who had already filed planning applications for the mill and could not afford to lose the land, decided that a dead Charles was more profitable than a living, renegotiating one. With Charles dead before the will was read, the land contracts — already signed — would stand, and no heir would know to challenge them."
+      red_herrings:
+        - character_id: c3
+          description: "Edward reported Charles's land sales to their father, directly causing the disinheritance. He stands to inherit everything if Charles dies before the will is read. His notebook contains a map of the sold parcels — evidence of meticulous tracking that looks, from the wrong angle, like planning."
+        - character_id: c8
+          description: "Constance has motive — Charles forged her name on contracts, and a legal separation would be far simpler as a widow than as a divorcee. She was seen near the gunroom corridor on Friday evening, though she claims she was looking for writing paper."
+        - character_id: c6
+          description: "Mrs. Calder has keys to every room including the gunroom, and she harbours a twelve-year grudge against Lord Ashworth over her husband's death. If she mistakenly sabotaged Charles's gun intending it for the father, the wrong Ashworth died."
+
+    dramatic_beats:
+      - order: 1
+        timing: "Act II, immediately after the crime"
+        description: "The gamekeeper bursts into the drawing room with the news. He is carrying the remains of the shattered Purdey — and he reports that the gun was not the one issued to Charles that morning. Someone switched the firearms between breakfast and the shoot."
+      - order: 2
+        timing: "Act II, 10 minutes in"
+        description: "Inspector Graves examines the gunroom and discovers that Mrs. Calder's master key was used to unlock the cabinet overnight. The lock shows fresh scratches. The host announces this finding and asks Mrs. Calder to account for her keys."
+      - order: 3
+        timing: "Act II, 20 minutes in"
+        description: "A footman (the host narrates) confesses under Graves's questioning that he was paid five shillings to 'borrow' Mrs. Calder's keys for one hour on Friday night and return them before dawn. He cannot identify who paid him — only that the man had 'rough hands and a Northern accent.'"
+      - order: 4
+        timing: "Act II, 30 minutes in"
+        description: "Lord Ashworth, shaken by his son's death, orders his solicitor to read the will immediately. The host narrates the key provisions: Edward inherits the estate. Elspeth receives a life tenancy and an annuity. Charles — now deceased — was to receive nothing. Constance is not mentioned. The room absorbs this in silence."
+      - order: 5
+        timing: "Act II, 40 minutes in"
+        description: "Edward discovers Bradshaw's architectural drawings in the billiard room — a cotton mill blueprinted onto the Ashworth water meadows. The land parcels match the ones Charles sold. The host places the drawings on the table for all to examine."
+      - order: 6
+        timing: "Act II, 50 minutes in, just before Act III"
+        description: "Constance produces the forged land contracts from her writing case — the ones bearing her signature in Charles's hand. She lays them beside the architectural drawings. The two documents together tell a complete story: Charles sold the land, Bradshaw bought it, and someone decided Charles was worth more dead than renegotiating."
+
+
+  # ---------------------------------------------------------------------------
+  # SEED 3 — 1960s Mediterranean, 1967
+  # Murder mechanic: Drowning staged as swimming accident
+  # ---------------------------------------------------------------------------
+  - id: curated-mm-003
+    name: "The Collector's Tide"
+    era: "1967"
+    location: "Villa Seripha — a whitewashed modernist compound perched on a cliff above Kalami Bay on the northeast coast of Corfu, Greece, accessible only by a single unpaved road or by boat from the harbor"
+    milieu: "The international art-and-exile set — painters, poets, minor diplomats, dissolute aristocrats, and the wealthy eccentrics who collect them — the kind of people who washed up on Greek islands in the 1960s because the light was good and the questions were fewer"
+    tension: "The unveiling of a private art collection rumored to contain works looted during the Nazi occupation of Greece — and the Greek government's quiet pressure, through an agent at the party, to repatriate the pieces before the international press makes it a scandal"
+
+    setting_description: |
+      Villa Seripha belongs to Nikos Kastellanos, or rather, it belongs to his money, which belongs to shipping, which belongs to the sea. The villa is a monument to mid-century taste: poured concrete, floor-to-ceiling glass, a cantilevered terrace extending over the cliff edge like a dare. Below, the Ionian Sea churns against rocks that have been killing swimmers since Odysseus. The villa's pool — saltwater, infinity-edged, tiled in cobalt — sits between the house and the drop, an architectural joke about the distance between civilization and drowning.
+
+      Nikos has invited seven guests for a long weekend to celebrate the completion of his private gallery — a climate-controlled annex built into the cliff itself, housing forty-three paintings, twelve sculptures, and one secret that everyone in the European art world whispers about but no one can prove. Among the collection are six works believed to have been confiscated from Jewish families during the German occupation of Thessaloniki in 1943. Nikos claims provenance through a Zurich dealer. The dealer is dead. The provenance papers are, depending on whom you ask, either impeccable or forged.
+
+      On Saturday evening, after the gallery unveiling and a dinner served on the terrace under a canopy of bougainvillea, Nikos will be found face-down in the infinity pool at 2:14 AM. He was a strong swimmer. The pool is four feet deep. The local police will call it a drowning — too much retsina, a stumble in the dark. But someone held Nikos Kastellanos underwater, and the bruises on his shoulders, hidden beneath the water's surface until the coroner arrives from Corfu Town, will tell a different story.
+
+    player_count:
+      min: 6
+      max: 10
+
+    characters:
+      - id: c1
+        name: "Nikos Kastellanos"
+        occupation: "Shipping magnate and art collector"
+        personality: "Expansive, sensual, and casually ruthless in the way of men who have never been told no by anyone who mattered. Nikos fills rooms with his laughter and empties them with his temper. He is generous with wine, hospitality, and opinions. He is parsimonious with truth."
+        secret: "Nikos knows the six disputed paintings are looted. He bought them knowingly from a Zurich intermediary connected to wartime confiscations. He has fabricated provenance documents. The gallery unveiling is a calculated gamble — he believes that once the works are publicly displayed and celebrated, repatriation becomes politically impossible. He is wrong."
+        relationships:
+          - target: c2
+            type: kin
+            description: "Daphne is your wife, and she is the only person whose opinion you fear. She does not know about the looted provenance. If she discovers it, she will leave — and she will take the one painting in the collection that is legally hers."
+          - target: c5
+            type: professional
+            description: "Spiros works for the Greek Ministry of Culture, though he's pretending to be here as an old university friend. You know exactly what he is. You invited him anyway because you believe you can charm, bribe, or outlast any bureaucrat alive."
+        contribution_brief:
+          food: "You are Greek and proud of it in the way only a man who left Greece for London at nineteen can be. Bring something aggressively Mediterranean — grilled octopus, a massive horiatiki, olives from your own trees (or claim they're from your own trees). Abundance is your love language."
+          dress: "White linen shirt, unbuttoned. White trousers. Bare feet on marble. Gold at the wrist and neck. You dress like a man who owns the horizon."
+          prop: "A gallery catalog for the new collection — leather-bound, foil-stamped with the Villa Seripha crest. You've had fifty printed. The provenance page for paintings 37-42 is notably less detailed than the others."
+
+      - id: c2
+        name: "Daphne Kastellanos"
+        occupation: "Former prima ballerina, Athens National Opera"
+        personality: "Graceful, perceptive, and armored in a serenity that cost her decades to construct. Daphne retired from the stage at thirty-five and married Nikos at thirty-eight. She brought to the marriage one Modigliani painting — a nude, inherited from her grandmother — and a capacity for silence that Nikos has never learned to read."
+        secret: "Daphne has been contacted by representatives of the Matarasso family — a Thessaloniki Jewish family whose art collection was confiscated in 1943. They believe three of Nikos's paintings belong to them. Daphne has seen the Matarasso provenance documents and knows they are genuine. She has not told Nikos. She is deciding what to do."
+        relationships:
+          - target: c1
+            type: kin
+            description: "Your husband. You married him for his vitality and his willingness to build a world for you. You are discovering that the world he built has rotten foundations. The question is whether you demolish it or walk away."
+          - target: c4
+            type: secret
+            description: "Leo has been writing you letters — not love letters, but something adjacent. Letters about art, about beauty, about the ethical weight of owning things that were taken from the dead. You have kept every one."
+        contribution_brief:
+          food: "You are a woman of exacting taste who eats little and appreciates everything. Bring a single perfect dish — a galaktoboureko, a fig tart, something that demonstrates mastery through restraint."
+          dress: "White silk kaftan, gold sandals, hair swept up and pinned with a vintage brooch. You dress like a woman who stepped out of an Antonioni film and decided to stay."
+          prop: "A pair of opera glasses — small, mother-of-pearl, from your performing days. You use them to examine paintings up close. Other guests may notice you examining specific paintings with unusual intensity."
+
+      - id: c3
+        name: "Aurelio Ferrante"
+        occupation: "Italian art dealer and gallery owner, Rome"
+        personality: "Elegant, corrupt, and exhaustingly charming. Aurelio has sold more paintings of questionable provenance than any dealer in Southern Europe, and he has done so with such grace that his clients feel grateful rather than swindled. He speaks four languages, tips extravagantly, and lies with the fluency of a native speaker."
+        secret: "Aurelio is the intermediary who sourced the six looted paintings for Nikos. He fabricated the Zurich provenance trail and took a 30% commission. If the provenance is exposed, he faces criminal prosecution in three countries. He has come this weekend to ensure the unveiling goes smoothly — and to destroy any documentation that links him to the transaction."
+        relationships:
+          - target: c1
+            type: professional
+            description: "Nikos is your most important client and your greatest liability. You built his collection. You also built the paper trail that could send you both to prison. If he cracks under pressure from the Greeks, he will name you first."
+          - target: c7
+            type: rival
+            description: "Helena is a restorer who has examined the disputed paintings. She knows the provenance is fabricated — she can read a painting's history in its varnish layers. You've been trying to discredit her expertise before she speaks publicly."
+        contribution_brief:
+          food: "You are Italian and the kitchen is your theatre. Bring something Roman and theatrical — a cacio e pepe made tableside, a tiramisu assembled with commentary. You narrate your cooking the way you narrate your sales: with irresistible conviction."
+          dress: "Cream linen suit, loafers without socks, tortoiseshell sunglasses pushed up on your forehead. You are dressed for a gallery opening on the Via del Corso that happens to be on a Greek island. Immaculate and slightly too much."
+          prop: "A small leather address book, hand-stitched, containing the private telephone numbers of every major collector in Europe. Several entries have been crossed out. One of them is a Zurich number with 'DECEASED' written beside it."
+
+      - id: c4
+        name: "Leo Ashford"
+        occupation: "English novelist and war correspondent"
+        personality: "Brooding, principled, and drinking more than he used to. Leo covered the Greek civil war in '49 and never fully returned from it. He writes novels about moral compromise set in Mediterranean light. He is the kind of man who falls in love with married women because available ones don't punish him enough."
+        secret: "Leo is writing a book about wartime art looting in Greece. He has spent two years tracing the Thessaloniki confiscations. He accepted Nikos's invitation specifically to see the collection — and he has already photographed three of the disputed paintings through the gallery's glass walls using a telephoto lens from the hillside above the villa. The photographs are hidden in his room."
+        relationships:
+          - target: c2
+            type: secret
+            description: "Daphne. The letters you've exchanged over the past year began as research and became something you don't have a word for. You came for the paintings. You stayed because she asked you to."
+          - target: c6
+            type: ally
+            description: "Marion is a painter whose work you admire and whose company you enjoy. She's the only person at this party who isn't trying to own something. That makes her the only person you trust."
+        contribution_brief:
+          food: "You are an Englishman abroad who has learned to cook from the countries he's lived in. Bring something that betrays your travels — a Levantine dip, a North African spice blend, bread you baked yourself. You cook like a man who has been alone in a lot of kitchens."
+          dress: "Rumpled linen shirt, khaki trousers, espadrilles. A battered canvas hat you've worn in four countries. You dress like a man who packed for a war zone and ended up at a dinner party."
+          prop: "A Leica M3 camera — scratched, well-used, loaded with Kodachrome. You carry it everywhere. Some of the photographs you've taken this weekend are innocent. Some are evidence."
+
+      - id: c5
+        name: "Spiros Makris"
+        occupation: "Cultural attache, Greek Ministry of Culture (officially); repatriation agent (actually)"
+        personality: "Warm, gregarious, and lethally patient. Spiros has the diplomat's gift of making you forget he's working. He drinks, he laughs, he tells stories about his village. Meanwhile, he is cataloguing everything — every painting, every conversation, every inconsistency in Nikos's provenance claims. He is kind and relentless, which is worse than being cruel."
+        secret: "Spiros has been authorized by the Ministry to offer Nikos a quiet deal: return the six paintings voluntarily, and Greece will not pursue criminal charges or publicize the looted provenance. If Nikos refuses, the Ministry will notify Interpol and the international press simultaneously. Spiros has until Sunday evening to secure an answer."
+        relationships:
+          - target: c1
+            type: secret
+            description: "You and Nikos were genuinely friends at university. The friendship is real. The mission is also real. You will betray him if you must, and you will lose sleep over it for years."
+          - target: c3
+            type: rival
+            description: "You know Aurelio fabricated the provenance. You have a partial paper trail from the Zurich intermediary's estate. Aurelio knows you're dangerous but doesn't know how much you know."
+        contribution_brief:
+          food: "You are from Crete, and Cretan food is a matter of regional honour. Bring something your grandmother made — dakos, kalitsounia, a honey-and-walnut dessert that requires a long story about the village where the honey comes from. The story is mandatory."
+          dress: "Light blue shirt, dark trousers, leather sandals. A straw hat for the sun. You dress like a man on holiday because that is your cover story. The only tell is the quality of your watch — government issue, Swiss, too expensive for a cultural attache."
+          prop: "A dog-eared copy of a Greek poetry anthology — Cavafy, Seferis, Ritsos — with passages underlined and notes in the margins. You read aloud after dinner. The poems you choose are never accidental."
+
+      - id: c6
+        name: "Marion Kessler"
+        occupation: "American painter, expatriate"
+        personality: "Fierce, funny, and more fragile than she admits. Marion left New York for Greece five years ago after a gallery scandal and has been painting the Ionian light ever since. She drinks too much, swims too far, says exactly what she thinks, and is the most genuinely talented person on the island — a fact that everyone acknowledges and no one rewards."
+        secret: "Marion's 'gallery scandal' in New York was actually a wrongful accusation of forgery — mounted by a rival dealer who wanted her out of the market. She was exonerated quietly, but the damage was done. She came to Greece to disappear. She has recognized two of Nikos's paintings as works she saw in a Munich recovery depot in 1958, where they were catalogued as Holocaust restitution claims. She has said nothing — yet."
+        relationships:
+          - target: c4
+            type: ally
+            description: "Leo is your drinking companion, your confidant, and the only man on this island who looks at your paintings before he looks at you. The friendship is genuine and uncomplicated, which is rare for both of you."
+          - target: c7
+            type: professional
+            description: "Helena restored one of your paintings last year and did it brilliantly. You trust her eye more than any dealer's. If she says the provenance is wrong, the provenance is wrong."
+        contribution_brief:
+          food: "You cook like a painter — intuitively, messily, generously. Bring something big and communal. A seafood stew, a massive salad, something that requires a table and people around it. You don't cook for one."
+          dress: "A paint-stained linen dress that you insist is your 'good' dress. Bare feet, turquoise jewelry bought from a beach vendor. You are the anti-Daphne and you don't mind."
+          prop: "A sketchbook — large, spiral-bound, smudged with charcoal. You've been sketching the villa and the guests all weekend. One sketch, done from the terrace, shows the gallery interior through the glass — including the disputed paintings with their catalog numbers visible."
+
+      - id: c7
+        name: "Dr. Helena Papadimitriou"
+        occupation: "Art restorer and conservation scientist, University of Athens"
+        personality: "Meticulous, quietly authoritative, and deeply uncomfortable at parties. Helena speaks the language of varnish layers, X-ray fluorescence, and canvas weave analysis. She can date a painting to within a decade by examining its ground layer. She was invited to authenticate the collection. She wishes she hadn't been."
+        secret: "Helena has already examined four of the six disputed paintings — secretly, at Aurelio's request, before they were sold to Nikos. She certified them as authentic, which they are. But she noted in her private report that the provenance trail was inconsistent with the paintings' conservation history. Aurelio paid her to omit this finding. Helena kept a copy of the original report, including the omitted section. She has brought it with her."
+        relationships:
+          - target: c3
+            type: rival
+            description: "Aurelio paid you to falsify your report. You took the money because your department's budget was cut and you couldn't afford to lose the commission. You have regretted it every day since. If you expose him, you expose yourself."
+          - target: c6
+            type: professional
+            description: "Marion's eye for art is as good as any scholar's. She recognized the Munich depot paintings. She told you. You told her to stay quiet until you could decide what to do. Neither of you has decided."
+        contribution_brief:
+          food: "You are precise in everything, including cooking. Bring something that requires technique — baklava with even layers, a perfectly tempered chocolate, something that shows mastery of process. You find cooking meditative in a way that parties are not."
+          dress: "White cotton blouse, navy skirt, sensible shoes. A pair of magnifying loupes around your neck on a chain. You are not dressed for a party. You are dressed for work that happens to take place at a party."
+          prop: "A leather portfolio case containing conservation reports — the official versions. In a hidden inner pocket, there is also the original, unredacted report on paintings 37-42. The one Aurelio paid you to suppress."
+
+    crime:
+      victim_character: c1  # Nikos Kastellanos
+      murderer_character: c3  # Aurelio Ferrante
+      weapon: "Manual drowning in the villa's infinity pool — Aurelio intercepted Nikos during his habitual late-night swim, held him under the water using his body weight against Nikos's shoulders, and arranged the scene to suggest a drunken stumble into the shallow end"
+      motive: "Nikos told Aurelio, during a private conversation after dinner, that Spiros had offered a repatriation deal — and that Nikos was considering accepting it to avoid criminal prosecution. If Nikos cooperated, the provenance trail would lead directly to Aurelio. Criminal charges in Italy, Greece, and Switzerland. Aurelio's entire career — and his freedom — depended on Nikos staying silent. When Nikos wavered, Aurelio decided that a drowned collector tells no tales."
+      red_herrings:
+        - character_id: c5
+          description: "Spiros had an ultimatum deadline and government authority to escalate. If Nikos refused the deal, Spiros's career depended on a public prosecution — easier to build against a dead collector whose estate can't fight back. He was seen walking near the pool at 1:45 AM."
+        - character_id: c4
+          description: "Leo has been secretly photographing the collection for his book. If Nikos discovered the telephoto photographs, a violent confrontation is plausible. Leo's camera and photographs were hidden in his room — the behavior of a man concealing evidence."
+        - character_id: c2
+          description: "Daphne had recently learned the full truth about the looted provenance. A wife who discovers her husband is a criminal has motive. Her Modigliani — the one painting that is legally hers — becomes vastly more valuable as the estate of a dead collector than as one piece in a living man's gallery."
+
+    dramatic_beats:
+      - order: 1
+        timing: "Act II, immediately after the crime"
+        description: "The villa's night watchman (host narrates) reports that the pool lights were turned off at 1:30 AM — unusual, as Nikos always left them on for his late swim. Someone turned them off from the switch panel in the kitchen corridor. The switch panel is accessible to all house guests."
+      - order: 2
+        timing: "Act II, 10 minutes in"
+        description: "A wet linen jacket is found draped over a terrace chair — not Nikos's. It is cream-colored and Italian-cut. Two guests in the room own jackets matching that description. The host places it on the table."
+      - order: 3
+        timing: "Act II, 20 minutes in"
+        description: "Spiros receives a telephone call from Athens (the host narrates). When he returns, he announces — with visible reluctance — that the Ministry has been informed of Nikos's death and is sending an investigator. All guests are asked to remain at the villa until Monday. The collection is now, officially, a matter of state interest."
+      - order: 4
+        timing: "Act II, 30 minutes in"
+        description: "Helena opens her portfolio and places two documents on the table: the official conservation report and the unredacted original. The differences are visible. She does not explain them. She simply says, 'I think you should all see this.'"
+      - order: 5
+        timing: "Act II, 40 minutes in, just before Act III"
+        description: "Marion produces her sketchbook, open to the page showing the gallery interior through the glass. She points to the catalog numbers of paintings 37-42 and says: 'I saw these paintings in a Munich recovery depot in 1958. They were tagged as Holocaust restitution. Someone explain to me how they got here.' The room falls silent."
+
+
+  # ---------------------------------------------------------------------------
+  # SEED 4 — Contemporary, 2018
+  # Murder mechanic: Allergic reaction induced by food tampering (anaphylaxis)
+  # ---------------------------------------------------------------------------
+  - id: curated-mm-004
+    name: "The Series A Dinner"
+    era: "2018"
+    location: "The Glasshouse — a converted industrial greenhouse on the top floor of a co-working space in the Dogpatch neighborhood of San Francisco, California, rented for the evening and dressed with Edison bulbs, reclaimed wood, and the particular optimism of venture capital"
+    milieu: "The San Francisco startup ecosystem at its most concentrated — founders, venture capitalists, engineers, and the lawyers who bind them together — where a single dinner can create a company or end one, and where the etiquette of term sheets is more rigid than any Victorian social code"
+    tension: "The closing dinner for a $40 million Series A round in an AI company called Meridian — a deal that will make three people at the table very rich and leave two others with nothing, and which is being signed over a meal where someone at the table has discovered that Meridian's core technology is built on stolen research"
+
+    setting_description: |
+      The term sheet is printed. The champagne is chilled. The non-disclosure agreements have been signed, countersigned, and filed with a law firm on Sand Hill Road whose retainer alone costs more than most people earn in a year. Tonight, at a dinner in the Glasshouse above SoMa's newest co-working space, the Series A round for Meridian AI closes. Forty million dollars. Lead investor: Pinnacle Ventures. Founders: Jaya Rao and Marcus Chen. The money will arrive on Monday. By then, someone at this table will be dead.
+
+      Meridian's technology is an adaptive learning system — AI that watches how humans make decisions under uncertainty and learns to replicate their cognitive shortcuts. The applications range from medical triage to financial trading to military intelligence. The demo is extraordinary. The patents are filed. The pitch deck has been called "the best I've seen in ten years" by three separate partners at three separate firms. What the pitch deck does not mention is that the core algorithm was developed during a Stanford research fellowship funded by DARPA, and that the intellectual property may belong to the university, the Department of Defense, or both — a fact that one person at this dinner can prove and that two people at this dinner will kill to keep hidden.
+
+      The Glasshouse is beautiful in the way that only temporary money can be: living walls of succulents, a long farmhouse table set for eight, a private chef preparing a tasting menu in the open kitchen. The fog is rolling in through the glass ceiling. By the time the amuse-bouche is cleared, Jaya Rao will be in anaphylactic shock on the concrete floor, her EpiPen — which she always carries — mysteriously absent from her bag, and walnut oil — to which she is lethally allergic — invisibly stirred into the sauce of the second course. Someone at this table knew about the allergy. Someone removed the EpiPen. Someone timed it to the minute.
+
+    player_count:
+      min: 6
+      max: 10
+
+    characters:
+      - id: c1
+        name: "Jaya Rao"
+        occupation: "Co-founder and CEO of Meridian AI"
+        personality: "Brilliant, driven, and radiating the particular intensity of someone who has been underestimated by every room she's entered and has decided to make that everyone else's problem. Jaya builds companies the way some people build arguments — with relentless, layered precision. She is kind to her engineers, ruthless with her competitors, and allergic to walnuts, shellfish, and dishonesty."
+        secret: "Jaya knows the algorithm's provenance is legally compromised. She developed it during her Stanford fellowship but refined it significantly after leaving. Her legal position is defensible but fragile — and she's been advised by her lawyers that if the university or DARPA challenges the IP before the round closes, the deal collapses. She has destroyed her Stanford lab notebooks. She does not know that someone made copies."
+        relationships:
+          - target: c2
+            type: professional
+            description: "Marcus is your co-founder. You chose him because he's the best systems architect you've ever met. You've started to wonder if he chose you because you're the best shield he's ever had."
+          - target: c4
+            type: obligation
+            description: "Priya was your research advisor at Stanford. She wrote the grant that funded your fellowship. She believes the algorithm belongs to the university. She is, technically, correct. You have not spoken to her in eight months."
+        contribution_brief:
+          food: "You're hosting and you've hired a chef, but you always bring one personal touch. Something from your mother's kitchen — a chutney, a spiced nut mix (no walnuts, obviously), a box of chai concentrate. It reminds you of the kitchen table where you first learned to think."
+          dress: "Black turtleneck, tailored black trousers, minimal gold jewelry. You dress like a founder who has moved past the hoodie stage and into the 'I've met with senators' stage. Clean, deliberate, expensive without logos."
+          prop: "Your phone — always in hand, always face-down on the table, always buzzing with Slack notifications you ignore with performative serenity. Also: an EpiPen, which you always carry in your bag. (Tonight, it won't be there when you need it.)"
+
+      - id: c2
+        name: "Marcus Chen"
+        occupation: "Co-founder and CTO of Meridian AI"
+        personality: "Quiet, meticulously prepared, and harboring an ambition he disguises as modesty. Marcus writes code the way a watchmaker builds movements — with precision that approaches obsession. He lets Jaya take the stage because he prefers to work in private. Private is where the important decisions happen."
+        secret: "Marcus made copies of Jaya's Stanford lab notebooks before she destroyed them. He did this as insurance — if the deal goes bad, the notebooks prove the algorithm originated at Stanford, which means Jaya bears the legal liability, not him. He's been negotiating a separate indemnification clause with Pinnacle's lawyers, without Jaya's knowledge, that protects his equity in the event of an IP challenge."
+        relationships:
+          - target: c1
+            type: professional
+            description: "Jaya is the visionary, the fundraiser, the one who makes the room believe. You are the one who makes the technology work. Your partnership is equal on paper and asymmetric in practice — she needs your code; you need her charisma. You've been preparing for the day the asymmetry reverses."
+          - target: c5
+            type: secret
+            description: "Elaine at Pinnacle knows about the lab notebooks. You told her — in confidence, over a drink that was not casual — because you needed a venture partner who would protect you if Jaya went down. Elaine has not told her partners. Yet."
+        contribution_brief:
+          food: "You're a home baker — it's your only hobby that doesn't involve screens. Bring something precise and slightly surprising. Madeleines. Financiers. Something French, baked that morning, presented in a tin your mother gave you."
+          dress: "Henley shirt, dark jeans, clean sneakers. The studied informality of a technical founder who is signaling that he doesn't need to wear a suit because his code speaks for itself. A Patek Philippe watch, inherited, that you never explain."
+          prop: "A USB drive on your keychain. You say it's a backup of the Meridian codebase. It also contains scanned copies of Jaya's Stanford lab notebooks. You touch the keychain when you're nervous."
+
+      - id: c3
+        name: "Diane Valdez"
+        occupation: "General counsel, Meridian AI"
+        personality: "Sharp, exhausted, and possessed of the lawyer's talent for seeing every possible disaster before it arrives. Diane has been running on cortisol and conviction for eighteen months. She believes in Meridian. She also knows where the bodies are buried — metaphorically, until tonight — because she helped dig the holes."
+        secret: "Diane advised Jaya to destroy the Stanford lab notebooks. She drafted the legal memo justifying the IP claim as 'independently developed post-fellowship work.' The memo is defensible but dishonest, and Diane knows the difference. If the IP challenge surfaces, she faces disbarment. She has been looking for a graceful exit from Meridian for three months and has not found one."
+        relationships:
+          - target: c1
+            type: obligation
+            description: "You advised Jaya to destroy the evidence. If she goes down, you go with her. Your fates are legally and ethically entangled in ways that keep you awake at 3 AM."
+          - target: c6
+            type: rival
+            description: "Raj handles the deal for the other side. He's the sharpest transactional lawyer you've faced, and he's been asking questions about IP provenance that suggest he knows more than the due diligence report shows. If he finds the gap, the deal dies — and your career with it."
+        contribution_brief:
+          food: "You stress-cook. Bring something that took three hours and tastes like you have your life together. A braised short rib. A mole. Something that says 'I am a competent person who does not lie awake wondering about disbarment.'"
+          dress: "Tailored blazer, silk camisole, dark trousers. You dress the way you argue: with precision and no wasted gestures. Your earrings are your one concession to flair — vintage, geometric, slightly too large."
+          prop: "A leather portfolio with the term sheet, tabbed and annotated. You've read it forty-seven times. You know every clause, every carve-out, every sentence that could become a weapon."
+
+      - id: c4
+        name: "Dr. Priya Venkatesh"
+        occupation: "Professor of Computer Science, Stanford University"
+        personality: "Rigorous, principled, and burning with the specific fury of a mentor who has been betrayed by their best student. Priya built the research program that produced Jaya's breakthrough. She wrote the DARPA grant. She supervised the fellowship. And she watched Jaya walk away with the work and call it her own."
+        secret: "Priya has filed a quiet IP challenge with Stanford's Office of Technology Licensing. The challenge has not yet been served on Meridian — it's being held pending a faculty review. Priya came tonight to give Jaya one last chance to negotiate a licensing agreement before the legal machinery activates. If Jaya refuses, the challenge will be served on Monday — the same day the Series A money is supposed to arrive."
+        relationships:
+          - target: c1
+            type: rival
+            description: "Jaya was your most brilliant student. She took your research and built an empire on it without attribution or licensing. You mentored her. She plagiarized you. The professional wound is deep. The personal wound is deeper."
+          - target: c7
+            type: ally
+            description: "Tom was a fellow researcher in your lab. He remembers the work's origins. He's the only person at this dinner who can independently verify that the algorithm began at Stanford, not at Meridian."
+        contribution_brief:
+          food: "You cook for your lab group every Friday — it's a tradition. Bring something from that tradition. A biryani. A dal. Something that feeds twenty but you've scaled for eight, because you believe in abundance even at a dinner you didn't want to attend."
+          dress: "Elegant but academic. A silk kurta in deep saffron over dark trousers. Statement glasses. You dress like a woman who runs a research lab, not a woman who pitches venture capitalists — and the distinction is intentional."
+          prop: "A printed copy of the original DARPA grant proposal — the one that funded Jaya's fellowship and described the algorithm's theoretical foundation. Key passages are highlighted. The principal investigator listed on page one is Dr. Priya Venkatesh."
+
+      - id: c5
+        name: "Elaine Park"
+        occupation: "Partner, Pinnacle Ventures"
+        personality: "Composed, analytically brilliant, and operating with the predator's patience of someone who has learned that the best deals are made by the person who panics last. Elaine evaluates companies the way a chess player evaluates boards — seven moves ahead, always calculating the exit."
+        secret: "Elaine knows about the Stanford IP risk. Marcus told her. She ran her own due diligence and concluded that the risk is real but manageable — if Meridian settles with Stanford quietly. She has not disclosed this risk to her partners at Pinnacle. If the deal closes and the IP challenge surfaces, her partners will accuse her of dereliction. If she discloses now, the deal dies and she loses the biggest win of her career."
+        relationships:
+          - target: c2
+            type: secret
+            description: "Marcus is your inside source. He gave you the lab notebooks. You've been protecting him because his information gives you leverage — over Jaya, over the deal, over the eventual board composition. Your relationship with Marcus is transactional and neither of you pretends otherwise."
+          - target: c4
+            type: professional
+            description: "Priya is a potential problem. If she's filed an IP challenge, the deal's risk profile changes entirely. You've been watching her all evening, trying to determine whether she's here as a guest or as a plaintiff."
+        contribution_brief:
+          food: "You are a VC who collects food experiences the way you collect deal flow. Bring something from the best restaurant you've eaten at this month — takeout from a Michelin star, repackaged as casual. 'Oh, I just had some leftover from Benu.' You do this without irony."
+          dress: "Understated luxury. Cashmere sweater, tailored wool trousers, Hermes scarf as a belt. You dress like money that has always been there, which is ironic given that you grew up in a two-bedroom apartment in Flushing."
+          prop: "A Moleskine notebook — the same kind, the same brand, every year. Your deal notes are legendary at the firm. Tonight's pages contain a decision tree: IF Jaya lives / IF Jaya dies / IF IP challenge / IF no IP challenge. You wrote it before dinner. You write these for every deal."
+
+      - id: c6
+        name: "Raj Krishnamurthy"
+        occupation: "Partner, Sato & Krishnamurthy LLP (Pinnacle's outside counsel)"
+        personality: "Methodical, courteous, and relentless in the way that the best transactional lawyers are — he never raises his voice because he never needs to. Raj finds the weakness in every contract the way water finds cracks in a dam. He has closed three billion dollars in venture deals. He has also unwound two, which taught him more."
+        secret: "Raj's due diligence uncovered a gap in Meridian's IP chain of title — the fellowship period is not accounted for in the patent filings. He flagged it to Elaine three weeks ago. She told him to close the deal anyway. He has the email. If the deal goes wrong, the email is his insurance — and Elaine's undoing."
+        relationships:
+          - target: c5
+            type: professional
+            description: "Elaine told you to ignore the IP gap. You have the email. You haven't decided yet whether you're her lawyer or her witness."
+          - target: c3
+            type: rival
+            description: "Diane is the opposing counsel. She's smart and she's hiding something. Her IP memo is too clean — the kind of clean that only happens when someone has scrubbed the record. You've been probing, and she knows you're probing."
+        contribution_brief:
+          food: "You are a man who appreciates whiskey the way others appreciate wine. Bring a bottle — something Japanese, single malt, with a story about the distillery you visited in Hokkaido. Pour generously. Listen to what people say after the second glass."
+          dress: "Slim-fit suit, no tie, pocket square folded with mathematical precision. You dress like a lawyer who bills $1,200 an hour and is worth every cent. Your shoes cost more than the wine."
+          prop: "A thin leather briefcase containing the deal documents, a pen that costs $400, and a printed email from Elaine Park instructing you to 'close without further IP diligence.' You have not decided what to do with it."
+
+      - id: c7
+        name: "Tom Okafor"
+        occupation: "Machine learning engineer, formerly Stanford AI Lab, now freelance consultant"
+        personality: "Earnest, brilliant with systems, and deeply uncomfortable with the social mechanics of power. Tom was in the Stanford lab when the algorithm was born. He wrote forty percent of the original code. He was not included in the patent filings. He was not offered a co-founder role. He was not invited to this dinner — Priya brought him as her plus-one."
+        secret: "Tom has a complete, timestamped copy of the Stanford lab's Git repository from the fellowship period — every commit, every branch, every code review. It proves definitively that the core algorithm was developed under the DARPA grant, on Stanford infrastructure, during Jaya's fellowship. He has been carrying this on an encrypted drive for two years, waiting for someone to ask. No one has asked."
+        relationships:
+          - target: c4
+            type: ally
+            description: "Priya is your former advisor and your champion. She's the only person who gave you credit for your contributions. You came tonight because she asked, but also because you want someone at this table to acknowledge that you helped build the thing they're selling."
+          - target: c1
+            type: rival
+            description: "Jaya was your lab-mate. You wrote code together for two years. She took it, refined it, patented it, and founded a company without you. You don't want revenge. You want recognition. And maybe revenge."
+        contribution_brief:
+          food: "You're a nervous guest at a dinner you weren't invited to. Bring something that shows effort without pretension — a really good guacamole, a batch of cookies, something your roommate helped you make this afternoon. You're not performing sophistication. You're performing sincerity."
+          dress: "Your best button-down, dark jeans, clean Allbirds. You are the least expensive person in the room and the most valuable, if anyone cared to notice."
+          prop: "An encrypted USB drive, worn on a lanyard around your neck like a badge. When people ask, you say it's 'just backups.' It contains the entire Stanford lab Git repository — 847 commits, 23 months of work, provenance for everything Meridian claims to have invented."
+
+    crime:
+      victim_character: c1  # Jaya Rao
+      murderer_character: c2  # Marcus Chen
+      weapon: "Walnut oil covertly added to the second course's butter sauce — Marcus spoke privately with the chef about 'enhancing the nut profile' of the dish while Jaya was taking a phone call — combined with the theft of Jaya's EpiPen from her bag during the cocktail hour"
+      motive: "Jaya told Marcus, one hour before dinner, that she had decided to accept Priya's licensing proposal and disclose the Stanford origins of the algorithm to Pinnacle. She framed it as 'getting ahead of the problem.' Marcus understood instantly that disclosure would trigger his indemnification clause — revealing to Jaya that he'd been negotiating behind her back, destroying their partnership and his equity position. Worse: his secret communication with Elaine about the lab notebooks would surface. With Jaya dead, Marcus becomes sole surviving founder. The IP story becomes 'she acted alone.' The lab notebooks become leverage rather than liability. The deal closes. Marcus inherits the company."
+      red_herrings:
+        - character_id: c4
+          description: "Priya had filed an IP challenge that would destroy the deal on Monday. If Jaya died before signing, the round collapses, and Stanford's claim is strengthened. Priya's fury at Jaya was visible all evening. She also brought an uninvited guest — Tom — who is carrying proof of the IP theft."
+        - character_id: c5
+          description: "Elaine suppressed the IP risk from her partners. If Jaya lived and disclosed the Stanford connection, Elaine's career at Pinnacle was over. A dead founder simplifies the narrative. Elaine's Moleskine contains a decision tree that accounts for Jaya's death — written before dinner."
+        - character_id: c3
+          description: "Diane advised Jaya to destroy evidence and faces disbarment if the truth surfaces. She's been looking for an exit for months. She knew about the walnut allergy — she negotiated the catering contract. Access, motive, and specific knowledge of the murder weapon."
+
+    dramatic_beats:
+      - order: 1
+        timing: "Act II, immediately after the crime"
+        description: "As guests search for the missing EpiPen, the chef emerges from the kitchen, shaken. He tells the room that someone requested a last-minute modification to the second course's sauce — 'walnut oil for depth.' He assumed it came from the host. The host narrates: the chef describes the person who made the request, but his description could match two people at the table."
+      - order: 2
+        timing: "Act II, 10 minutes in"
+        description: "Raj opens his briefcase and places Elaine's email on the table — the one instructing him to close without further IP diligence. He says, calmly: 'I think everyone should see this before we proceed.' Elaine's composure, for the first time all evening, cracks."
+      - order: 3
+        timing: "Act II, 20 minutes in"
+        description: "Tom removes the USB lanyard from his neck and sets the drive on the table. He says: 'This is the Stanford Git repository. Every commit from Jaya's fellowship. Timestamped. Authenticated. I've been carrying it for two years.' Priya places the DARPA grant beside it. The table now has evidence of what Meridian's technology actually is."
+      - order: 4
+        timing: "Act II, 30 minutes in"
+        description: "Marcus's phone buzzes. The host narrates: it's a text from an unknown number — 'Check your bag.' In Marcus's bag, someone has placed Jaya's missing EpiPen, wiped clean. Marcus insists he's been framed. The room divides."
+      - order: 5
+        timing: "Act II, 40 minutes in, just before Act III"
+        description: "Diane, white-faced, produces her laptop and pulls up a file: the legal memo she drafted advising Jaya to destroy the Stanford notebooks. She reads the key paragraph aloud, then says: 'I wrote this. I knew. And I want it on the record before someone else puts it there.' The confession is voluntary but strategic — and it shifts suspicion from Diane to the person who had the most to lose from Jaya's planned disclosure."
+
+
+  # ---------------------------------------------------------------------------
+  # SEED 5 — Colonial/Revolutionary Era, 1774
+  # Murder mechanic: Blackmail gone wrong (strangulation during confrontation)
+  # ---------------------------------------------------------------------------
+  - id: curated-mm-005
+    name: "The Printer's Devil"
+    era: "1774"
+    location: "The Sign of the Quill — a printing house and tavern on Chestnut Street in Philadelphia, Pennsylvania, operated from a three-storey brick building with the press on the ground floor, a public room above, and private lodgings in the garret"
+    milieu: "The colonial Philadelphia press — printers, pamphleteers, merchants, and agents of the Crown — where the printing press is both a business and a weapon, where every broadside is a political act, and where the line between journalism, espionage, and treason depends entirely on which side wins"
+    tension: "The imminent publication of a pamphlet that names specific Philadelphia merchants as Crown loyalists secretly provisioning the British garrison in Boston — a document that will destroy reputations, collapse fortunes, and push the colony one step closer to open rebellion"
+
+    setting_description: |
+      Philadelphia in the autumn of 1774 smells of horse dung, woodsmoke, and political ferment. The First Continental Congress adjourned three weeks ago, and the city is electric with consequence. In the taverns along Chestnut Street, men argue about liberty and commerce with equal passion, because in Philadelphia they are the same thing. The merchants who built this city on shipping, grain, and the slave trade are discovering that revolution is bad for business — and that the young men setting type in the printing houses don't care.
+
+      The Sign of the Quill belongs to Ezekiel Saunders, master printer, tavern keeper, and the most dangerous man in Philadelphia — not because he carries a weapon, but because he operates the fastest press in the colony. Ezekiel prints everything: mercantile notices, almanacs, shipping schedules, religious tracts, and — under a false imprint — the anonymous political pamphlets that have made him indispensable to both the Sons of Liberty and the merchants who wish they would shut up. His press is a lever. Tonight, he intends to use it.
+
+      Ezekiel has called seven associates to the Quill's upstairs room for what he describes as "a matter of mutual interest." The real purpose: to announce that he possesses a manuscript — "A True Account of Loyalist Provisioning in the Colony of Pennsylvania" — that names six prominent Philadelphia merchants as secret suppliers of the British garrison in Boston. The pamphlet is typeset and ready to print. Ezekiel intends to offer each named merchant the chance to buy their name off the list. It is extortion dressed as patriotism. By morning, Ezekiel Saunders will be found strangled in the pressroom below, a leather printer's apron knotted around his throat, the type for the pamphlet scattered across the floor, and the manuscript — the only copy — missing.
+
+    player_count:
+      min: 6
+      max: 10
+
+    characters:
+      - id: c1
+        name: "Ezekiel Saunders"
+        occupation: "Master printer and tavern keeper"
+        personality: "Wiry, shrewd, and addicted to the particular power of a man who controls what gets published. Ezekiel is a patriot when it suits him and a businessman always. He has the printer's hands — stained, calloused, perpetually ink-blackened — and the printer's eye for what sells. He talks fast, drinks slow, and never commits anything to paper that he doesn't intend to use."
+        secret: "The 'True Account' pamphlet is not journalism — it is a shakedown. Ezekiel compiled the list from shipping manifests he stole from the customs house, supplemented by gossip and reasonable inference. Some of the names are correct. Some are not. He doesn't care. The threat of publication is worth more than the truth."
+        relationships:
+          - target: c2
+            type: professional
+            description: "Silas is your apprentice, your surrogate son, and the only person who knows the pamphlet exists. He set the type. He believes in the cause. He does not know you plan to sell silence to the merchants rather than publish."
+          - target: c4
+            type: rival
+            description: "Abigail Whitmore is named in the pamphlet. Her husband's shipping company has been provisioning the British — and she runs the company while he's in London. She is also the most formidable person you've ever tried to blackmail."
+        contribution_brief:
+          food: "You are the tavern keeper and the host. Your table is honest — bread, cheese, cold meat, a good cider from your own press. Nothing fancy. You feed people the way you print: quickly, cheaply, and in quantity."
+          dress: "Leather apron over a linen shirt, waistcoat unbuttoned, breeches and work boots. Ink stains on your fingers that you stopped trying to scrub years ago. You dress like a man who works with his hands and is proud of it."
+          prop: "A compositor's stick — the hand-held tool used to set movable type, line by line. You carry it the way a soldier carries a sword: as a symbol of your trade and your authority."
+
+      - id: c2
+        name: "Silas Hatch"
+        occupation: "Printer's apprentice and Son of Liberty"
+        personality: "Young, idealistic, and burning with the convert's certainty that the world must change and that he is the one to change it. Silas came to Philadelphia from a Connecticut farm to learn printing. He found revolution instead. He sets type by day and attends committee meetings by night. He has the zealot's inability to see grey."
+        secret: "Silas has been leaking information about the Quill's printing schedule to the local Committee of Safety — the revolutionary shadow government. He believes he is serving the cause. He does not realize that the Committee is using his information to decide which publications to suppress and which to promote. He is, unwittingly, a censor for the revolution he thinks he's serving."
+        relationships:
+          - target: c1
+            type: professional
+            description: "Ezekiel is your master and your mentor. He taught you to set type, to read a proof, to understand the power of the press. You worship him. You are about to discover that he is not the patriot you believed."
+          - target: c5
+            type: secret
+            description: "You've been meeting secretly with Mercy Hallowell, who claims to be a patriot sympathizer but whose father is the Crown's customs inspector. You're not sure if you're converting her or if she's converting you. You are certain you're in love."
+        contribution_brief:
+          food: "You're a young man with no money and enormous conviction. Bring something humble and fervent — johnnycakes made on a hearthstone, a jug of small beer, something that says 'I believe in the common man's table.'"
+          dress: "Homespun linen, leather apron, worn boots. You dress like the working class you champion. A red liberty cockade pinned to your hat — the mark of the Sons."
+          prop: "A pamphlet — Thomas Paine's latest, dog-eared and annotated in the margins with your own fervent commentary. You quote it the way the Reverend quotes scripture."
+
+      - id: c3
+        name: "Alderman Cornelius van der Berg"
+        occupation: "Merchant, city alderman, and member of the Pennsylvania Assembly"
+        personality: "Prosperous, pragmatic, and fundamentally allergic to extremism in any direction. Cornelius has built his fortune on grain exports and his political career on the principle that reasonable men can always find a middle path. He is discovering that 1774 is not a year for middle paths."
+        secret: "Cornelius is named in the pamphlet, and the accusation is true. His grain ships have been provisioning the British garrison through a Halifax intermediary. He rationalizes it as commerce, not politics — the British pay in sterling, and sterling is sterling. But if the pamphlet is published, the Committee of Safety will seize his ships and his reputation will be destroyed."
+        relationships:
+          - target: c1
+            type: rival
+            description: "Ezekiel is blackmailing you. The price for removing your name from the pamphlet is 200 pounds — a fortune. You are deciding between payment, threats, and more permanent solutions."
+          - target: c6
+            type: ally
+            description: "Reverend Whitfield is your pastor, your friend, and your political ally. You've confided in him about the pamphlet. He urged patience. You are running out of patience."
+        contribution_brief:
+          food: "You are Dutch-descended and your table shows it. Bring something from the old country — olykoeks (doughnuts), a cheese you imported yourself, a crock of pickled herring. Present it as tradition, which it is, and as superiority, which it also is."
+          dress: "A fine broadcloth coat in dark blue, brass buttons, white stockings, silver shoe buckles. You dress like a man of substance and position. Your wig is freshly powdered. You are the most formally dressed person in a room full of revolutionaries, and you do not care."
+          prop: "A gold-handled walking stick — not for walking but for pointing, gesturing, and rapping on tables when you wish to be heard. It cost more than Silas earns in a year."
+
+      - id: c4
+        name: "Abigail Whitmore"
+        occupation: "Merchant and de facto operator of Whitmore & Sons Shipping"
+        personality: "Formidable, pragmatic, and operating in the narrow space available to a woman who runs a business in a world that does not believe women can. Abigail manages the company while her husband languishes in London negotiating trade licenses. She makes every decision. He signs every document. This arrangement would be intolerable if she were not so extraordinarily good at it."
+        secret: "Abigail's ships have been carrying British military supplies to Boston — but not willingly. The Crown requisitioned her vessels under a compulsory service order. She complied because refusal meant seizure of the entire fleet. She has the requisition papers locked in a strongbox in her counting house. If published, they would exonerate her — but they would also prove that the Crown is commandeering colonial merchant ships, which is precisely the kind of evidence the Continental Congress needs. Abigail is holding a weapon she's afraid to use."
+        relationships:
+          - target: c1
+            type: rival
+            description: "Ezekiel is threatening to publish your name as a loyalist provisioner. He doesn't know — or doesn't care — that the provisioning was compulsory. You could destroy his pamphlet with your requisition papers. But using them means entering a political fight you've spent years avoiding."
+          - target: c7
+            type: secret
+            description: "Captain Shaw has offered to buy your silence about his own loyalist activities in exchange for Royal Navy protection for your ships. The deal is tempting. It is also treason, depending on who wins."
+        contribution_brief:
+          food: "You are a merchant who understands the power of hospitality as a negotiating tool. Bring something generous and strategic — a syllabub, a roast fowl, a bottle of Madeira you've been saving. Feed the table well. Well-fed men make gentler enemies."
+          dress: "Silk gown in dove grey, modest fichu, pearl earrings. You dress with deliberate restraint — feminine enough to be dismissed, expensive enough to be respected. A chatelaine at your waist carries keys to the counting house."
+          prop: "A brass pocket telescope — your husband's, left behind when he sailed for London. You carry it as a talisman and use it, sometimes, to watch the harbor from the Quill's upper windows. You are always watching the harbor."
+
+      - id: c5
+        name: "Mercy Hallowell"
+        occupation: "Schoolmistress and daughter of the Crown's customs inspector"
+        personality: "Intelligent, conflicted, and navigating the impossible terrain of a woman with patriot sympathies and a loyalist father. Mercy teaches Latin and arithmetic to Philadelphia's merchant children. She reads Locke in secret and attends Quaker meetings for the silence. She is trying to decide who she is, and 1774 is not giving her time."
+        secret: "Mercy has been copying her father's customs manifests and passing them to Silas, believing they will be used for patriot intelligence. She does not know that the manifests are the source material for Ezekiel's blackmail pamphlet. She is, unknowingly, the origin of the document that will destroy several reputations — including, potentially, her father's."
+        relationships:
+          - target: c2
+            type: secret
+            description: "Silas. What began as political sympathy has become something more complicated. He believes you are a convert to liberty. You believe you are following your conscience. Neither of you has discussed what happens when your father finds out."
+          - target: c3
+            type: professional
+            description: "Alderman van der Berg is a patron of your school. His children sit in your classroom. You know him as a reasonable man. If the pamphlet names him, your school loses its most important sponsor."
+        contribution_brief:
+          food: "You are a schoolmistress who earns modestly and cooks with precision. Bring something Quaker-influenced — a shoofly pie, a fruit preserves, something plain and perfect. You believe in the dignity of simple things."
+          dress: "Modest wool dress in dark green, white cap, no jewelry except a small silver cross your mother left you. You dress like a woman who has nothing to hide, which is precisely the point."
+          prop: "A commonplace book — leather-bound, filled with your handwriting. Passages from Locke and Montesquieu alongside household accounts and student marks. Between the pages of philosophy, there are also hand-copied customs manifests in a code only Silas can read."
+
+      - id: c6
+        name: "Reverend Josiah Whitfield"
+        occupation: "Minister of Christ Church, Philadelphia"
+        personality: "Eloquent, morally anguished, and caught between his calling and his politics. Josiah preaches reconciliation from the pulpit and privately believes that war is coming and that God has not chosen a side. He counsels patience to men who have run out of it. He is respected by both factions, which means neither fully trusts him."
+        secret: "The Reverend has been serving as a secret intermediary between the Committee of Safety and the royal governor. Both sides believe he is their agent. In truth, he is trying to broker a negotiated settlement before the colony slides into war. His correspondence with the governor, if discovered by the patriots, would be grounds for tarring and feathering — or worse."
+        relationships:
+          - target: c3
+            type: ally
+            description: "Cornelius is your parishioner and your friend. He confided about the pamphlet. You counseled mercy. You are beginning to wonder if mercy is a luxury this year can afford."
+          - target: c7
+            type: professional
+            description: "Captain Shaw attends your church when he is in port. You have heard his confession — figuratively, since you are not Catholic — and you know he is playing both sides of the conflict. You also know that he carries a pistol to church, which tells you everything about his faith."
+        contribution_brief:
+          food: "You are a minister and your table reflects your calling — modest, welcoming, abundant. Bring a loaf of bread — good bread, made by the women of your congregation. And a pot of honey from the church apiaries. You believe bread and honey solve more problems than pamphlets."
+          dress: "Black frock coat, white clerical bands, plain buckle shoes. You are dressed for a funeral, which — given the evening's events — may prove appropriate."
+          prop: "A well-worn Book of Common Prayer with a folded letter tucked inside the cover. The letter is from the royal governor, discussing terms for a 'peaceful resolution.' If anyone opens the Prayer Book, the letter is visible."
+
+      - id: c7
+        name: "Captain Nathaniel Shaw"
+        occupation: "Privateer and merchant captain"
+        personality: "Weathered, amoral, and possessed of the sailor's pragmatism that sees every conflict as a business opportunity. Shaw has sailed for the British, the colonial merchants, and — when the price was right — the smugglers who supply both. He is loyal to the wind and the wage. His politics are wind-dependent."
+        secret: "Captain Shaw has been running a double operation: carrying patriot correspondence to sympathizers in the Caribbean while simultaneously reporting patriot ship movements to the Royal Navy in exchange for letters of marque. He is playing both sides with the cheerful amorality of a man who expects to survive every storm because he always has. The pamphlet does not name him — Ezekiel doesn't know about his naval intelligence work — but Shaw fears that the customs manifests Ezekiel used might contain shipping records that expose his double dealing."
+        relationships:
+          - target: c4
+            type: secret
+            description: "Abigail Whitmore's ships are the best in the harbor, and you've offered her Royal Navy protection in exchange for silence. The deal would make you both rich and complicit. She hasn't answered yet."
+          - target: c1
+            type: professional
+            description: "Ezekiel prints your shipping notices and, occasionally, your smuggling manifests — encoded as poetry in the almanac. You need his press. You do not need his pamphlet drawing attention to the harbor's loyalist traffic."
+        contribution_brief:
+          food: "You are a man of the sea and your palate shows it. Bring something from the docks — a cask of rum from your last Caribbean run, smoked fish, ship's biscuit that you present as a joke and that people eat anyway because rum makes everything edible."
+          dress: "Sea coat, leather boots, a tricorn hat you refuse to remove indoors. A cutlass scar on your left hand that you display strategically. You dress like a man who has been everywhere and belongs nowhere."
+          prop: "A brass compass, battered and salt-corroded, that you claim guided you through a hurricane off Barbados. You set it on the table like a talisman. The compass also conceals, in its hollow base, a folded letter of marque from the Royal Navy — your insurance policy."
+
+      - id: c8
+        name: "Patience Okoye"
+        occupation: "Free Black woman, herbalist and apothecary"
+        personality: "Measured, observant, and armored in the particular vigilance required of a free Black woman in colonial Philadelphia. Patience runs an apothecary shop two doors from the Quill. She knows every herb, every tincture, every poison. She also knows every secret on Chestnut Street, because people tell their apothecary things they would never tell their minister."
+        secret: "Patience has been supplying Ezekiel with a compound of belladonna and valerian that he uses as a 'persuasion aid' — he doses his guests' drinks to make them suggestible during negotiations. She has not asked what he uses it for. She suspects. She has also been approached by the Committee of Safety to provide intelligence on loyalist merchants who purchase specific compounds — intelligence she has been providing, because the Committee's protection is the only thing standing between her shop and the men who would seize a free Black woman's property on any pretext."
+        relationships:
+          - target: c1
+            type: obligation
+            description: "Ezekiel is your landlord, your customer, and the man who vouched for your freedom papers when the constable questioned them. You owe him. The debt is real and the chain it creates is also real."
+          - target: c5
+            type: ally
+            description: "Mercy brings her students to your shop for lessons on botany and natural philosophy. She is one of the few white women in Philadelphia who treats you as a colleague rather than a curiosity. You trust her, which is rare."
+        contribution_brief:
+          food: "You are an herbalist, and your food is your pharmacy is your art. Bring a tisane — an herbal tea blended for the occasion. Calming herbs for a tense evening. Also bring a cornbread made from your mother's recipe — the one she carried from the Eastern Shore. It is the most valuable thing you own."
+          dress: "A clean linen dress, indigo-dyed, with a white apron. A pouch of dried herbs at your belt. You dress practically and precisely, because attention to your appearance is both pride and protection."
+          prop: "A wooden apothecary case with twelve small drawers, each containing a dried herb or tincture. You can identify any plant by smell. You carry it because you are never not working — and because tonight, you suspect someone may need medicine before the evening is over."
+
+    crime:
+      victim_character: c1  # Ezekiel Saunders
+      murderer_character: c3  # Cornelius van der Berg
+      weapon: "Strangulation with a leather printer's apron — Cornelius confronted Ezekiel in the pressroom after the other guests had retired upstairs, demanding the manuscript's destruction; when Ezekiel refused and threatened to print by morning, the confrontation turned physical, and Cornelius strangled him with the nearest binding — Ezekiel's own apron, knotted around his throat"
+      motive: "Cornelius could not pay the 200-pound blackmail demand, and he could not survive the pamphlet's publication. His grain-provisioning operation was his primary income; exposure would bring seizure of his ships, expulsion from the Assembly, and possible imprisonment by the Committee of Safety. He went to the pressroom to negotiate one final time. When Ezekiel laughed and reached for the press handle — literally preparing to print — Cornelius acted. The murder was not planned. It was the terminal event of a man who saw his entire life about to be destroyed by a single sheet of paper."
+      red_herrings:
+        - character_id: c7
+          description: "Captain Shaw had the most to lose from the customs manifests underlying the pamphlet — they could expose his double-dealing with the Royal Navy. He was seen near the pressroom stairs at midnight, and he carries a weapon habitually. A sailor who strangles with rope or leather is not a stretch."
+        - character_id: c8
+          description: "Patience has been supplying Ezekiel with belladonna compounds. If she decided he was becoming a danger to her safety or her shop, she has the pharmacological knowledge to disable him and the physical proximity (her shop is two doors away) to access the pressroom. Her apothecary case contains compounds that could incapacitate a man before strangulation."
+        - character_id: c2
+          description: "Silas discovered tonight that his master is a blackmailer, not a patriot. The betrayal of his idealism is total. A young man with a zealot's conviction, confronting his fallen idol in the pressroom, could have acted in a rage — strangling the man who corrupted the press Silas worships. The compositor's stick found on the floor suggests a struggle."
+
+    dramatic_beats:
+      - order: 1
+        timing: "Act II, immediately after the crime"
+        description: "Silas stumbles upstairs from the pressroom, white-faced, ink on his hands. He announces that Ezekiel is dead — strangled — and that the type for the pamphlet has been scattered across the floor. The manuscript is gone. He holds up the compositor's stick, found beside the body, and his hands are shaking."
+      - order: 2
+        timing: "Act II, 10 minutes in"
+        description: "The host announces that the pressroom door was locked from the inside — but the window facing the alley was found open. Someone either escaped through the window or opened it afterward to suggest an intruder. Captain Shaw's muddy boots match prints found on the alley cobblestones below the window."
+      - order: 3
+        timing: "Act II, 20 minutes in"
+        description: "Mercy's commonplace book falls open during the commotion, and Abigail — who was standing nearest — sees the coded customs manifests. She recognizes her own ships' names in the entries. The host narrates: Abigail holds the book and asks, 'Miss Hallowell, where did you obtain these shipping records?' The room turns to Mercy."
+      - order: 4
+        timing: "Act II, 30 minutes in"
+        description: "Patience examines the body (the host narrates her findings) and reports that Ezekiel's lips show traces of a purple discoloration consistent with belladonna ingestion — he was drugged before he was strangled. Someone incapacitated him first. Patience blanches, because she knows exactly who she sold belladonna to. But the buyer was not Cornelius."
+      - order: 5
+        timing: "Act II, 40 minutes in"
+        description: "Abigail Whitmore produces the Crown's compulsory requisition papers from her pocket — she brought them tonight as insurance. She lays them on the table: 'My ships were commandeered. I am not a loyalist. I am a hostage of the Crown.' The papers change the political calculus of the entire room. If published alongside the pamphlet, they would be dynamite."
+      - order: 6
+        timing: "Act II, 50 minutes in, just before Act III"
+        description: "The Reverend's Book of Common Prayer is knocked from the table during an argument. It falls open. The governor's letter slides across the floor. Silas picks it up, reads the first line aloud — 'My dear Reverend, regarding the terms we discussed for a cessation of hostilities' — and the room divides between those who see treason and those who see diplomacy. The evening's alliances shatter."

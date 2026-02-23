@@ -262,6 +262,19 @@ specs/005-game-night-engine/
                                                            └────────────┘
 ```
 
+### Sync Protocol
+
+**Strategy**: Last-writer-wins with server timestamps for non-conflicting fields. Host device is authoritative for all game night state.
+
+**Conflict resolution rules**:
+1. **Phase transitions**: Host device is the single writer. No conflicts possible (only host advances phases).
+2. **Player actions** (chain entries, accusations, votes): Each action has a unique `(session_id, player_id, action_type, sequence_number)` key. No overwrites — append-only log.
+3. **Written answers** (text contributions submitted during game night): Last-write-wins with `updated_at` timestamp. If the same player submits from multiple devices (unlikely but possible), the most recent write wins.
+4. **Host notes/bookmarks**: Last-write-wins. Low-stakes data; host can re-add bookmarks.
+5. **Contribution text conflicts** (if a player edits a pre-game contribution while offline and the host also edited it): Host resolves manually in a post-game reconciliation step. The system flags the conflict and presents both versions.
+
+**Sync ordering**: Changes are pushed to the server in the order they were recorded locally. Each change carries a monotonically increasing local sequence number and a device timestamp. The Edge Function processes changes sequentially and rejects any change with a sequence number already seen (idempotent).
+
 ### Game Plugin Architecture
 
 ```
@@ -302,34 +315,37 @@ GamePlugin interface:
 
 ## 5. Implementation Phases
 
-### Phase 1: Foundation (Tasks 1-4)
+**Total estimated effort**: 27 tasks, ~25–30 working days (solo developer)
+
+### Phase 1: Foundation (Tasks 1-4) — ~5 days
 - Local SQLite schema setup and migration
 - Pre-cache engine (seed Supabase data to local SQLite)
 - Ambient mode container (wake lock, brightness, dark theme)
 - Zustand dashboard store with SQLite write-through
 
-### Phase 2: Dashboard Shell (Tasks 5-8)
+### Phase 2: Dashboard Shell (Tasks 5-8) — ~6 days
 - Phase timeline component
 - Phase progression with confirmation and undo
 - Player roster with turn tracking
 - Dashboard main screen assembly
 
-### Phase 3: Timer & Reference (Tasks 9-12)
+### Phase 3: Timer & Reference (Tasks 9-12) — ~5 days
 - Timer ring animation (Reanimated)
 - Timer controls (pause, extend, dismiss)
 - Emergency reference overlay
 - Reference search
 
-### Phase 4: Accessibility & Player Management (Tasks 13-15)
+### Phase 4: Accessibility & Player Management (Tasks 13-15) — ~5 days
 - Written answer mode (input + display)
 - Pass/skip mechanics
 - Mid-game player add/drop
 
-### Phase 5: Sync & Plugin Interface (Tasks 16-19)
+### Phase 5: Sync & Plugin Interface (Tasks 16-19) — ~6 days
 - Sync queue and engine
 - Background sync with retry
 - Game plugin interface definition
 - Plugin stubs for Confession Album and Murder Mystery
+- Integration testing (Tasks 20-27)
 
 ---
 

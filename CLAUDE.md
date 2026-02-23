@@ -60,22 +60,22 @@ Fixture data in `artifacts/fixtures/` — one JSON per game, auto-resolved from 
 
 Six specs decompose the PRD into implementable feature areas. Each contains: `spec.md`, `plan.md`, `research.md`, `data-model.md`, `contracts/openapi.yaml`, `quickstart.md`, `tasks.md`, `checklists/requirements.md`.
 
-**Dependency order (solo dev MVP build sequence):** 001 → 002 → 006 → 005 → 003 → 004
+**Dependency order (solo dev MVP build sequence):** 001 → 002 → 005 → 006 → 003 → 004
 
 | Spec | Area | Depends On |
 |------|------|------------|
 | 001 | Auth, profiles, session state machine | (foundation) |
-| 002 | Invitations, contributions, notifications, content store | 001 |
-| 003 | Confession Album vertical slice | 001, 002 |
-| 004 | Murder Mystery vertical slice | 001, 002 |
-| 005 | Dashboard shell, offline infra, plugin architecture | 001 |
-| 006 | Server artifact rendering (wraps existing `artifacts/`) | 001 |
+| 002 | Invitations, contributions, notifications, role assignment | 001 |
+| 003 | Confession Album vertical slice | 001, 002, 005 |
+| 004 | Murder Mystery vertical slice | 001, 002, 005 |
+| 005 | Dashboard shell, offline infra, plugin architecture | 001, 002 |
+| 006 | Server artifact rendering (wraps existing `artifacts/`) | 001, 005 |
 
 ## Constitution
 
 All work must pass 4 architectural gates defined in `memory/constitution.md`:
 
-1. **Simplicity** — Max 3 Supabase Edge Functions, no premature abstractions, single PostgreSQL schema
+1. **Simplicity** — Max 5 Supabase Edge Functions, no premature abstractions, single PostgreSQL schema
 2. **Offline** — Game night works with zero connectivity, local DB is source of truth during ACTIVE state
 3. **Privacy** — No social feed, no public profiles, contributions encrypted, minimal data retention
 4. **Analog** — No features replacing in-room human interaction, screen-dark during play

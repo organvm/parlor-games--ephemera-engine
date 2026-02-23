@@ -43,17 +43,25 @@ The Ephemera Engine is a mobile application that transforms ordinary dinner part
 | **Player Access** | Native app for hosts + app players; web join (mobile browser) for web players |
 | **Phases** | Full three-phase lifecycle: pre-game, game night, post-game |
 | **Artifacts** | Server-side HTML→PDF generation, in-app download, push notification delivery |
-| **Content** | Base content library bundled with app; purchasable content packs |
+| **Content** | Base content library bundled with app (curated seeds, question lineages) |
 | **Auth** | Email/password, Apple Sign-In, Google Sign-In; guest mode for web players |
-| **Monetization** | Premium app ($9.99) + content packs ($2.99–$6.99) |
-| **LLM Integration** | Claude API for Murder Mystery Setting Seed generation (server-side) |
+| **Monetization** | Premium app ($9.99); content packs deferred to V1.1 |
+| **LLM Integration** | Curated content only at V1 launch; Claude API generation deferred to V1.1 |
+
+### V1.1 (Post-Launch Enhancement)
+
+| Category | Feature | Rationale |
+|----------|---------|-----------|
+| **LLM Generation** | Claude API for Murder Mystery Setting Seed generation | Validate game mechanics with curated seeds first; add generation after confirming quality bar |
+| **Content Packs** | Purchasable content packs ($2.99–$6.99) via IAP | Requires iOS StoreKit 2 + Android BillingClient integration; multi-week effort |
+| **Content Store** | In-app browsing, preview, and purchase of content packs | Depends on IAP infrastructure |
 
 ### V1 Excludes
 
 | Category | Excluded | Rationale |
 |----------|----------|-----------|
 | **Games** | Whose Memory? (P1), The Exquisite Corpse (P1) | Ship with two games; expand post-launch |
-| **Facilitator Edition** | B2B licensing, custom branding, analytics | Requires separate pricing/feature tier (STRATEGY.md §Deep Dive B) |
+| **Facilitator Edition** | B2B licensing, custom branding, analytics | V2 scope; requires privacy impact assessment (STRATEGY.md §Deep Dive B) |
 | **Print-on-Demand** | Physical artifact shipping via Lulu/Peecho/Blurb API | Stretch goal; validate digital artifacts first |
 | **Social Features** | Public profiles, social feed, sharing to Instagram | By design: "No social feed, no public profiles" (STRATEGY.md §8.3) |
 | **Subscription Model** | Season pass / annual subscription | Content pack model matches usage patterns (STRATEGY.md §Pillar 7) |
@@ -1001,7 +1009,8 @@ All four games share a common infrastructure layer. Features in this section app
    a. Host receives writing prompt notification 2 days after game night
    b. Host writes content in-app (guided by per-character/per-player prompts)
    c. Content saved; delivery proceeds on schedule
-   d. If host doesn't write by delivery date: delivery postponed, host reminded
+   d. If host doesn't write by delivery date: delivery postponed, host reminded daily for 7 additional days (14 days total from game night)
+   e. **Fallback**: If host has not written by day 14, the delayed artifact is delivered without personalization. A note is included: "Your host is still crafting your epilogue — this artifact may be updated." The host can still submit content afterward, which triggers a revised artifact delivery.
 4. For auto-generated delayed artifacts (Proust's Answer, Fragment That Got Away):
    a. Generated server-side at scheduled time
    b. Personalized per player
@@ -1311,7 +1320,7 @@ Each game module specifies its Pre-Game, Game Night, and Post-Game features, gam
 
 **Dependencies**: 2.3.2 RSVP Tracking
 
-### 3.1.5 Game Night: Digital Board Display
+### 3.1.5 Game Night: Board Display
 
 **Priority**: P0
 **Phase**: Game Night
@@ -1320,6 +1329,8 @@ Each game module specifies its Pre-Game, Game Night, and Post-Game features, gam
 **Purpose**: Display the question board on the host's device during game night. Questions are removed as they are selected, making the board visibly diminish — the central visual metaphor of the game. (DESIGN.md §IV: "As questions are removed, the gaps are visible. The board becomes a record of what has been asked and what remains.")
 
 **Trigger**: Host starts game night → board appears on Game Night Dashboard.
+
+#### Display Mode: Digital Board (default)
 
 **Flow**:
 1. Board displays all questions in configured layout
@@ -1335,11 +1346,29 @@ Each game module specifies its Pre-Game, Game Night, and Post-Game features, gam
 4. Host can tap any remaining question to preview it (for their commentary: "we've lost all the questions about virtue")
 5. When board is empty, chain is complete
 
+#### Display Mode: Physical Board
+
+When the host selects Physical Board format in §3.1.2, the dashboard does NOT display the question grid. Instead:
+
+1. Dashboard shows a simplified "Current Phase" indicator with:
+   - Current player name and turn number
+   - Phase progression (Act I → Act II → The Return)
+   - Remaining question count (host manually decrements)
+   - Optional timer
+2. Host manually removes physical cards from the table/wall as questions are selected
+3. Host taps "Next Turn" to advance the turn order
+4. Host taps "Question Selected" and types/selects the question ID to log which question was chosen (required for artifact generation)
+
+#### Display Mode: Hybrid
+
+Combines Digital Board display on the host's device with physical cards as a backup. Dashboard functions identically to Digital Board mode.
+
 **Success Criteria**:
-- Question removal animation smooth (300ms, fade + collapse)
-- Remaining question count visible at all times
-- Board readable at the configured distance throughout (font scales as questions reduce)
-- Host can undo a removal within 10 seconds (in case of accidental tap)
+- Digital Board: question removal animation smooth (300ms, fade + collapse)
+- All modes: remaining question count visible at all times
+- Digital Board: readable at the configured distance throughout (font scales as questions reduce)
+- Digital Board: host can undo a removal within 10 seconds (in case of accidental tap)
+- Physical Board: chain data still captured for artifact generation via manual input
 
 **Dependencies**: 3.1.2 Board Configuration, 2.6.1 Dashboard Overview
 
@@ -1666,7 +1695,7 @@ Session (confession_album)
    - Full name, occupation, public reputation
    - Personality sketch (2–3 sentences)
    - One secret (relevant to the crime)
-   - One relationship to another character (by role, not player name)
+   - One or more relationships to other characters (by role, not player name)
 2. **Contribution Brief**:
    - Food/drink: narratively motivated suggestion
    - Dress code: color palette, silhouette, era-appropriate, one signature accessory
@@ -1757,28 +1786,36 @@ Session (confession_album)
 
 **Dependencies**: 2.6.1 Dashboard Overview, 3.2.1 Setting Seed
 
-### 3.2.4 Game Night: Accusation Submission (Optional)
+### 3.2.4 Game Night: Accusation Submission
 
 **Priority**: P0
 **Phase**: Game Night
-**Users**: App Player
+**Users**: App Player, Host
 
-**Purpose**: Allow players to submit their accusation digitally instead of on paper. (DESIGN.md §II: "Each guest writes down their accusation — who committed the crime, how, and why — and seals it.")
+**Purpose**: Capture player accusations digitally for inclusion in The Dossier artifact. (DESIGN.md §II: "Each guest writes down their accusation — who committed the crime, how, and why — and seals it.")
 
-**Trigger**: Host activates "Begin Accusations" on dashboard; players receive optional notification.
+**Trigger**: Host activates "Begin Accusations" on dashboard; players receive notification.
 
 **Flow**:
 1. Host activates accusation phase
-2. App players see accusation form (if they open the app):
+2. App players see accusation form on their devices:
    - Who committed the crime? (select from character list)
    - How? (free text, 1–2 sentences)
    - Why? (free text, 1–2 sentences)
 3. Players submit → sealed (not visible to others or host until reveal)
 4. Host dashboard shows submission count (X/Y submitted), not content
-5. During The Reveal, host can display accusation summary
+5. **Analog fallback**: Players who prefer paper write their accusations and seal them. After The Reveal, host transcribes paper accusations into the app via a "Post-Game Reconciliation" step before artifact generation.
+6. During The Reveal, host can display accusation summary
+
+**Post-Game Reconciliation** (before artifact generation):
+- Host reviews the accusation list; any missing players are flagged
+- Host can enter paper accusations on behalf of players who didn't use the app
+- Reconciliation must be completed before The Dossier can be generated
+- Host can mark a player as "no accusation" if they chose not to participate
 
 **Success Criteria**:
-- Accusation form is optional (paper works fine; not all players need to use the app)
+- Digital accusation is the default path; paper is an explicit fallback
+- All accusations (digital and transcribed) available for The Dossier artifact
 - Submissions sealed until host triggers reveal
 - Form takes <2 minutes to complete
 - Works offline (syncs when connectivity resumes)
@@ -1814,7 +1851,7 @@ Session (confession_album)
 
 **Success Criteria**:
 - Dossier voice matches the era/setting of the game
-- All player accusations included if submitted digitally
+- All player accusations included (digital submissions + host-transcribed paper accusations from §3.2.4 reconciliation)
 - Generated in <30 seconds
 - Feels like a genuine artifact from the game's world
 
@@ -1926,7 +1963,8 @@ Session (murder_mystery)
 │   ├── occupation: string
 │   ├── personality: string
 │   ├── secret: string  <!-- allow-secret -->
-│   ├── relationship: { target_character_id, description }
+│   ├── relationships: { target_character_id, type, description }[]
+│   │       type: "ally" | "rival" | "secret" | "obligation" | "kin" | "professional"
 │   ├── is_murderer: boolean
 │   ├── is_victim: boolean
 │   ├── contribution_brief: { food, dress, prop }
@@ -2142,6 +2180,23 @@ All app screens support VoiceOver (iOS) and TalkBack (Android):
 - Contribution deadlines flexible (grace periods, extensions)
 - No public shame mechanics (no "X hasn't submitted yet" visible to other players)
 
+### 4.1.6 Observer Role
+
+A guest who RSVPs as "Observer" can be present at game night but opts out of all game mechanics. No contributions required, no turn in the chain, no character assigned.
+
+**Rules**:
+- Observer receives artifacts but contributes nothing to them
+- Observer does not appear in turn order or player roster during game night
+- Observer can be converted to a player mid-game if they choose to join (host adds them to the roster)
+- No stigma or friction: the RSVP flow offers "Participant" and "Observer" as equal options
+- For Murder Mystery: Observers may still receive a character packet marked "Guest of the Evening" — a non-critical character who attends but has no secret or role in the crime. This allows social participation without mechanical involvement.
+
+### 4.1.7 Multi-Device Host (V1: Single Device)
+
+V1 supports single-device hosting only. The host uses one device (phone or tablet) for both the board display and the dashboard controls.
+
+**V2 consideration**: Multi-device support (tablet for board + phone for controls) requires session state sharing between devices, which conflicts with the Offline Gate (no network during game night). A local peer-to-peer solution (Bluetooth or local Wi-Fi) could resolve this but adds significant complexity. Deferred to V2 with a dedicated spike.
+
 ## 4.2 Privacy & Data
 
 **Priority**: P0
@@ -2327,6 +2382,141 @@ If connectivity is lost during pre-game or post-game:
 - Host can log into the app on a new device and resume any active session
 - Session state transitions are server-validated when online
 - Offline changes queued and replayed on reconnect
+
+## 4.6 Safety & Moderation
+
+**Priority**: P0
+**Phase**: All
+**Users**: All
+
+**Purpose**: Ensure player safety during vulnerability-heavy game moments and prevent harmful content from entering the artifact pipeline. These games invite genuine self-disclosure, personal storytelling, and emotional risk — the platform must actively protect that trust. (STRATEGY.md §8.3: content belongs to the room; RESEARCH.md §1.7: cultural calibration; DESIGN.md §IV: no timer, no pressure)
+
+### 4.6.1 Content Filters on LLM Output
+
+All Claude API output (Murder Mystery setting seeds, character descriptions, scenario narrative) passes through a content safety filter before display or storage.
+
+**Filter rejects**:
+- Graphic violence beyond genre conventions (Murder Mystery permits classic whodunit tropes; explicit gore is rejected)
+- Sexual content of any kind
+- Real-world hate speech, slurs, or discriminatory language
+- Content targeting or referencing real living persons
+- Content that could be interpreted as inciting real-world harm
+
+**Handling**:
+- Rejected output triggers automatic re-generation with the same seed axes (up to 3 retries)
+- If all 3 retries fail: host is notified with "Content generation failed — try adjusting your seed axes" and the generation is logged for review
+- Content that passes the automated filter but is flagged by the host can be reported and regenerated manually via the host dashboard
+- Filter runs server-side (Supabase Edge Function) before content is written to the session store
+
+**Implementation**: A validation layer between the Claude API response and the session content store. Filter logic is deterministic (keyword/pattern matching + category classification), not a second LLM call. Filter rules are versioned and updatable without app deployment.
+
+### 4.6.2 Player Comfort ("Tap Out" Mechanic)
+
+Any player can silently "tap out" of a question, prompt, or scene without explanation. Tap Out is a first-class game mechanic — not an edge case or failure mode.
+
+**Tap Out vs. Pass**:
+- **Pass** (§4.1.2): skips one turn or one question. The player remains active in the current phase and will be called on again.
+- **Tap Out**: exits the current game phase entirely. The player remains present in the room but is not called on until the next phase begins.
+
+**Rules**:
+- Tap Out is always available — no cooldown, no limit, no confirmation dialog
+- The player's device shows a persistent "Tap Out" button during active game phases
+- Tapped-out player's screen returns to a neutral "waiting" state with a "Rejoin Phase" option
+- No notification to other players — only the host's dashboard shows the tapped-out status (discreet indicator, not a banner)
+- Turn order adjusts automatically: the tapped-out player is simply skipped
+- The player can rejoin the current phase at any time via "Rejoin Phase"
+
+**Game-Specific Behavior**:
+- **Confession Album**: tapped-out player is skipped in the chain. Their inherited question passes to the next player in order. They re-enter the chain in the next round or phase.
+- **Murder Mystery**: if a player taps out during interrogation, their character is temporarily "called away" in fiction (e.g., "receives an urgent telephone call"). The host's Emergency Reference notes the absence. The character returns when the player rejoins.
+- **Whose Memory?**: tapped-out player's story remains in the pool but the player is not called on to reveal or elaborate.
+- **Exquisite Corpse**: tapped-out player's fragments are still included (they are anonymous); the player simply does not participate in assembly discussion.
+
+### 4.6.3 Host Conduct Guidelines
+
+The host bears primary responsibility for setting the emotional tone of game night. The app provides structured guidance without being prescriptive.
+
+**Pre-Game Onboarding — "Hosting with Care" Guide**:
+- Displayed once during the host's first session creation flow (dismissible after first use)
+- Available at any time from Settings (§2.9)
+- Content covers:
+  - **Read the room**: escalate intimacy gradually — start with light questions/scenes before deeper ones
+  - **Respect passes and tap-outs**: never comment on, question, or draw attention to a player's pass or tap-out
+  - **Never force a reveal or confession**: the game invites vulnerability, it never demands it
+  - **Manage energy**: schedule breaks between intense phases; the app suggests break points but the host decides
+  - **Know your group**: acquaintances need different question registers than lifelong friends
+
+**Pre-Game Night Checklist**:
+- Appears on the host dashboard when transitioning to ACTIVE state
+- Checklist items:
+  - [ ] Review all content (questions, character sheets, scenario descriptions)
+  - [ ] Check question register mix (see §4.6.5)
+  - [ ] Confirm all players have submitted contributions (or acknowledge missing ones)
+  - [ ] Consider whether content warnings are appropriate for this group (see §4.6.4)
+- Dismissible after first use per host (stored in host preferences)
+- Can be re-enabled from Settings
+
+**Post-Game Self-Assessment — "How Did It Go?"**:
+- Optional prompt shown to the host after session transitions to POST_GAME
+- Private reflection (never shared with players or the platform):
+  - "Did everyone seem comfortable?"
+  - "Were there moments that felt too intense?"
+  - "Would you adjust anything for next time?"
+- Responses stored locally only — not synced to server
+- Purely for the host's own learning; no scoring, no judgment
+
+### 4.6.4 Content Warnings
+
+Hosts can preview and tag content to help players make informed choices about engagement.
+
+**Host Preview**:
+- Host can preview all content (questions, character sheets, scenario descriptions) before distributing to players
+- Preview is available during pre-game setup and at any time during game night via the dashboard
+- Host can remove, replace, or reorder content items during preview
+
+**Theme Tags**:
+- Content items (questions, seeds, character descriptions) carry theme metadata: `[vulnerability]`, `[mortality]`, `[family]`, `[romance]`, `[conflict]`
+- Tags are assigned during content authoring (content packs) and by the content filter (LLM-generated content)
+- Tags are metadata — not visible to players by default
+
+**Content Warnings Mode**:
+- Host can enable "Content Warnings" mode per session (toggle in session settings)
+- When enabled: players see theme tags before engaging with a question or prompt
+- Display format: a small, non-intrusive tag line below the question text (e.g., "Themes: vulnerability, family")
+- Players can still pass (§4.1.2) or tap out (§4.6.2) after seeing the tags
+- Content Warnings mode does not change the content — it only adds visibility
+
+**Implementation**: Theme tags are a `string[]` field on content items (questions, seeds, character sheets). The host dashboard exposes a filter/sort by tag. Content Warnings mode is a boolean on the session configuration.
+
+### 4.6.5 Sensitive Theme Handling
+
+The games invite emotional depth, but the platform must help hosts calibrate that depth to their group.
+
+**Question Register Ratings (Confession Album)**:
+- Every question in the content library carries a register rating:
+  - **Light**: safe for acquaintances, work colleagues, new groups ("What is your idea of earthly happiness?")
+  - **Medium**: appropriate for friends, recurring groups ("What is the trait you most deplore in yourself?")
+  - **Deep**: close friends, family, established trust ("What is your greatest regret?")
+- Register is metadata on the question item, displayed to the host during content selection
+- Players do not see the register rating
+
+**Register Mix Warning**:
+- When the host's selected question set contains a mix of registers, the dashboard displays an advisory:
+  - "This set includes 3 'deep' questions alongside 5 'light' questions. Consider your group's comfort level."
+- Warning is informational only — the host can proceed without changes
+- Triggered when the set contains both "deep" and "light" questions with no "medium" bridge
+
+**Murder Mystery Hard Exclusions**:
+- The following themes are permanently excluded from Murder Mystery scenario generation — both in the Claude API generation prompt and in the content safety filter (§4.6.1):
+  - Sexual assault as a crime mechanic
+  - Suicide as a plot device
+  - Child harm in any form
+- These are not configurable — they are hard-coded exclusions in both the generation prompt template and the server-side filter
+- Violation of these exclusions by the LLM is treated as a filter failure and triggers re-generation
+
+**Content Pack Review**:
+- All content packs (shipped or user-created) are tagged with a minimum register rating
+- Content packs that include "deep" register content are flagged during import: "This pack contains questions rated 'deep'. Recommended for close friends and family."
 
 ---
 
@@ -2548,6 +2738,18 @@ metadata:
   preview_items: 3  # number of items visible before purchase
   author: "Ephemera Engine"  # or contributor name for future UGC
   tags: ["mortality", "deep", "philosophical"]
+  min_app_version: "1.0.0"  # minimum app version required
+  locale: "en"  # content language (future: localized variants)
+
+versioning:
+  # Content pack version management
+  # - Pack updates delivered via app update or background download
+  # - Items have stable IDs; updated items keep their ID with bumped version
+  # - Sessions reference item IDs at time of creation (snapshot)
+  # - Post-purchase updates are free within the same major version
+  # - Major version bumps (2.0) may require re-purchase (future UGC packs)
+  update_strategy: "additive"  # "additive" (new items only) | "replace" (full pack replace)
+  changelog: "Description of changes in this version"
 
 content:
   items:
@@ -2628,8 +2830,8 @@ Decisions deferred to the technical architecture phase:
 | 4 | **Content delivery for packs** | Bundle content packs in the app binary, or download on purchase? | A) In-binary (faster, larger app); B) On-demand download (smaller app, requires connectivity) |
 | 5 | **Web player technology** | Static HTML pages or lightweight React SPA for the web join experience? | A) Static (fastest, simplest); B) React SPA (richer UX, more maintenance) |
 | 6 | **LLM generation caching** | Cache LLM-generated setting seeds for reuse, or generate fresh each time? | A) Cache with similarity detection; B) Always fresh (higher cost, guaranteed uniqueness) |
-| 7 | **Artifact versioning** | Can hosts regenerate artifacts after initial generation (e.g., to fix a typo)? | A) One-shot (simpler); B) Regenerate with version tracking |
-| 8 | **Multi-device host support** | Can the host use a tablet for the board display and a phone for the dashboard simultaneously? | A) Single device; B) Multi-device with session sharing (complex but valuable) |
+| 7 | **Artifact versioning** | ~~Can hosts regenerate artifacts after initial generation?~~ **RESOLVED**: One re-generation within 24 hours, then locked. See spec 006 plan.md. | Decision: B (limited regeneration) |
+| 8 | **Multi-device host support** | ~~Can the host use a tablet + phone simultaneously?~~ **RESOLVED**: V1 is single-device only. V2 may explore local peer-to-peer. See §4.1.7. | Decision: A (V1), B (V2 consideration) |
 | 9 | **Player contribution encryption** | End-to-end encrypt contributions, or rely on server-side access controls? | A) E2E encryption (strongest privacy, complex key management); B) Server-side ACLs (simpler) |
 | 10 | **Internationalization architecture** | Prepare i18n infrastructure in V1 (even though content is English-only)? | A) Yes (string extraction, locale support); B) No (defer to V2) |
 

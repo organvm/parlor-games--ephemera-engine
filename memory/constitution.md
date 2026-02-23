@@ -44,7 +44,9 @@ Artifacts preserve traces, not recordings. A case file, not a transcript. A zine
 
 ### VII. Simplicity
 
-Maximum 3 Supabase Edge Functions. No premature abstraction. Use framework primitives directly (Expo APIs, Supabase client). YAGNI. Start simple, add complexity only when proven necessary. Every additional dependency, service, or abstraction layer requires justification.
+Maximum 5 Supabase Edge Functions or equivalent server-side services. No premature abstraction. Use framework primitives directly (Expo APIs, Supabase client). YAGNI. Start simple, add complexity only when proven necessary. Every additional dependency, service, or abstraction layer requires justification.
+
+*Budget rationale (updated 2026-02-23): Original ≤3 budget cannot hold the specified feature set. Realistic allocation: (1) send-notification, (2) generate-artifacts trigger, (3) game-night-sync, (4) generate-seed (Claude API proxy), (5) reserve. IAP receipt validation deferred to V1.1; pg_cron handles scheduling without consuming an Edge Function slot.*
 
 *Source: STRATEGY.md §Pillar 6, PRD §5.1*
 
@@ -54,7 +56,7 @@ Checked during `/speckit.plan` for every specification.
 
 ### Simplicity Gate
 
-- [ ] Total server-side services ≤3?
+- [ ] Total server-side services ≤5?
 - [ ] No speculative "might need" features?
 - [ ] Using framework primitives directly (not wrapped)?
 - [ ] No premature abstractions or repository patterns?

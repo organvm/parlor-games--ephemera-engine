@@ -163,7 +163,57 @@ supabase/migrations/
 └── YYYYMMDD_create_artifact_writing_prompts.sql
 ```
 
-**Structure Decision**: The three-tier architecture (Cloud Run service + Supabase Edge Function + mobile client) is necessary because Puppeteer cannot run on Deno. The Cloud Run service is a stateless renderer; the Edge Function is the coordinator; the mobile client is the consumer. This uses one of the 3 allowed server-side services per the Simplicity Gate.
+**Structure Decision**: The three-tier architecture (Cloud Run service + Supabase Edge Function + mobile client) is necessary because Puppeteer cannot run on Deno. The Cloud Run service is a stateless renderer; the Edge Function is the coordinator; the mobile client is the consumer. This uses one of the 5 allowed server-side services per the Simplicity Gate.
+
+## Implementation Phases
+
+**Total estimated effort**: ~24 tasks, ~18–22 working days (solo developer)
+
+> **Note (2026-02-23)**: Original spec estimate of 6-8 days was unrealistic. Server integration (Cloud Run + Docker + Supabase Storage) is the critical path. Spike the Cloud Run integration in week 1.
+
+### Phase 1: Server Infrastructure (Tasks 1-5) — ~6 days
+- Dockerize existing render.ts + Puppeteer
+- Cloud Run service (HTTP handler, health check)
+- Supabase Storage bucket and upload helpers
+- Supabase Edge Function trigger (generate-artifacts)
+- End-to-end smoke test: API call → PDF in Storage
+
+### Phase 2: Delivery Pipeline (Tasks 6-10) — ~5 days
+- Artifact metadata DB schema and migrations
+- Immediate delivery flow (push + email)
+- Delayed delivery scheduler (pg_cron)
+- Host writing prompt flow (Sealed Envelope, Afterword)
+- Download link generation with time-limited signed URLs
+
+### Phase 3: Mobile Client (Tasks 11-16) — ~5 days
+- PDF viewer screen (react-native-pdf)
+- Artifact preview screen
+- Artifact library (personal collection)
+- Distribution status screen
+- Host writing prompt screen
+- Re-generation flow (24-hour window)
+
+### Phase 4: Testing & Polish (Tasks 17-24) — ~4 days
+- Fixture-driven rendering tests
+- Delivery pipeline integration tests
+- Performance testing (30-second target)
+- PDF size validation (<5MB)
+- Accessibility pass on PDF viewer
+- Constitution gate audit
+
+---
+
+## Artifact Re-Generation Rules
+
+Hosts may need to re-generate an artifact after initial creation (e.g., to incorporate late accusation reconciliation data, fix host-written content, or add a missing player's contribution).
+
+**Policy**:
+1. **One free re-generation per artifact** within 24 hours of initial generation. The host taps "Regenerate" on the artifact preview screen.
+2. After 24 hours, the artifact is locked. No further re-generation is possible.
+3. Re-generation replaces the PDF in Supabase Storage (same URL). Players who already downloaded receive a push notification: "An updated version of [Artifact Name] is available."
+4. Re-generation does NOT create a new Artifact record — it updates the existing one with a `regenerated_at` timestamp and `version: 2`.
+5. Delayed artifacts (Sealed Envelope, Proust's Answer) can be re-generated if the host submits revised writing content before the delivery date. After delivery, the artifact is locked.
+6. The `artifacts` table tracks: `generated_at`, `regenerated_at` (nullable), `version` (default 1), `locked_at` (set 24h after generation or on delivery).
 
 ## Complexity Tracking
 

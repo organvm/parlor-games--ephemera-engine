@@ -38,7 +38,7 @@ Every game draws from all three sources of uniqueness simultaneously. If any leg
 
 **Analog warmth, digital scaffolding.** The games live in the room, between people. Technology may generate the scenario, coordinate the menu, or compile the post-game artifact — but during the evening, the screen is dark. Cards, not apps. Conversation, not interfaces.
 
-**The host is a player.** The host has a role, not just responsibilities. They are the narrator, the detective, the editor — but also a character with secrets and stakes. Hosting is a creative act, not event management.
+**The host is a player.** The host has a role, not just responsibilities. They are the narrator, the detective, the editor — but also a character with secrets and stakes. Hosting is a creative act, not event management. In the Confession Album, the host answers the first question as a warm-up to set the tone, but is not in the rotating chain — their role during The Chain is facilitator, pacing the evening and managing the board. In Murder Mystery, the host is in character as the evening's convener.
 
 ---
 
@@ -84,7 +84,7 @@ Each guest receives a sealed packet (physical or digital) containing:
 - Full name, occupation, and public reputation
 - A personality sketch: 2–3 sentences establishing voice, temperament, and social posture
 - One secret: something the character is hiding, relevant to the crime <!-- allow-secret -->
-- One relationship to another character: defined by role, not by player ("You owe a great debt to the art dealer" — but the guest doesn't yet know who plays the art dealer)
+- One or more relationships to other characters: defined by role, not by player ("You owe a great debt to the art dealer" — but the guest doesn't yet know who plays the art dealer). Relationship types include ally, rival, secret, obligation, kin, and professional. Complex motive geometry requires multiple relationship edges per character.
 
 **2. Contribution Brief**
 

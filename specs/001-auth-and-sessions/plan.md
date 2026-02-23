@@ -179,28 +179,31 @@ web/
 
 ## 4. Implementation Phases
 
-### Phase 1: Foundation (Tasks 1-3)
+**Total estimated effort**: 12 tasks, ~14–18 working days (solo developer)
+
+### Phase 1: Foundation (Tasks 1-3) — ~4 days
 - Supabase project setup and configuration
 - Database schema: users, sessions, session_participations, session_state_log
 - RLS policies for all tables
 - Supabase Auth configuration (email, Apple, Google providers)
 
-### Phase 2: Core Auth (Tasks 4-6)
+### Phase 2: Core Auth (Tasks 4-6) — ~4 days
 - React Native auth flows (sign-up, sign-in, sign-out)
 - Expo SecureStore token persistence
 - Auth guard (protected routes)
 - Profile creation and auto-host activation
 
-### Phase 3: Session Management (Tasks 7-9)
+### Phase 3: Session Management (Tasks 7-9) — ~4 days
 - Session CRUD operations
 - State machine implementation (client + server validation)
 - State transition logging
 - Deep link generation
 
-### Phase 4: Guest Mode + Settings (Tasks 10-12)
+### Phase 4: Guest Mode + Settings (Tasks 10-12) — ~4 days
 - Web player join flow (anonymous auth + cookie)
 - Settings screen (notification preferences, accessibility)
 - Settings persistence and sync
+- Integration testing
 
 ---
 

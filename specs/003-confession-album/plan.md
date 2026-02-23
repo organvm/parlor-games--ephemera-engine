@@ -244,32 +244,34 @@ Host taps "Generate Artifacts"
 
 ## 6. Implementation Phases
 
-### Phase 1: Data Layer + Content Library (Tasks 1-4)
+**Total estimated effort**: ~19 tasks, ~20–25 working days (solo developer)
+
+### Phase 1: Data Layer + Content Library (Tasks 1-4) — ~4 days
 - TypeScript types
 - WatermelonDB models + migrations
 - Question content seeding
 - Supabase schema
 
-### Phase 2: Pre-Game Screens (Tasks 5-8)
+### Phase 2: Pre-Game Screens (Tasks 5-8) — ~5 days
 - Lineage selector
 - Board preview + curation
 - Board configuration
 - Archetype assignment
 - Player order
 
-### Phase 3: Game Night Core (Tasks 9-12)
-- Digital board display
+### Phase 3: Game Night Core (Tasks 9-12) — ~6 days
+- Digital board display (with Physical Board fallback mode)
 - Chain tracker
 - Bookmark + undo
 - Local persistence
 
-### Phase 4: Post-Game + Artifacts (Tasks 13-16)
+### Phase 4: Post-Game + Artifacts (Tasks 13-16) — ~5 days
 - The Portrait screen
 - Album data assembler
 - Template integration
 - Proust's Answer scheduler
 
-### Phase 5: Polish + Testing (Tasks 17-18)
+### Phase 5: Polish + Testing (Tasks 17-18) — ~4 days
 - Animation polish
 - E2E tests
 - Constitution gate audit

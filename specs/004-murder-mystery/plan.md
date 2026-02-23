@@ -225,6 +225,33 @@ tests/
                                       └──────────────────┘
 ```
 
+## Implementation Phases
+
+**Total estimated effort**: ~13 tasks, ~18–22 working days (solo developer)
+
+### Phase 1: Data & Content (Tasks 1-3) — ~4 days
+- TypeScript types for MurderMysteryData
+- Local DB schema for game night state
+- Curated seed loading and validation
+
+### Phase 2: Pre-Game Screens (Tasks 4-6) — ~5 days
+- Setting seed browser (curated seeds for V1; LLM generation deferred to V1.1)
+- Scenario review and character customization
+- Character packet delivery screen
+
+### Phase 3: Game Night Core (Tasks 7-10) — ~6 days
+- Three-act dashboard screen
+- Clue distribution tracker
+- Accusation form (with post-game reconciliation for paper accusations)
+- Reveal screen with awards voting
+
+### Phase 4: Post-Game & Artifacts (Tasks 11-13) — ~5 days
+- Epilogue writing screen (Sealed Envelope)
+- Artifact data assembly for Dossier, Menu, Sealed Envelope
+- Template integration testing with existing Nunjucks templates
+
+---
+
 ## Risk Assessment
 
 | Risk | Impact | Likelihood | Mitigation |
