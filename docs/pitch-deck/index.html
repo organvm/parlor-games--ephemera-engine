@@ -1,0 +1,1704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ephemera Engine — Unrepeatable Parlor Games</title>
+  <meta name="description" content="A system for unrepeatable social games that privilege human interaction, creative contribution, and the residue of an evening that can never be reconstructed.">
+  <meta name="theme-color" content="#3C2415">
+  <meta property="og:title" content="Ephemera Engine — Unrepeatable Parlor Games">
+  <meta property="og:description" content="4 games. 3 phases. Beautiful artifacts. Played once, remembered always, repeated never.">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lora:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================================
+       LAYER 1: DESIGN TOKENS (from artifacts/design-system/tokens.css)
+       ============================================================ */
+
+    :root {
+      --sp-1: 4px;
+      --sp-2: 8px;
+      --sp-3: 12px;
+      --sp-4: 16px;
+      --sp-5: 20px;
+      --sp-6: 24px;
+      --sp-7: 28px;
+      --sp-8: 32px;
+      --sp-9: 36px;
+      --sp-10: 40px;
+      --sp-11: 44px;
+      --sp-12: 48px;
+
+      --fs-xs: 0.64rem;
+      --fs-sm: 0.8rem;
+      --fs-base: 1rem;
+      --fs-md: 1.25rem;
+      --fs-lg: 1.563rem;
+      --fs-xl: 1.953rem;
+      --fs-2xl: 2.441rem;
+      --fs-3xl: 3.052rem;
+
+      --lh-tight: 1.2;
+      --lh-base: 1.5;
+      --lh-relaxed: 1.65;
+      --lh-letter: 1.8;
+
+      --radius-sm: 2px;
+      --radius-md: 4px;
+      --radius-lg: 8px;
+      --radius-round: 50%;
+
+      --color-gold: #C4A95B;
+    }
+
+    /* Theme: Confession Album */
+    [data-theme="confession-album"] {
+      --color-bg: #FFFDF5;
+      --color-text: #2C2C2C;
+      --color-accent: #4A6741;
+      --color-gold: #C4A95B;
+      --color-divider: #D4C9A8;
+      --color-muted: #8A8370;
+      --color-highlight: #F5F0E0;
+    }
+
+    /* Theme: Murder Mystery */
+    [data-theme="murder-mystery"] {
+      --color-bg: #1A1A1A;
+      --color-text: #F5F5F0;
+      --color-accent: #8B0000;
+      --color-gold: #C4A95B;
+      --color-divider: #333333;
+      --color-muted: #999999;
+      --color-highlight: #2A2A2A;
+    }
+
+    /* Theme: Personal Letter */
+    [data-theme="personal-letter"] {
+      --color-bg: #FFF8F0;
+      --color-text: #3C2415;
+      --color-accent: #8B6914;
+      --color-gold: #C4A95B;
+      --color-divider: #D4C0A0;
+      --color-muted: #7A6B5A;
+      --color-highlight: #FFF0E0;
+    }
+
+    /* Theme: Whose Memory (soft blues + kraft — from STRATEGY.md palette) */
+    [data-theme="whose-memory"] {
+      --color-bg: #F0F4F8;
+      --color-text: #2C3E50;
+      --color-accent: #34698A;
+      --color-gold: #C4A95B;
+      --color-divider: #B0BEC5;
+      --color-muted: #6B7C8A;
+      --color-highlight: #E3EBF0;
+    }
+
+    /* Theme: Exquisite Corpse (off-white + deep violet — from STRATEGY.md palette) */
+    [data-theme="exquisite-corpse"] {
+      --color-bg: #FAF8F5;
+      --color-text: #2C2C2C;
+      --color-accent: #5B3A7A;
+      --color-gold: #C4A95B;
+      --color-divider: #C5B8D4;
+      --color-muted: #7A6B8A;
+      --color-highlight: #F0ECF5;
+    }
+
+    /* Theme: Neutral Dark (new for pitch deck) */
+    [data-theme="neutral-dark"] {
+      --color-bg: #111111;
+      --color-text: #E8E8E3;
+      --color-accent: #C4A95B;
+      --color-gold: #C4A95B;
+      --color-divider: #2A2A2A;
+      --color-muted: #888888;
+      --color-highlight: #1A1A1A;
+    }
+
+
+    /* ============================================================
+       LAYER 2: TYPOGRAPHY (from artifacts/design-system/typography.css)
+       ============================================================ */
+
+    :root {
+      --ff-heading: 'Playfair Display', Georgia, 'Times New Roman', serif;
+      --ff-body: 'Lora', Georgia, 'Times New Roman', serif;
+      --ff-mono: 'JetBrains Mono', 'Courier New', Courier, monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--ff-body);
+      font-size: var(--fs-base);
+      line-height: var(--lh-base);
+      color: var(--color-text);
+      background: #111;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: var(--ff-heading);
+      font-weight: 700;
+      line-height: var(--lh-tight);
+    }
+
+    p { line-height: var(--lh-relaxed); }
+
+    .text-mono {
+      font-family: var(--ff-mono);
+      font-size: var(--fs-sm);
+    }
+
+    .metadata {
+      font-family: var(--ff-mono);
+      font-size: var(--fs-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-muted);
+    }
+
+    .small-caps {
+      font-variant: small-caps;
+      letter-spacing: 0.05em;
+    }
+
+    .text-gold { color: var(--color-gold); }
+
+
+    /* ============================================================
+       LAYER 3: TEXTURES (from artifacts/design-system/textures.css)
+       ============================================================ */
+
+    .texture-parchment { position: relative; }
+    .texture-parchment::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle, rgba(139, 119, 80, 0.03) 1px, transparent 1px);
+      background-size: 4px 4px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .texture-aged { position: relative; }
+    .texture-aged::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle, rgba(139, 119, 80, 0.03) 1px, transparent 1px),
+        radial-gradient(ellipse at center, transparent 60%, rgba(139, 119, 80, 0.06) 100%);
+      background-size: 4px 4px, 100% 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .texture-noir { position: relative; }
+    .texture-noir::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 3px 3px;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .texture-noir::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, transparent 50%, rgba(0, 0, 0, 0.15) 100%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+
+    /* ============================================================
+       LAYER 4: MACRO COMPONENTS (adapted from _macros.njk)
+       ============================================================ */
+
+    /* Wax seal */
+    .wax-seal {
+      display: flex;
+      justify-content: center;
+      margin: var(--sp-8) 0;
+    }
+    .wax-seal__circle {
+      width: 100px;
+      height: 100px;
+      border-radius: var(--radius-round);
+      background: radial-gradient(circle at 35% 35%, #C0392B, #8B0000 60%, #5C0000);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), inset 0 1px 3px rgba(255, 255, 255, 0.2);
+    }
+    .wax-seal__text {
+      font-family: var(--ff-heading);
+      font-size: var(--fs-xs);
+      color: #F5E6D0;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      text-align: center;
+      line-height: 1.1;
+    }
+
+    /* Classified stamp */
+    .classified-stamp {
+      display: inline-block;
+      transform: rotate(-15deg);
+      border: 3px solid var(--color-accent, #8B0000);
+      padding: var(--sp-2) var(--sp-6);
+      font-family: var(--ff-mono);
+      font-size: var(--fs-xl);
+      color: var(--color-accent, #8B0000);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      opacity: 0;
+    }
+
+    /* Divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+      margin: var(--sp-6) 0;
+    }
+    .divider__line {
+      flex: 1;
+      height: 1px;
+      background-color: var(--color-divider);
+    }
+    .divider__symbol {
+      font-family: var(--ff-heading);
+      color: var(--color-gold);
+      font-size: var(--fs-md);
+    }
+
+    /* Ornament */
+    .ornament {
+      text-align: center;
+      margin: var(--sp-6) 0;
+      color: var(--color-gold);
+    }
+    .ornament--fleuron { font-size: var(--fs-lg); }
+    .ornament--dots { font-size: var(--fs-md); letter-spacing: 0.3em; }
+
+    /* Stat card */
+    .stat-card {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      padding: var(--sp-4) var(--sp-6);
+      border: 1px solid var(--color-divider);
+      border-radius: var(--radius-md);
+      min-width: 100px;
+    }
+    .stat-card__value {
+      font-family: var(--ff-heading);
+      font-size: var(--fs-2xl);
+      color: var(--color-gold);
+    }
+    .stat-card__label {
+      margin-top: var(--sp-2);
+      font-family: var(--ff-mono);
+      font-size: var(--fs-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-muted);
+    }
+
+
+    /* ============================================================
+       LAYER 5: PITCH DECK LAYOUT
+       ============================================================ */
+
+    /* Progress bar */
+    .progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--color-gold);
+      transform-origin: left;
+      transform: scaleX(0);
+      z-index: 1000;
+    }
+
+    /* Slide */
+    .slide {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide__inner {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 80px 40px;
+    }
+
+    /* Section label */
+    .section-label {
+      font-family: var(--ff-mono);
+      font-size: var(--fs-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--color-muted);
+      margin-bottom: var(--sp-6);
+    }
+
+    /* Section heading */
+    .section-heading {
+      font-size: clamp(1.8rem, 4vw, var(--fs-3xl));
+      margin-bottom: var(--sp-6);
+      color: var(--color-text);
+    }
+
+    .section-subheading {
+      font-size: var(--fs-lg);
+      color: var(--color-muted);
+      margin-bottom: var(--sp-8);
+      max-width: 640px;
+    }
+
+    .section-body {
+      font-size: var(--fs-md);
+      color: var(--color-text);
+      line-height: var(--lh-relaxed);
+      max-width: 640px;
+    }
+
+    /* Hero */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: relative;
+    }
+
+    .hero__title {
+      font-family: var(--ff-heading);
+      font-size: clamp(2.4rem, 6vw, 4.5rem);
+      line-height: 1.1;
+      margin-bottom: var(--sp-4);
+    }
+
+    .hero__subtitle {
+      font-family: var(--ff-body);
+      font-style: italic;
+      font-size: clamp(1rem, 2vw, var(--fs-lg));
+      color: var(--color-muted);
+      margin-bottom: var(--sp-8);
+      max-width: 540px;
+    }
+
+    .hero__tagline {
+      font-family: var(--ff-mono);
+      font-size: var(--fs-sm);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-gold);
+    }
+
+    .scroll-indicator {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--sp-2);
+      color: var(--color-muted);
+      font-family: var(--ff-mono);
+      font-size: var(--fs-xs);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      animation: scroll-bounce 2s ease-in-out infinite;
+    }
+
+    .scroll-indicator__arrow {
+      width: 1px;
+      height: 24px;
+      background: var(--color-muted);
+      position: relative;
+    }
+    .scroll-indicator__arrow::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: -4px;
+      width: 9px;
+      height: 9px;
+      border-right: 1px solid var(--color-muted);
+      border-bottom: 1px solid var(--color-muted);
+      transform: rotate(45deg);
+    }
+
+    @keyframes scroll-bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(8px); }
+    }
+
+    /* Stats row */
+    .stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--sp-6);
+      margin: var(--sp-8) 0;
+      justify-content: center;
+    }
+
+    .stat-number {
+      font-family: var(--ff-heading);
+      font-size: clamp(2rem, 5vw, var(--fs-3xl));
+      color: var(--color-gold);
+      display: block;
+    }
+
+    .stat-label {
+      font-family: var(--ff-mono);
+      font-size: var(--fs-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-muted);
+      display: block;
+      margin-top: var(--sp-1);
+    }
+
+    .stat-block {
+      text-align: center;
+      min-width: 140px;
+    }
+
+    /* Split layout */
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-12);
+      align-items: center;
+    }
+
+    .split--reverse { direction: rtl; }
+    .split--reverse > * { direction: ltr; }
+
+    /* SVG timeline */
+    .timeline-svg {
+      width: 100%;
+      max-width: 700px;
+      margin: var(--sp-8) auto;
+      display: block;
+    }
+
+    .timeline-svg text {
+      font-family: 'Lora', Georgia, serif;
+    }
+
+    .timeline-svg .timeline-line {
+      stroke: var(--color-gold);
+      stroke-width: 2;
+      fill: none;
+    }
+
+    .timeline-svg .timeline-node {
+      fill: var(--color-gold);
+    }
+
+    .timeline-svg .timeline-label {
+      fill: var(--color-text);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .timeline-svg .timeline-sublabel {
+      fill: var(--color-muted, #7A6B5A);
+      font-size: 11px;
+    }
+
+    /* Comparison table */
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: var(--sp-8) 0;
+      font-size: var(--fs-sm);
+    }
+
+    .comparison-table th {
+      font-family: var(--ff-mono);
+      font-size: var(--fs-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-muted);
+      text-align: left;
+      padding: var(--sp-3) var(--sp-4);
+      border-bottom: 2px solid var(--color-divider);
+    }
+
+    .comparison-table td {
+      padding: var(--sp-3) var(--sp-4);
+      border-bottom: 1px solid var(--color-divider);
+      vertical-align: middle;
+    }
+
+    .comparison-table tr { opacity: 0; transform: translateY(10px); }
+    .comparison-table thead tr { opacity: 1; transform: none; }
+
+    .comparison-table .check {
+      color: var(--color-gold);
+      font-size: var(--fs-md);
+    }
+
+    .comparison-table .no-check {
+      color: var(--color-muted);
+      opacity: 0.4;
+    }
+
+    .comparison-table .product-name {
+      font-family: var(--ff-heading);
+      font-weight: 700;
+    }
+
+    .comparison-table .ephemera-row {
+      background: rgba(196, 169, 91, 0.06);
+    }
+    .comparison-table .ephemera-row .product-name {
+      color: var(--color-gold);
+    }
+
+    /* Artifact miniature */
+    .artifact-mini {
+      width: 220px;
+      height: 310px;
+      border-radius: var(--radius-md);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: var(--sp-6);
+      position: relative;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    .artifact-mini--album {
+      background: #FFFDF5;
+      color: #2C2C2C;
+      border: 1px solid #D4C9A8;
+    }
+    .artifact-mini--album .artifact-mini__title {
+      color: #4A6741;
+    }
+
+    .artifact-mini--dossier {
+      background: #1A1A1A;
+      color: #F5F5F0;
+      border: 1px solid #333;
+    }
+    .artifact-mini--dossier .artifact-mini__title {
+      color: #8B0000;
+    }
+
+    .artifact-mini--anthology {
+      background: #F0F4F8;
+      color: #2C3E50;
+      border: 1px solid #B0BEC5;
+    }
+    .artifact-mini--anthology .artifact-mini__title {
+      color: #34698A;
+    }
+
+    .artifact-mini--chapbook {
+      background: #FAF8F5;
+      color: #2C2C2C;
+      border: 1px solid #C5B8D4;
+    }
+    .artifact-mini--chapbook .artifact-mini__title {
+      color: #5B3A7A;
+    }
+
+    .artifact-mini__ornament {
+      color: var(--color-gold);
+      font-size: var(--fs-lg);
+      margin-bottom: var(--sp-4);
+    }
+
+    .artifact-mini__title {
+      font-family: var(--ff-heading);
+      font-size: var(--fs-lg);
+      margin-bottom: var(--sp-2);
+    }
+
+    .artifact-mini__subtitle {
+      font-size: var(--fs-sm);
+      opacity: 0.6;
+      margin-bottom: var(--sp-4);
+    }
+
+    .artifact-mini__meta {
+      font-family: var(--ff-mono);
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      opacity: 0.5;
+    }
+
+    .artifact-mini__stamp {
+      position: absolute;
+      top: 20px;
+      right: 12px;
+      font-family: var(--ff-mono);
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      color: #8B0000;
+      border: 2px solid #8B0000;
+      padding: 2px 6px;
+      transform: rotate(-12deg);
+      opacity: 0.6;
+    }
+
+    /* Constitution seals */
+    .constitution-seals {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--sp-6);
+      justify-content: center;
+      margin: var(--sp-8) 0;
+    }
+
+    .seal {
+      width: 80px;
+      height: 80px;
+      border-radius: var(--radius-round);
+      background: radial-gradient(circle at 35% 35%, #C0392B, #8B0000 60%, #5C0000);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.2);
+      opacity: 0;
+    }
+    .seal__text {
+      font-family: var(--ff-heading);
+      font-size: 8px;
+      color: #F5E6D0;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      text-align: center;
+      line-height: 1.2;
+      padding: 4px;
+    }
+
+    /* Artifacts side by side */
+    .artifacts-display {
+      display: flex;
+      gap: var(--sp-10);
+      justify-content: center;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      margin: var(--sp-8) 0;
+    }
+
+    .artifact-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--sp-4);
+      max-width: 260px;
+    }
+
+    .artifact-column h4 {
+      font-family: var(--ff-heading);
+      font-size: var(--fs-md);
+      text-align: center;
+    }
+
+    .artifact-column p {
+      font-size: var(--fs-sm);
+      color: var(--color-muted);
+      text-align: center;
+    }
+
+    /* Badge row */
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--sp-3);
+      justify-content: center;
+      margin-top: var(--sp-6);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-2);
+      padding: var(--sp-2) var(--sp-3);
+      border: 1px solid var(--color-divider);
+      border-radius: var(--radius-sm);
+      font-family: var(--ff-mono);
+      font-size: var(--fs-xs);
+      letter-spacing: 0.05em;
+      color: var(--color-muted);
+    }
+    .badge__icon { color: var(--color-gold); }
+
+    /* CTA */
+    .cta-list {
+      list-style: none;
+      margin: var(--sp-8) 0;
+    }
+
+    .cta-list li {
+      font-size: var(--fs-md);
+      padding: var(--sp-3) 0;
+      border-bottom: 1px solid var(--color-divider);
+      color: var(--color-text);
+    }
+
+    .cta-list li::before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: var(--color-gold);
+      border-radius: var(--radius-round);
+      margin-right: var(--sp-3);
+      vertical-align: middle;
+    }
+
+    .cta-link {
+      display: inline-block;
+      margin-top: var(--sp-8);
+      font-family: var(--ff-mono);
+      font-size: var(--fs-sm);
+      color: var(--color-gold);
+      text-decoration: none;
+      letter-spacing: 0.08em;
+      border-bottom: 1px solid var(--color-gold);
+      padding-bottom: 2px;
+      transition: opacity 0.2s;
+    }
+    .cta-link:hover { opacity: 0.7; }
+
+    /* Citation */
+    .citation {
+      font-style: italic;
+      color: var(--color-muted);
+      font-size: var(--fs-sm);
+      margin-top: var(--sp-4);
+      border-left: 2px solid var(--color-divider);
+      padding-left: var(--sp-4);
+    }
+
+    .citation strong {
+      font-style: normal;
+      color: var(--color-text);
+    }
+
+    /* Pricing */
+    .pricing-card {
+      border: 2px solid var(--color-gold);
+      border-radius: var(--radius-lg);
+      padding: var(--sp-8);
+      text-align: center;
+      max-width: 300px;
+      margin: var(--sp-8) auto;
+    }
+
+    .pricing-card__price {
+      font-family: var(--ff-heading);
+      font-size: var(--fs-3xl);
+      color: var(--color-gold);
+    }
+
+    .pricing-card__period {
+      font-family: var(--ff-mono);
+      font-size: var(--fs-xs);
+      color: var(--color-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .pricing-card__features {
+      list-style: none;
+      margin-top: var(--sp-6);
+      font-size: var(--fs-sm);
+    }
+
+    .pricing-card__features li {
+      padding: var(--sp-2) 0;
+      border-bottom: 1px solid var(--color-divider);
+      color: var(--color-muted);
+    }
+
+    /* Animation base classes */
+    .anim-up {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+
+    .anim-fade {
+      opacity: 0;
+    }
+
+    .anim-left {
+      opacity: 0;
+      transform: translateX(-40px);
+    }
+
+    .anim-right {
+      opacity: 0;
+      transform: translateX(40px);
+    }
+
+
+    /* ============================================================
+       LAYER 6: RESPONSIVE
+       ============================================================ */
+
+    @media (max-width: 1024px) {
+      .split {
+        grid-template-columns: 1fr;
+        gap: var(--sp-8);
+      }
+      .split--reverse { direction: ltr; }
+      .artifact-mini {
+        width: 180px;
+        height: 254px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .slide__inner {
+        padding: 60px 24px;
+      }
+      .stats-row {
+        gap: var(--sp-4);
+      }
+      .stat-block {
+        min-width: 110px;
+      }
+      .comparison-table {
+        font-size: var(--fs-xs);
+      }
+      .comparison-table th,
+      .comparison-table td {
+        padding: var(--sp-2);
+      }
+      .artifact-mini {
+        width: 160px;
+        height: 226px;
+      }
+      .artifacts-display {
+        gap: var(--sp-6);
+      }
+      .seal {
+        width: 64px;
+        height: 64px;
+      }
+      .seal__text {
+        font-size: 7px;
+      }
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .scroll-indicator { animation: none; }
+      .anim-up, .anim-fade, .anim-left, .anim-right {
+        opacity: 1;
+        transform: none;
+      }
+      .classified-stamp { opacity: 0.7; }
+      .seal { opacity: 1; }
+      .comparison-table tr { opacity: 1; transform: none; }
+      .progress-bar { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Progress bar -->
+  <div class="progress-bar" aria-hidden="true"></div>
+
+
+  <!-- ============================================================
+       SECTION 0: HERO
+       ============================================================ -->
+  <section class="slide hero texture-aged" data-theme="personal-letter" aria-label="Introduction">
+    <div class="slide__inner" style="text-align: center;">
+      <div class="wax-seal anim-fade" aria-label="Wax seal: Ephemera Engine">
+        <div class="wax-seal__circle">
+          <span class="wax-seal__text">Ephemera<br>Engine</span>
+        </div>
+      </div>
+      <h1 class="hero__title anim-up">Parlor Games:<br>Ephemera Engine</h1>
+      <p class="hero__subtitle anim-up">A system for unrepeatable social games that privilege human interaction, creative contribution, and the residue of an evening that can never be reconstructed.</p>
+      <p class="hero__tagline anim-up">4 games &middot; 3 phases &middot; beautiful artifacts</p>
+    </div>
+    <div class="scroll-indicator" aria-hidden="true">
+      <span>Scroll</span>
+      <div class="scroll-indicator__arrow"></div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       SECTION 1: THE PROBLEM
+       ============================================================ -->
+  <section class="slide texture-noir" data-theme="neutral-dark" aria-label="The Problem">
+    <div class="slide__inner">
+      <p class="section-label anim-up">The Problem</p>
+      <h2 class="section-heading anim-up">We gather more and connect less.</h2>
+      <p class="section-body anim-up">The U.S. Surgeon General declared loneliness an epidemic. Gen Z and Millennials are reviving the dinner party as a cultural response to digital fatigue. The market for meaningful in-person experiences is exploding.</p>
+
+      <div class="stats-row" aria-label="Key statistics">
+        <div class="stat-block anim-up">
+          <span class="stat-number" data-count="20">0</span>
+          <span class="stat-label">% of adults lonely daily</span>
+        </div>
+        <div class="stat-block anim-up">
+          <span class="stat-number" data-count="160">0</span>
+          <span class="stat-label">% dinner party search growth</span>
+        </div>
+        <div class="stat-block anim-up">
+          <span class="stat-number" data-count="12.7" data-prefix="$" data-suffix="B" data-decimals="1">0</span>
+          <span class="stat-label">Escape room market (2024)</span>
+        </div>
+      </div>
+
+      <p class="citation anim-up">
+        <strong>Gallup 2023</strong> &middot; <strong>Pinterest/Instagram YoY data</strong> &middot; <strong>Verified Market Research</strong>
+      </p>
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       SECTION 2: THE SOLUTION
+       ============================================================ -->
+  <section class="slide texture-aged" data-theme="personal-letter" aria-label="The Solution">
+    <div class="slide__inner" style="text-align: center;">
+      <p class="section-label anim-up">The Solution</p>
+      <h2 class="section-heading anim-up" style="max-width: 640px; margin-left: auto; margin-right: auto;">Three phases. One unforgettable evening.</h2>
+      <p class="section-body anim-up" style="max-width: 580px; margin-left: auto; margin-right: auto; margin-bottom: var(--sp-8);">
+        Every Ephemera Engine game follows a ritual arc: preparation builds anticipation, game night creates connection, and artifacts preserve the memory.
+      </p>
+
+      <!-- SVG Timeline -->
+      <svg class="timeline-svg anim-fade" viewBox="0 0 700 180" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three-phase timeline: Preparation, Game Night, Post-Game">
+        <!-- Line -->
+        <line x1="80" y1="70" x2="620" y2="70" class="timeline-line" stroke-dasharray="540" stroke-dashoffset="540"/>
+
+        <!-- Node 1: Pre-Game -->
+        <circle cx="110" cy="70" r="12" class="timeline-node" opacity="0"/>
+        <text x="110" y="110" text-anchor="middle" class="timeline-label" opacity="0">Preparation</text>
+        <text x="110" y="128" text-anchor="middle" class="timeline-sublabel" opacity="0">Days to weeks before</text>
+        <text x="110" y="143" text-anchor="middle" class="timeline-sublabel" opacity="0">Invitations, roles, anticipation</text>
+
+        <!-- Node 2: Game Night -->
+        <circle cx="350" cy="70" r="16" class="timeline-node" opacity="0"/>
+        <text x="350" y="110" text-anchor="middle" class="timeline-label" opacity="0">Game Night</text>
+        <text x="350" y="128" text-anchor="middle" class="timeline-sublabel" opacity="0">The evening itself</text>
+        <text x="350" y="143" text-anchor="middle" class="timeline-sublabel" opacity="0">Screen dark. Room alive.</text>
+
+        <!-- Node 3: Post-Game -->
+        <circle cx="590" cy="70" r="12" class="timeline-node" opacity="0"/>
+        <text x="590" y="110" text-anchor="middle" class="timeline-label" opacity="0">Artifacts</text>
+        <text x="590" y="128" text-anchor="middle" class="timeline-sublabel" opacity="0">Hours to days after</text>
+        <text x="590" y="143" text-anchor="middle" class="timeline-sublabel" opacity="0">Albums, dossiers, letters</text>
+      </svg>
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       SECTION 3: CONFESSION ALBUM
+       ============================================================ -->
+  <section class="slide texture-parchment" data-theme="confession-album" aria-label="The Confession Album">
+    <div class="slide__inner">
+      <div class="split">
+        <div>
+          <p class="section-label anim-up">Game I</p>
+          <h2 class="section-heading anim-up" style="color: var(--color-accent);">The Confession Album</h2>
+          <p class="section-body anim-up">
+            A chain-answering game built on the Victorian confession album tradition that Marcel Proust made famous at age thirteen. Questions are displayed on a physical board. Each player inherits the previous player's question, then chooses a new one from the diminishing board.
+          </p>
+          <p class="section-body anim-up" style="margin-top: var(--sp-4);">
+            The game appears to be about answering questions. It is actually about <em>choosing</em> them.
+          </p>
+          <p class="citation anim-up">
+            Structured, escalating, reciprocal self-disclosure produces measurable closeness. &mdash; <strong>Aron et al., 1997</strong>
+          </p>
+        </div>
+        <div style="display: flex; justify-content: center;">
+          <div class="artifact-mini artifact-mini--album anim-right">
+            <div class="artifact-mini__ornament" aria-hidden="true">&#10087;</div>
+            <div class="artifact-mini__title">The Confession<br>Album</div>
+            <div class="artifact-mini__subtitle">An Evening of Confessions</div>
+            <div class="divider" style="margin: var(--sp-3) 0;">
+              <span class="divider__line" style="background: #D4C9A8;"></span>
+              <span class="divider__symbol" style="font-size: var(--fs-sm);">&#9830;</span>
+              <span class="divider__line" style="background: #D4C9A8;"></span>
+            </div>
+            <div class="artifact-mini__meta">February 2026</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       SECTION 4: MURDER MYSTERY
+       ============================================================ -->
+  <section class="slide texture-noir" data-theme="murder-mystery" aria-label="Murder Mystery">
+    <div class="slide__inner">
+      <div class="split split--reverse">
+        <div>
+          <p class="section-label anim-up">Game II</p>
+          <h2 class="section-heading anim-up" style="color: var(--color-accent);">Murder Mystery</h2>
+          <p class="section-body anim-up">
+            A fully immersive whodunit where pre-game transforms guests into characters weeks before the party. Unlike commercial murder mystery kits, this system generates unique scenarios from combinatorial seeds and deeply involves guests in world-building.
+          </p>
+          <p class="section-body anim-up" style="margin-top: var(--sp-4); color: var(--color-muted); font-style: italic;">
+            "The Alhambra is dressed for an occasion. Gardenias float in cut-glass bowls. The piano has been tuned twice. By midnight, the gardenias will have wilted and Cora Delacroix will be dead in her chair..."
+          </p>
+
+          <div class="classified-stamp" aria-label="Classified">CLASSIFIED</div>
+        </div>
+        <div style="display: flex; justify-content: center;">
+          <div class="artifact-mini artifact-mini--dossier anim-left">
+            <div class="artifact-mini__stamp" aria-hidden="true">CLASSIFIED</div>
+            <div class="artifact-mini__meta" style="margin-bottom: var(--sp-4);">CASE NO. 1926-01</div>
+            <div class="artifact-mini__title">The Dossier</div>
+            <div class="artifact-mini__subtitle" style="color: #999;">The Last Note at the Alhambra</div>
+            <div class="divider" style="margin: var(--sp-3) 0;">
+              <span class="divider__line" style="background: #333;"></span>
+              <span class="divider__symbol" style="font-size: var(--fs-sm);">&#10038;</span>
+              <span class="divider__line" style="background: #333;"></span>
+            </div>
+            <div class="artifact-mini__meta">October 14, 1926</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       SECTION 4b: WHOSE MEMORY?
+       ============================================================ -->
+  <section class="slide" data-theme="whose-memory" aria-label="Whose Memory?">
+    <div class="slide__inner">
+      <div class="split">
+        <div>
+          <p class="section-label anim-up">Game III</p>
+          <h2 class="section-heading anim-up" style="color: var(--color-accent);">Whose Memory?</h2>
+          <p class="section-body anim-up">
+            An intimate storytelling game where anonymous personal stories become the medium for knowing each other more deeply. Players submit true stories on a theme before the party; during the evening, the group reads, discusses, and tries to match each story to its author.
+          </p>
+          <p class="section-body anim-up" style="margin-top: var(--sp-4);">
+            The game surface is simple. The depth comes from the stories people choose to tell, the assumptions the group makes, and the conversations that follow the reveal.
+          </p>
+          <p class="citation anim-up">
+            A game about perception, intimacy, and the distance between who we are and who others think we are.
+          </p>
+        </div>
+        <div style="display: flex; justify-content: center;">
+          <div class="artifact-mini artifact-mini--anthology anim-right">
+            <div class="artifact-mini__ornament" aria-hidden="true">&#8258;</div>
+            <div class="artifact-mini__title">The Anthology</div>
+            <div class="artifact-mini__subtitle">Stories revealed, authors named</div>
+            <div class="divider" style="margin: var(--sp-3) 0;">
+              <span class="divider__line" style="background: #B0BEC5;"></span>
+              <span class="divider__symbol" style="font-size: var(--fs-sm);">&#9830;</span>
+              <span class="divider__line" style="background: #B0BEC5;"></span>
+            </div>
+            <div class="artifact-mini__meta">Stapled zine &middot; 5-15 stories</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       SECTION 4c: THE EXQUISITE CORPSE
+       ============================================================ -->
+  <section class="slide" data-theme="exquisite-corpse" aria-label="The Exquisite Corpse">
+    <div class="slide__inner">
+      <div class="split split--reverse">
+        <div>
+          <p class="section-label anim-up">Game IV</p>
+          <h2 class="section-heading anim-up" style="color: var(--color-accent);">The Exquisite Corpse</h2>
+          <p class="section-body anim-up">
+            A collaborative fiction game where players contribute fragments &mdash; sentences, images, lines of dialogue &mdash; then assemble them into narratives using structural templates. Honoring the Surrealist parlor game that produced <em>"The exquisite corpse shall drink the new wine."</em>
+          </p>
+          <p class="section-body anim-up" style="margin-top: var(--sp-4);">
+            Four rounds: Story Spine, Exquisite Corpse, Cut-Up, Rewrite. The constraint of random fragments forced into fixed structures produces surprising, often beautiful narratives from collision.
+          </p>
+          <p class="citation anim-up">
+            The most collaborative game in the series and the least vulnerable &mdash; a natural complement to the other three.
+          </p>
+        </div>
+        <div style="display: flex; justify-content: center;">
+          <div class="artifact-mini artifact-mini--chapbook anim-left">
+            <div class="artifact-mini__ornament" aria-hidden="true">&#10087;</div>
+            <div class="artifact-mini__title">The Chapbook</div>
+            <div class="artifact-mini__subtitle">Literary magazine</div>
+            <div class="divider" style="margin: var(--sp-3) 0;">
+              <span class="divider__line" style="background: #C5B8D4;"></span>
+              <span class="divider__symbol" style="font-size: var(--fs-sm);">&#10038;</span>
+              <span class="divider__line" style="background: #C5B8D4;"></span>
+            </div>
+            <div class="artifact-mini__meta">Assembled texts &middot; Colophon</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       SECTION 5: ARTIFACTS
+       ============================================================ -->
+  <section class="slide texture-aged" data-theme="personal-letter" aria-label="Artifacts">
+    <div class="slide__inner" style="text-align: center;">
+      <p class="section-label anim-up">The Artifacts</p>
+      <h2 class="section-heading anim-up" style="margin-left: auto; margin-right: auto; max-width: 640px;">Beautiful keepsakes from unrepeatable evenings.</h2>
+      <p class="section-body anim-up" style="margin-left: auto; margin-right: auto; margin-bottom: var(--sp-4);">
+        Every game produces physical and digital artifacts: albums, dossiers, zines, and personal letters. Generated from HTML/CSS templates, rendered as typographically beautiful PDFs. A confession album that looks like a database has confessed nothing.
+      </p>
+
+      <div class="artifacts-display">
+        <div class="artifact-column anim-left">
+          <div class="artifact-mini artifact-mini--album">
+            <div class="artifact-mini__ornament" aria-hidden="true">&#10087;</div>
+            <div class="artifact-mini__title">The Album</div>
+            <div class="artifact-mini__subtitle">Saddle-stitched booklet</div>
+            <div class="artifact-mini__meta">A5 Portrait &middot; 8-40 pages</div>
+          </div>
+          <h4>Confession Album</h4>
+          <p>Questions paired with two answers. Parchment texture, drop caps. Proust's own responses arrive privately one week later.</p>
+        </div>
+        <div class="artifact-column anim-right">
+          <div class="artifact-mini artifact-mini--dossier">
+            <div class="artifact-mini__stamp" aria-hidden="true">CLASSIFIED</div>
+            <div class="artifact-mini__title">The Dossier</div>
+            <div class="artifact-mini__subtitle">Case file</div>
+            <div class="artifact-mini__meta">A5 Portrait &middot; 12-30 pages</div>
+          </div>
+          <h4>Murder Mystery</h4>
+          <p>Cast of characters, evidence log, accusation tally, the reveal. Noir grain, typewriter mono. Sealed envelope epilogues.</p>
+        </div>
+        <div class="artifact-column anim-left">
+          <div class="artifact-mini artifact-mini--anthology">
+            <div class="artifact-mini__ornament" aria-hidden="true">&#8258;</div>
+            <div class="artifact-mini__title">The Anthology</div>
+            <div class="artifact-mini__subtitle">Stapled zine</div>
+            <div class="artifact-mini__meta">Stories &middot; Guess map</div>
+          </div>
+          <h4>Whose Memory?</h4>
+          <p>All stories with author names revealed. The guess map shows who thought they knew whom. Handmade, folded, stamped.</p>
+        </div>
+        <div class="artifact-column anim-right">
+          <div class="artifact-mini artifact-mini--chapbook">
+            <div class="artifact-mini__ornament" aria-hidden="true">&#10087;</div>
+            <div class="artifact-mini__title">The Chapbook</div>
+            <div class="artifact-mini__subtitle">Literary magazine</div>
+            <div class="artifact-mini__meta">Texts &middot; Fragment census</div>
+          </div>
+          <h4>The Exquisite Corpse</h4>
+          <p>Assembled texts from all rounds, story spines as appendix, colophon with date, players, constraints, and the books on the table.</p>
+        </div>
+      </div>
+
+      <div class="badge-row anim-up">
+        <span class="badge"><span class="badge__icon" aria-hidden="true">&#9670;</span> A5 Portrait</span>
+        <span class="badge"><span class="badge__icon" aria-hidden="true">&#9670;</span> PDF</span>
+        <span class="badge"><span class="badge__icon" aria-hidden="true">&#9670;</span> CSS-Only Textures</span>
+        <span class="badge"><span class="badge__icon" aria-hidden="true">&#9670;</span> 3 Themes</span>
+        <span class="badge"><span class="badge__icon" aria-hidden="true">&#9670;</span> Nunjucks + Puppeteer</span>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       SECTION 6: COMPETITIVE LANDSCAPE
+       ============================================================ -->
+  <section class="slide" data-theme="neutral-dark" aria-label="Competitive Landscape">
+    <div class="slide__inner">
+      <p class="section-label anim-up">Landscape</p>
+      <h2 class="section-heading anim-up">No one does all three phases.</h2>
+      <p class="section-body anim-up" style="margin-bottom: var(--sp-6);">
+        Existing products cover entertainment or intimacy, but none combine pre-game anticipation, screen-dark game night, and beautiful post-game artifacts.
+      </p>
+
+      <div style="overflow-x: auto;">
+        <table class="comparison-table" aria-label="Competitive comparison">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Pre-Game</th>
+              <th>Game Night</th>
+              <th>Artifacts</th>
+              <th>Multi-Game</th>
+              <th>Intimacy</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="product-name">Jackbox Games</td>
+              <td><span class="no-check" aria-label="No">&mdash;</span></td>
+              <td><span class="check" aria-label="Yes">&#10003;</span></td>
+              <td><span class="no-check" aria-label="No">&mdash;</span></td>
+              <td><span class="check" aria-label="Yes">&#10003;</span></td>
+              <td><span class="no-check" aria-label="No">&mdash;</span></td>
+            </tr>
+            <tr>
+              <td class="product-name">We're Not Really Strangers</td>
+              <td><span class="no-check" aria-label="No">&mdash;</span></td>
+              <td><span class="check" aria-label="Yes">&#10003;</span></td>
+              <td><span class="no-check" aria-label="No">&mdash;</span></td>
+              <td><span class="no-check" aria-label="No">&mdash;</span></td>
+              <td><span class="check" aria-label="Yes">&#10003;</span></td>
+            </tr>
+            <tr>
+              <td class="product-name">Mystery Night App</td>
+              <td><span class="no-check" aria-label="No">&mdash;</span></td>
+              <td><span class="check" aria-label="Yes">&#10003;</span></td>
+              <td><span class="no-check" aria-label="No">&mdash;</span></td>
+              <td><span class="no-check" aria-label="No">&mdash;</span></td>
+              <td><span class="no-check" aria-label="No">&mdash;</span></td>
+            </tr>
+            <tr>
+              <td class="product-name">Night of Mystery</td>
+              <td><span class="check" aria-label="Yes">&#10003;</span></td>
+              <td><span class="check" aria-label="Yes">&#10003;</span></td>
+              <td><span class="no-check" aria-label="No">&mdash;</span></td>
+              <td><span class="no-check" aria-label="No">&mdash;</span></td>
+              <td><span class="no-check" aria-label="No">&mdash;</span></td>
+            </tr>
+            <tr>
+              <td class="product-name">{THE AND} by Skin Deep</td>
+              <td><span class="no-check" aria-label="No">&mdash;</span></td>
+              <td><span class="check" aria-label="Yes">&#10003;</span></td>
+              <td><span class="no-check" aria-label="No">&mdash;</span></td>
+              <td><span class="no-check" aria-label="No">&mdash;</span></td>
+              <td><span class="check" aria-label="Yes">&#10003;</span></td>
+            </tr>
+            <tr class="ephemera-row">
+              <td class="product-name">Ephemera Engine</td>
+              <td><span class="check" aria-label="Yes">&#10003;</span></td>
+              <td><span class="check" aria-label="Yes">&#10003;</span></td>
+              <td><span class="check" aria-label="Yes">&#10003;</span></td>
+              <td><span class="check" aria-label="Yes">&#10003;</span></td>
+              <td><span class="check" aria-label="Yes">&#10003;</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       SECTION 7: DESIGN DEPTH
+       ============================================================ -->
+  <section class="slide texture-aged" data-theme="personal-letter" aria-label="Design Depth">
+    <div class="slide__inner" style="text-align: center;">
+      <p class="section-label anim-up">Design Depth</p>
+      <h2 class="section-heading anim-up" style="margin-left: auto; margin-right: auto; max-width: 640px;">Not a prototype. A complete design corpus.</h2>
+      <p class="section-body anim-up" style="margin-left: auto; margin-right: auto;">
+        The Ephemera Engine has been designed at the depth of a professional product ready for implementation. Every game, screen, notification, and artifact has been specified.
+      </p>
+
+      <div class="stats-row">
+        <div class="stat-block anim-up">
+          <span class="stat-number" data-count="2700" data-suffix=" lines">0</span>
+          <span class="stat-label">PRD</span>
+        </div>
+        <div class="stat-block anim-up">
+          <span class="stat-number" data-count="270" data-prefix="~">0</span>
+          <span class="stat-label">Research citations</span>
+        </div>
+        <div class="stat-block anim-up">
+          <span class="stat-number" data-count="45">0</span>
+          <span class="stat-label">Screens designed</span>
+        </div>
+        <div class="stat-block anim-up">
+          <span class="stat-number" data-count="226">0</span>
+          <span class="stat-label">Implementation tasks</span>
+        </div>
+        <div class="stat-block anim-up">
+          <span class="stat-number" data-count="7">0</span>
+          <span class="stat-label">SpecKit specs</span>
+        </div>
+        <div class="stat-block anim-up">
+          <span class="stat-number" data-count="8.7" data-decimals="1">0</span>
+          <span class="stat-label">Evaluation score / 10</span>
+        </div>
+      </div>
+
+      <div class="divider anim-up">
+        <span class="divider__line"></span>
+        <span class="divider__symbol">&#9830;</span>
+        <span class="divider__line"></span>
+      </div>
+
+      <p class="section-label anim-up" style="margin-bottom: var(--sp-4);">Architectural Constitution</p>
+
+      <div class="constitution-seals">
+        <div class="seal" aria-label="Simplicity gate">
+          <span class="seal__text">Simplicity</span>
+        </div>
+        <div class="seal" aria-label="Offline gate">
+          <span class="seal__text">Offline<br>First</span>
+        </div>
+        <div class="seal" aria-label="Privacy gate">
+          <span class="seal__text">Privacy<br>by Design</span>
+        </div>
+        <div class="seal" aria-label="Analog gate">
+          <span class="seal__text">Analog<br>Warmth</span>
+        </div>
+      </div>
+
+      <p class="section-body anim-up" style="margin-left: auto; margin-right: auto; color: var(--color-muted); font-size: var(--fs-sm);">
+        Four immutable gates govern every architectural decision. All specifications must pass all four.
+      </p>
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       SECTION 8: MARKET
+       ============================================================ -->
+  <section class="slide" data-theme="neutral-dark" aria-label="Market Opportunity">
+    <div class="slide__inner" style="text-align: center;">
+      <p class="section-label anim-up">Market</p>
+      <h2 class="section-heading anim-up" style="margin-left: auto; margin-right: auto; max-width: 640px;">The experience economy is waiting.</h2>
+
+      <div class="stats-row">
+        <div class="stat-block anim-up">
+          <span class="stat-number" data-count="12.7" data-prefix="$" data-suffix="B" data-decimals="1">0</span>
+          <span class="stat-label">Escape room market</span>
+        </div>
+        <div class="stat-block anim-up">
+          <span class="stat-number" data-count="281" data-prefix="$" data-suffix="B">0</span>
+          <span class="stat-label">U.S. immersive entertainment by 2033</span>
+        </div>
+        <div class="stat-block anim-up">
+          <span class="stat-number" data-count="24.23" data-suffix="%" data-decimals="2">0</span>
+          <span class="stat-label">Immersive entertainment CAGR</span>
+        </div>
+      </div>
+
+      <div class="divider anim-up">
+        <span class="divider__line"></span>
+        <span class="divider__symbol">&#10038;</span>
+        <span class="divider__line"></span>
+      </div>
+
+      <p class="section-body anim-up" style="margin-left: auto; margin-right: auto; margin-bottom: var(--sp-6);">
+        <strong>Target audience:</strong> Dinner party hosts, 25&ndash;45, experience-oriented. People who already gather, who want those gatherings to be meaningful. Not a social network &mdash; a tool for the people who already host.
+      </p>
+
+      <div class="pricing-card anim-up">
+        <div class="pricing-card__price">$9.99</div>
+        <div class="pricing-card__period">One-time purchase</div>
+        <ul class="pricing-card__features">
+          <li>2 complete games (Album + Mystery)</li>
+          <li>Curated content library</li>
+          <li>5 murder mystery seeds</li>
+          <li>4 question lineages</li>
+          <li>Beautiful PDF artifacts</li>
+          <li>No ads. No subscription.</li>
+        </ul>
+      </div>
+
+      <p class="section-body anim-up" style="margin-left: auto; margin-right: auto; font-size: var(--fs-sm); color: var(--color-muted);">
+        Ads destroy the magic circle. A game about intimacy cannot interrupt itself with a banner ad.
+      </p>
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       SECTION 9: CTA
+       ============================================================ -->
+  <section class="slide texture-aged" data-theme="personal-letter" aria-label="Call to action">
+    <div class="slide__inner" style="text-align: center;">
+      <div class="wax-seal anim-fade" aria-label="Wax seal">
+        <div class="wax-seal__circle">
+          <span class="wax-seal__text">Played Once<br>Remembered<br>Always</span>
+        </div>
+      </div>
+
+      <h2 class="section-heading anim-up" style="margin-left: auto; margin-right: auto; max-width: 580px;">Let's make the evening unforgettable.</h2>
+
+      <p class="section-body anim-up" style="margin-left: auto; margin-right: auto; margin-bottom: var(--sp-4);">
+        The design corpus is complete. The artifact pipeline is built. The specification is ready for implementation. We're looking for:
+      </p>
+
+      <ul class="cta-list" style="max-width: 420px; margin-left: auto; margin-right: auto;">
+        <li class="anim-up">Partners &amp; investors</li>
+        <li class="anim-up">Technical collaborators</li>
+        <li class="anim-up">Early adopter hosts</li>
+        <li class="anim-up">Content authors &amp; game designers</li>
+      </ul>
+
+      <div class="anim-up">
+        <a href="https://github.com/organvm-iii-ergon/parlor-games--ephemera-engine" class="cta-link" target="_blank" rel="noopener">
+          View on GitHub &rarr;
+        </a>
+      </div>
+
+      <div class="ornament ornament--dots anim-fade" aria-hidden="true" style="margin-top: var(--sp-12);">&middot;&ensp;&middot;&ensp;&middot;</div>
+
+      <p class="metadata anim-fade" style="margin-top: var(--sp-4);">
+        Parlor Games: Ephemera Engine &middot; ORGAN-III Commerce &middot; organvm-iii-ergon
+      </p>
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+     SCRIPTS: GSAP + ScrollTrigger (progressive enhancement)
+     ============================================================ -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      // Respect prefers-reduced-motion
+      var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReducedMotion) return;
+
+      gsap.registerPlugin(ScrollTrigger);
+
+      // ── Progress bar ──
+      gsap.to('.progress-bar', {
+        scaleX: 1,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: 'body',
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: 0.3
+        }
+      });
+
+      // ── Generic reveal animations ──
+      document.querySelectorAll('.anim-up').forEach(function (el) {
+        gsap.to(el, {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: el,
+            start: 'top 85%',
+            toggleActions: 'play none none none'
+          }
+        });
+      });
+
+      document.querySelectorAll('.anim-fade').forEach(function (el) {
+        gsap.to(el, {
+          opacity: 1,
+          duration: 1,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: el,
+            start: 'top 85%',
+            toggleActions: 'play none none none'
+          }
+        });
+      });
+
+      document.querySelectorAll('.anim-left').forEach(function (el) {
+        gsap.to(el, {
+          opacity: 1,
+          x: 0,
+          duration: 0.8,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: el,
+            start: 'top 85%',
+            toggleActions: 'play none none none'
+          }
+        });
+      });
+
+      document.querySelectorAll('.anim-right').forEach(function (el) {
+        gsap.to(el, {
+          opacity: 1,
+          x: 0,
+          duration: 0.8,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: el,
+            start: 'top 85%',
+            toggleActions: 'play none none none'
+          }
+        });
+      });
+
+      // ── Stat counters ──
+      document.querySelectorAll('.stat-number[data-count]').forEach(function (el) {
+        var target = parseFloat(el.getAttribute('data-count'));
+        var prefix = el.getAttribute('data-prefix') || '';
+        var suffix = el.getAttribute('data-suffix') || '';
+        var decimals = parseInt(el.getAttribute('data-decimals') || '0', 10);
+
+        var obj = { val: 0 };
+        gsap.to(obj, {
+          val: target,
+          duration: 1.5,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: el,
+            start: 'top 85%',
+            toggleActions: 'play none none none'
+          },
+          onUpdate: function () {
+            el.textContent = prefix + obj.val.toFixed(decimals) + suffix;
+          }
+        });
+      });
+
+      // ── SVG Timeline draw ──
+      var timelineLine = document.querySelector('.timeline-svg .timeline-line');
+      if (timelineLine) {
+        var lineLength = timelineLine.getTotalLength ? timelineLine.getTotalLength() : 540;
+
+        var tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: '.timeline-svg',
+            start: 'top 75%',
+            toggleActions: 'play none none none'
+          }
+        });
+
+        tl.to(timelineLine, {
+          strokeDashoffset: 0,
+          duration: 1.2,
+          ease: 'power2.inOut'
+        });
+
+        // Nodes and labels appear sequentially
+        var nodes = document.querySelectorAll('.timeline-svg .timeline-node');
+        var labels = document.querySelectorAll('.timeline-svg .timeline-label');
+        var sublabels = document.querySelectorAll('.timeline-svg .timeline-sublabel');
+
+        nodes.forEach(function (node, i) {
+          tl.to(node, { opacity: 1, duration: 0.3 }, 0.3 + i * 0.4);
+        });
+        labels.forEach(function (label, i) {
+          tl.to(label, { opacity: 1, duration: 0.3 }, 0.5 + i * 0.4);
+        });
+        sublabels.forEach(function (sub, i) {
+          tl.to(sub, { opacity: 1, duration: 0.3 }, 0.6 + Math.floor(i / 2) * 0.4);
+        });
+      }
+
+      // ── Classified stamp slam ──
+      var stamp = document.querySelector('.classified-stamp');
+      if (stamp) {
+        gsap.fromTo(stamp,
+          { opacity: 0, scale: 3, rotation: -25 },
+          {
+            opacity: 0.7,
+            scale: 1,
+            rotation: -15,
+            duration: 0.5,
+            ease: 'back.out(2)',
+            scrollTrigger: {
+              trigger: stamp,
+              start: 'top 80%',
+              toggleActions: 'play none none none'
+            }
+          }
+        );
+      }
+
+      // ── Comparison table rows stagger ──
+      var tableRows = document.querySelectorAll('.comparison-table tbody tr');
+      if (tableRows.length) {
+        gsap.to(tableRows, {
+          opacity: 1,
+          y: 0,
+          duration: 0.5,
+          stagger: 0.1,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: '.comparison-table',
+            start: 'top 80%',
+            toggleActions: 'play none none none'
+          }
+        });
+      }
+
+      // ── Constitution seals ──
+      var seals = document.querySelectorAll('.seal');
+      if (seals.length) {
+        gsap.fromTo(seals,
+          { opacity: 0, scale: 2.5, rotation: -10 },
+          {
+            opacity: 1,
+            scale: 1,
+            rotation: 0,
+            duration: 0.5,
+            stagger: 0.15,
+            ease: 'back.out(2)',
+            scrollTrigger: {
+              trigger: '.constitution-seals',
+              start: 'top 80%',
+              toggleActions: 'play none none none'
+            }
+          }
+        );
+      }
+
+      // ── Hide scroll indicator after scroll ──
+      var scrollInd = document.querySelector('.scroll-indicator');
+      if (scrollInd) {
+        ScrollTrigger.create({
+          start: 100,
+          onEnter: function () {
+            gsap.to(scrollInd, { opacity: 0, duration: 0.5 });
+          },
+          onLeaveBack: function () {
+            gsap.to(scrollInd, { opacity: 1, duration: 0.5 });
+          }
+        });
+      }
+
+    })();
+  </script>
+
+</body>
+</html>
