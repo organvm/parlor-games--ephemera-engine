@@ -27,7 +27,7 @@ Hand-authored design, research, and strategy documents that define the product. 
 
 ### EE-F01 — DESIGN.md
 - **Title**: Series Design Document
-- **Path**: `DESIGN.md`
+- **Path**: `docs/DESIGN.md`
 - **Tags**: `design`, `games`, `framework`
 - **Lines**: 836
 - **Provenance**: `manual`
@@ -35,7 +35,7 @@ Hand-authored design, research, and strategy documents that define the product. 
 
 ### EE-F02 — STRATEGY.md
 - **Title**: Mobile App Research & Strategy
-- **Path**: `STRATEGY.md`
+- **Path**: `docs/STRATEGY.md`
 - **Tags**: `strategy`, `market`, `architecture`, `monetization`
 - **Lines**: 475
 - **Provenance**: `manual`
@@ -43,7 +43,7 @@ Hand-authored design, research, and strategy documents that define the product. 
 
 ### EE-F03 — RESEARCH.md
 - **Title**: Academic Research Synthesis
-- **Path**: `RESEARCH.md`
+- **Path**: `docs/RESEARCH.md`
 - **Tags**: `research`, `academic`, `psychology`, `game-studies`
 - **Lines**: 935
 - **Provenance**: `manual`
@@ -51,7 +51,7 @@ Hand-authored design, research, and strategy documents that define the product. 
 
 ### EE-F04 — PRD.md
 - **Title**: Product Requirements Document
-- **Path**: `PRD.md`
+- **Path**: `docs/PRD.md`
 - **Tags**: `prd`, `requirements`, `screens`, `data-model`, `notifications`, `artifacts`
 - **Lines**: 2,713
 - **Provenance**: `manual`
