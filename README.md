@@ -70,7 +70,7 @@ flowchart TD
 
 | Document | Description |
 |----------|-------------|
-| [Pitch Deck](https://organvm-iii-ergon.github.io/parlor-games--ephemera-engine/) | Interactive pitch deck (GitHub Pages) |
+| [Pitch Deck](https://a-organvm.github.io/parlor-games--ephemera-engine/) | Interactive pitch deck (GitHub Pages) |
 | [DESIGN.md](docs/DESIGN.md) | Series framework, four game designs, template system |
 | [STRATEGY.md](docs/STRATEGY.md) | Market analysis, architecture, monetization, ritual design theory |
 | [RESEARCH.md](docs/RESEARCH.md) | Academic synthesis (~270 citations across 7 domains) |
