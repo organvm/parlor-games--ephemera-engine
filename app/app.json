@@ -30,7 +30,7 @@
             {
               "scheme": "https",
               "host": "ephemera.app",
-              "pathPrefix": "/join"
+              "pathPrefix": "/invite"
             }
           ],
           "category": [
