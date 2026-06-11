@@ -9,7 +9,10 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.organvm.ephemera"
+      "bundleIdentifier": "com.organvm.ephemera",
+      "associatedDomains": [
+        "applinks:ephemera.app"
+      ]
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +22,23 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.organvm.ephemera"
+      "package": "com.organvm.ephemera",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "https",
+              "host": "ephemera.app",
+              "pathPrefix": "/join"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
