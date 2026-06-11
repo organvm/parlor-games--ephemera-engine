@@ -2,7 +2,7 @@ schema_version: "1.0"
 organ: III
 organ_name: Commerce
 repo: parlor-games--ephemera-engine
-org: organvm-iii-ergon
+org: a-organvm
 
 metadata:
   implementation_status: DESIGN_ONLY
