@@ -10,7 +10,13 @@ export default function TabsLayout() {
           tabBarLabel: 'Home',
         }} 
       />
-      {/* Settings tab can be added later (T011) */}
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: 'Settings',
+          tabBarLabel: 'Settings',
+        }}
+      />
     </Tabs>
   );
 }
