@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useSession } from '../../hooks/use-session';
+import { useSession } from '../../../hooks/use-session';
 import { SessionRow } from '../../types/session';
 
 export default function SessionDetail() {

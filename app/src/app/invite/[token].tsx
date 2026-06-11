@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, ActivityIndicator, StyleSheet, Button } from 'react-native';
-import { useDeepLink } from '../../src/hooks/useDeepLink';
+import { useDeepLink } from '../../hooks/useDeepLink';
 import { useRouter } from 'expo-router';
+import { SessionInvitation } from '../../components/SessionInvitation';
 
 export default function InviteScreen() {
   const { token, resolution, loading } = useDeepLink();
@@ -43,16 +44,11 @@ export default function InviteScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>You've been invited!</Text>
-      <Text style={styles.text}>Session: {resolution.session?.name}</Text>
-      <Text style={styles.text}>Game Type: {resolution.session?.game_type}</Text>
-      {/* 
-        This is a placeholder for T011's SessionInvitation component.
-        For now, we just show a button to navigate to the RSVP flow, or simply "RSVP".
-      */}
-      <Button title="Join Session" onPress={() => {
-        // T011 will implement the actual RSVP mutation and redirect
-      }} />
+      <SessionInvitation
+        sessionId={resolution.session!.id}
+        sessionName={resolution.session!.name}
+        gameType={resolution.session!.game_type}
+      />
     </View>
   );
 }

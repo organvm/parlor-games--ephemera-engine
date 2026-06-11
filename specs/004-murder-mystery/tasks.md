@@ -45,7 +45,7 @@
 
 ### Implementation
 
-- [ ] T010 [P] [US1] Create Supabase Edge Function `supabase/functions/generate-seed/index.ts`:
+- [x] T010 [P] [US1] Create Supabase Edge Function `supabase/functions/generate-seed/index.ts`:
   - Accept 4-axis input + session_id + player_count
   - System prompt with JSON schema, consistency rules, and 1–2 few-shot examples
   - Call Claude API (Sonnet model)
@@ -53,14 +53,14 @@
   - Auto-retry up to 3 times on validation failure
   - Log to seed_generation_log
   - Rate limit: 10/session, 5s cooldown
-- [ ] T011 [P] [US1] Create seed generation service in `src/features/murder-mystery/services/seedGenerationService.ts` — client-side wrapper for Edge Function calls, loading state management, error handling
-- [ ] T012 [P] [US1] Create `useSettingSeed` hook in `src/features/murder-mystery/hooks/useSettingSeed.ts` — seed CRUD, generation trigger, curated seed fetching, regeneration
-- [ ] T013 [US1] Create SettingSeedBrowserScreen in `src/features/murder-mystery/screens/SettingSeedBrowserScreen.tsx` — grid/list of curated seeds with era, location, milieu, tension previews; tap to view full details; confirm selection
-- [ ] T014 [P] [US1] Create SettingSeedCard component in `src/features/murder-mystery/components/SettingSeedCard.tsx` — preview card for curated seeds
-- [ ] T015 [US1] Create SettingSeedGeneratorScreen in `src/features/murder-mystery/screens/SettingSeedGeneratorScreen.tsx` — 4-axis selector dropdowns/pickers, "Generate" button, "Full Random" button, loading state, result display
-- [ ] T016 [US1] Create ScenarioReviewScreen in `src/features/murder-mystery/screens/ScenarioReviewScreen.tsx` — display generated/curated scenario with setting description, character roster, crime structure, timeline; edit individual fields; "Regenerate" and "Confirm" buttons
-- [ ] T017 [US1] Write unit tests in `tests/unit/scenarioValidation.test.ts` — test validation rules (ID references, circular relationships, missing fields, victim=murderer contradiction)
-- [ ] T018 [US1] Write integration test in `tests/integration/seedGeneration.test.ts` — mock Claude API response, verify Edge Function validation, rate limiting, and session.config persistence
+- [x] T011 [P] [US1] Create seed generation service in `src/features/murder-mystery/services/seedGenerationService.ts` — client-side wrapper for Edge Function calls, loading state management, error handling
+- [x] T012 [P] [US1] Create `useSettingSeed` hook in `src/features/murder-mystery/hooks/useSettingSeed.ts` — seed CRUD, generation trigger, curated seed fetching, regeneration
+- [x] T013 [US1] Create SettingSeedBrowserScreen in `src/features/murder-mystery/screens/SettingSeedBrowserScreen.tsx` — grid/list of curated seeds with era, location, milieu, tension previews; tap to view full details; confirm selection
+- [x] T014 [P] [US1] Create SettingSeedCard component in `src/features/murder-mystery/components/SettingSeedCard.tsx` — preview card for curated seeds
+- [x] T015 [US1] Create SettingSeedGeneratorScreen in `src/features/murder-mystery/screens/SettingSeedGeneratorScreen.tsx` — 4-axis selector dropdowns/pickers, "Generate" button, "Full Random" button, loading state, result display
+- [x] T016 [US1] Create ScenarioReviewScreen in `src/features/murder-mystery/screens/ScenarioReviewScreen.tsx` — display generated/curated scenario with setting description, character roster, crime structure, timeline; edit individual fields; "Regenerate" and "Confirm" buttons
+- [x] T017 [US1] Write unit tests in `tests/unit/scenarioValidation.test.ts` — test validation rules (ID references, circular relationships, missing fields, victim=murderer contradiction)
+- [x] T018 [US1] Write integration test in `tests/integration/seedGeneration.test.ts` — mock Claude API response, verify Edge Function validation, rate limiting, and session.config persistence
 
 **Checkpoint**: Host can select curated seeds or generate unique scenarios via Claude API
 
@@ -74,13 +74,13 @@
 
 ### Implementation
 
-- [ ] T019 [P] [US2] Create `useCharacters` hook in `src/features/murder-mystery/hooks/useCharacters.ts` — character assignment (auto/manual/preference), delivery trigger, assignment state
-- [ ] T020 [P] [US2] Create CharacterEntry component in `src/features/murder-mystery/components/CharacterEntry.tsx` — character display card with mugshot initials, name, occupation, bio; used in roster and assignment screens
-- [ ] T021 [US2] Create CharacterCustomizationScreen in `src/features/murder-mystery/screens/CharacterCustomizationScreen.tsx` — edit character names, secrets, briefs, prompts; drag-and-drop assignment to guests (manual mode)
-- [ ] T022 [US2] Create CharacterPacketScreen in `src/features/murder-mystery/screens/CharacterPacketScreen.tsx` — sealed envelope animation (react-native-reanimated), tap-to-open, progressive reveal (character sheet → contribution brief → preparation prompts), offline cached
-- [ ] T023 [US2] Implement character assignment API call: POST `/sessions/{id}/characters/assign` with auto/manual mode support
-- [ ] T024 [US2] Implement character delivery API call: POST `/sessions/{id}/characters/deliver` — trigger push notifications (app players) and email (web players)
-- [ ] T025 [US2] Write integration test in `tests/integration/characterDelivery.test.ts` — verify packet content completeness, offline caching, host dashboard tracking
+- [x] T019 [P] [US2] Create `useCharacters` hook in `src/features/murder-mystery/hooks/useCharacters.ts` — character assignment (auto/manual/preference), delivery trigger, assignment state
+- [x] T020 [P] [US2] Create CharacterEntry component in `src/features/murder-mystery/components/CharacterEntry.tsx` — reusable card showing character name, occupation, personality, secret (if revealed/host), and current assigneent screens
+- [x] T021 [US2] Create CharacterCustomizationScreen in `src/features/murder-mystery/screens/CharacterCustomizationScreen.tsx` — edit character names, secrets, briefs, prompts; drag-and-drop assignment to guests (manual mode)
+- [x] T022 [US2] Create CharacterPacketScreen in `src/features/murder-mystery/screens/CharacterPacketScreen.tsx` — sealed envelope animation (react-native-reanimated), tap-to-open, progressive reveal (character sheet → contribution brief → preparation prompts), offline cached
+- [x] T023 [US2] Implement character assignment API call: POST `/sessions/{id}/characters/assign` with auto/manual mode support
+- [x] T024 [US2] Implement character delivery API call: POST `/sessions/{id}/characters/deliver` — trigger push notifications (app players) and email (web players)
+- [x] T025 [US2] Write integration test in `tests/integration/characterDelivery.test.ts` — verify packet content completeness, offline caching, host dashboard tracking
 
 **Checkpoint**: Guests receive and can view character packets; host tracks delivery and contributions
 
@@ -94,11 +94,11 @@
 
 ### Implementation
 
-- [ ] T026 [P] [US3] Create `useGameNight` hook in `src/features/murder-mystery/hooks/useGameNight.ts` — act state, phase progression, timestamp logging, offline-first writes to local DB
-- [ ] T027 [P] [US3] Create `useClues` hook in `src/features/murder-mystery/hooks/useClues.ts` — clue distribution state, check/uncheck, character knowledge panel data
-- [ ] T028 [P] [US3] Create ActProgressIndicator component in `src/features/murder-mystery/components/ActProgressIndicator.tsx` — horizontal 3-segment bar, active/completed/future states, tap-safe
-- [ ] T029 [P] [US3] Create ClueChecklistItem component in `src/features/murder-mystery/components/ClueChecklistItem.tsx` — clue card with title, type badge, checkbox, "found by" attribution
-- [ ] T030 [US3] Create ThreeActDashboardScreen in `src/features/murder-mystery/screens/ThreeActDashboardScreen.tsx`:
+- [x] T026 [P] [US3] Create `useGameNight` hook in `src/features/murder-mystery/hooks/useGameNight.ts` — act state, phase progression, timestamp logging, offline-first writes to local DB
+- [x] T027 [P] [US3] Create `useClues` hook in `src/features/murder-mystery/hooks/useClues.ts` — clue distribution state, check/uncheck, character knowledge panel data
+- [x] T028 [P] [US3] Create ActProgressIndicator component in `src/features/murder-mystery/components/ActProgressIndicator.tsx` — horizontal 3-segment bar, active/completed/future states, tap-safe
+- [x] T029 [P] [US3] Create ClueChecklistItem component in `src/features/murder-mystery/components/ClueChecklistItem.tsx` — clue card with title, type badge, checkbox, "found by" attribution
+- [x] T030 [US3] Create ThreeActDashboardScreen in `src/features/murder-mystery/screens/ThreeActDashboardScreen.tsx`:
   - Ambient mode (dark bg, warm accents, wake lock via expo-keep-awake, brightness dim via expo-brightness)
   - Act I view: character introduction checklist, player roster, "Begin Act II" hold-to-confirm button
   - Act II view: "Reveal the Crime" button, clue distribution tracker, character knowledge panel, optional interrogation timer, "New Evidence" button

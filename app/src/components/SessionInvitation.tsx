@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Button, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, Button, ActivityIndicator, Alert, TextInput } from 'react-native';
 import { supabase } from '../lib/supabase';
 import { useRouter } from 'expo-router';
 
@@ -12,27 +12,49 @@ interface Props {
 
 export function SessionInvitation({ sessionId, sessionName, gameType, hostName }: Props) {
   const [loading, setLoading] = useState(false);
+  const [displayName, setDisplayName] = useState('');
+  const [email, setEmail] = useState('');
+  const [needsDetails, setNeedsDetails] = useState(false);
   const router = useRouter();
 
   const handleRsvp = async () => {
     setLoading(true);
     try {
-      const { data: userData, error: userError } = await supabase.auth.getUser();
+      let { data: userData, error: userError } = await supabase.auth.getUser();
+      let userId = userData?.user?.id;
+      let finalDisplayName = displayName;
       
-      if (userError || !userData.user) {
-        throw new Error('You must be logged in to RSVP.');
-      }
+      if (userError || !userData?.user) {
+        if (!needsDetails) {
+          setNeedsDetails(true);
+          setLoading(false);
+          return;
+        }
 
-      // Default display name could be derived from metadata, fallback to email prefix
-      const emailPrefix = userData.user.email?.split('@')[0] || 'Player';
-      const displayName = userData.user.user_metadata?.full_name || emailPrefix;
+        if (!displayName.trim() || !email.trim()) {
+          throw new Error('Please provide your name and email to RSVP.');
+        }
+
+        // Create anonymous user
+        const { data: anonData, error: anonError } = await supabase.auth.signInAnonymously();
+        if (anonError) throw anonError;
+        userId = anonData.user!.id;
+
+        // Optionally, store email/name in user metadata if Supabase allows updating anon users
+        await supabase.auth.updateUser({
+          data: { full_name: displayName, preferred_email: email }
+        });
+      } else {
+        const emailPrefix = userData.user.email?.split('@')[0] || 'Player';
+        finalDisplayName = userData.user.user_metadata?.full_name || emailPrefix;
+      }
 
       const { error } = await supabase
         .from('session_participations')
         .insert({
           session_id: sessionId,
-          user_id: userData.user.id,
-          display_name: displayName,
+          user_id: userId,
+          display_name: finalDisplayName,
         });
 
       if (error) {
@@ -64,6 +86,26 @@ export function SessionInvitation({ sessionId, sessionName, gameType, hostName }
         
         {hostName && (
           <Text style={styles.hostText}>Hosted by {hostName}</Text>
+        )}
+
+        {needsDetails && (
+          <View style={styles.formContainer}>
+            <Text style={styles.formLabel}>How should we address you?</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Display Name"
+              value={displayName}
+              onChangeText={setDisplayName}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Email Address"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              value={email}
+              onChangeText={setEmail}
+            />
+          </View>
         )}
 
         <View style={styles.actionContainer}>
@@ -130,5 +172,23 @@ const styles = StyleSheet.create({
   actionContainer: {
     width: '100%',
     marginTop: 16,
+  },
+  formContainer: {
+    width: '100%',
+    marginBottom: 16,
+  },
+  formLabel: {
+    fontSize: 14,
+    color: '#5C5A55',
+    marginBottom: 8,
+    fontFamily: 'serif',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#E8E6E1',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+    backgroundColor: '#fff',
   },
 });
