@@ -14,7 +14,7 @@ export default function RootLayout() {
 
     if (isAuthenticated && inAuthGroup) {
       // Redirect away from auth screens to app
-      router.replace('/(app)');
+      router.replace('/(tabs)');
     } else if (!isAuthenticated && !inAuthGroup) {
       // Redirect unauthenticated users to welcome screen
       router.replace('/(auth)/welcome');
@@ -25,7 +25,7 @@ export default function RootLayout() {
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(app)" />
+      <Stack.Screen name="(tabs)" />
       <Stack.Screen name="(auth)" />
     </Stack>
   );
