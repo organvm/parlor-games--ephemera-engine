@@ -75,6 +75,13 @@ export interface GameNightState {
   clues_distributed: string[];   // Clue IDs marked as distributed
   evidence_reveals: EvidenceReveal[];
   accusations: Accusation[];
+  award_votes?: AwardVote[];
+}
+
+export interface AwardVote {
+  player_id: string;             // SessionParticipation.id
+  category: string;
+  nominee_character_id: string;  // Character.id
 }
 
 export interface ActTimestamp {

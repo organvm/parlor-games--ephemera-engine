@@ -1,7 +1,9 @@
-import { describe, it, expect, beforeAll } from 'vitest';
-import { testClient } from './setup';
+import { describe, it, expect } from 'vitest';
+import { testClient, checkSupabaseReachability } from './setup';
 
-describe('Bundled Content Seeding', () => {
+const isDBReachable = await checkSupabaseReachability();
+
+describe.skipIf(!isDBReachable)('Bundled Content Initialization', () => {
   it('should have all 8 bundled content packs', async () => {
     const { data, error } = await testClient
       .from('content_packs')

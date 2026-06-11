@@ -1,7 +1,9 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { testClient } from './setup';
+import { testClient, checkSupabaseReachability } from './setup';
 
-describe('Contributions CRUD & RLS', () => {
+const isDBReachable = await checkSupabaseReachability();
+
+describe.skipIf(!isDBReachable)('Contributions CRUD & RLS', () => {
   const hostEmail = `host_c_${Date.now()}@example.com`;
   const guestEmail = `guest_c_${Date.now()}@example.com`;
   // allow-secret

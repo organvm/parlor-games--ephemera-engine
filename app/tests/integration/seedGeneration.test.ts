@@ -1,14 +1,18 @@
+import { describe, it, expect, vi, beforeEach } from "vitest";
+
 import { SeedGenerationService } from '../../src/features/murder-mystery/services/seedGenerationService';
 import { supabase } from '../../src/lib/supabase';
+vi.mock("react-native", () => ({ Platform: { OS: "web" } }));
+
 import { MurderMysteryData } from '../../src/features/murder-mystery/types/murder-mystery';
 
 // Mock Supabase
-jest.mock('../../src/lib/supabase', () => ({
+vi.mock('../../src/lib/supabase', () => ({
   supabase: {
     functions: {
-      invoke: jest.fn()
+      invoke: vi.fn()
     },
-    from: jest.fn()
+    from: vi.fn()
   }
 }));
 
@@ -55,11 +59,11 @@ describe('SeedGenerationService Integration', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('generates a scenario via edge function', async () => {
-    (supabase.functions.invoke as jest.Mock).mockResolvedValue({
+    (supabase.functions.invoke as any).mockResolvedValue({
       data: { scenario: mockScenario },
       error: null
     });
@@ -86,7 +90,7 @@ describe('SeedGenerationService Integration', () => {
   });
 
   it('throws an error if edge function fails', async () => {
-    (supabase.functions.invoke as jest.Mock).mockResolvedValue({
+    (supabase.functions.invoke as any).mockResolvedValue({
       data: null,
       error: { message: 'Rate limit exceeded' }
     });
@@ -100,29 +104,29 @@ describe('SeedGenerationService Integration', () => {
   });
 
   it('saves scenario to session config', async () => {
-    const mockUpdate = jest.fn().mockResolvedValue({ error: null });
-    const mockEqUpdate = jest.fn().mockReturnValue({ update: mockUpdate });
+    const mockUpdate = vi.fn().mockResolvedValue({ error: null });
+    const mockEqUpdate = vi.fn().mockReturnValue({ update: mockUpdate });
     
-    const mockSingle = jest.fn().mockResolvedValue({ 
+    const mockSingle = vi.fn().mockResolvedValue({ 
       data: { config: { existing: 'value' } }, 
       error: null 
     });
-    const mockEqFetch = jest.fn().mockReturnValue({ single: mockSingle });
-    const mockSelect = jest.fn().mockReturnValue({ eq: mockEqFetch });
+    const mockEqFetch = vi.fn().mockReturnValue({ single: mockSingle });
+    const mockSelect = vi.fn().mockReturnValue({ eq: mockEqFetch });
 
-    (supabase.from as jest.Mock).mockImplementation((table: string) => {
+    (supabase.from as any).mockImplementation((table: string) => {
       if (table === 'sessions') {
         // Return object that handles both select and update chains
         return {
           select: mockSelect,
-          update: jest.fn().mockReturnValue({ eq: jest.fn().mockResolvedValue({ error: null }) })
+          update: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) })
         };
       }
       return {};
     });
 
     // Mock the update chain more specifically
-    (supabase.from as jest.Mock).mockReturnValue({
+    (supabase.from as any).mockReturnValue({
       select: mockSelect,
       update: () => ({ eq: mockUpdate })
     });

@@ -1,7 +1,9 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { testClient } from './setup';
+import { testClient, checkSupabaseReachability } from './setup';
 
-describe('Guest Mode and Web Player', () => {
+const isDBReachable = await checkSupabaseReachability();
+
+describe.skipIf(!isDBReachable)('Guest Mode and Web Player', () => {
   let inviteCode = 'TEST1234';
   let sessionId: string;
   let guestId: string;

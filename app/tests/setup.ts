@@ -5,11 +5,11 @@ import { resolve } from 'path';
 // Load .env variables
 dotenv.config({ path: resolve(__dirname, '../.env') });
 
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321';
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'dummy_key';
+// Remove the hardcoded fallback to localhost. We rely strictly on the environment configuration.
+// If the user configures a remote staging DB, this will use it without needing Docker.
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
 
-// This is a Supabase client configured for Node.js testing
-// We don't use the app's React Native specific client that depends on AsyncStorage/SecureStore
 export const testClient = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: false,
@@ -17,3 +17,16 @@ export const testClient = createClient(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: false
   }
 });
+
+// Utility to verify if the configured Supabase instance is currently reachable.
+// This allows our test suites to gracefully skip RLS/Backend tests if the DB is offline (e.g., Docker is quit)
+export const checkSupabaseReachability = async (): Promise<boolean> => {
+  if (!supabaseUrl) return false;
+  try {
+    // Ping the health endpoint
+    const response = await fetch(`${supabaseUrl}/rest/v1/`, { method: 'HEAD' });
+    return response.ok || response.status === 401; // 401 means it's up but requires auth, which is fine
+  } catch (e) {
+    return false;
+  }
+};

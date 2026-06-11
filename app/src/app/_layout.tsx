@@ -11,11 +11,12 @@ export default function RootLayout() {
     if (!initialized) return;
 
     const inAuthGroup = segments[0] === '(auth)';
+    const isSandbox = segments[0] === 'sandbox';
 
     if (isAuthenticated && inAuthGroup) {
       // Redirect away from auth screens to app
       router.replace('/(tabs)');
-    } else if (!isAuthenticated && !inAuthGroup) {
+    } else if (!isAuthenticated && !inAuthGroup && !isSandbox) {
       // Redirect unauthenticated users to welcome screen
       router.replace('/(auth)/welcome');
     }
@@ -27,6 +28,7 @@ export default function RootLayout() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="(auth)" />
+      <Stack.Screen name="sandbox" options={{ title: 'Sandbox', presentation: 'modal' }} />
     </Stack>
   );
 }

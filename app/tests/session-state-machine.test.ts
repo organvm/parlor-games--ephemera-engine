@@ -1,7 +1,9 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { testClient } from './setup';
+import { testClient, checkSupabaseReachability } from './setup';
 
-describe('Session State Machine', () => {
+const isDBReachable = await checkSupabaseReachability();
+
+describe.skipIf(!isDBReachable)('Session State Machine', () => {
   const hostEmail = `host_state_${Date.now()}@example.com`;
   let sessionId: string;
 

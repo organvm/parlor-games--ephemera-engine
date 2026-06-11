@@ -1,11 +1,15 @@
+import { describe, it, expect, vi, beforeEach } from "vitest";
+
 import { CharacterService } from '../../src/features/murder-mystery/services/characterService';
 import { supabase } from '../../src/lib/supabase';
+vi.mock("react-native", () => ({ Platform: { OS: "web" } }));
+
 import { MurderMysteryData } from '../../src/features/murder-mystery/types/murder-mystery';
 
 // Mock Supabase
-jest.mock('../../src/lib/supabase', () => ({
+vi.mock('../../src/lib/supabase', () => ({
   supabase: {
-    from: jest.fn()
+    from: vi.fn()
   }
 }));
 
@@ -52,13 +56,13 @@ describe('CharacterService Integration', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('assignCharacters', () => {
     it('assigns characters manually and updates session config', async () => {
-      const mockUpdate = jest.fn().mockReturnValue({ eq: jest.fn().mockResolvedValue({ error: null }) });
-      (supabase.from as jest.Mock).mockReturnValue({ update: mockUpdate });
+      const mockUpdate = vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) });
+      (supabase.from as any).mockReturnValue({ update: mockUpdate });
 
       const result = await CharacterService.assignCharacters('session-1', mockScenario, {
         'c1': 'user-1',
@@ -114,12 +118,12 @@ describe('CharacterService Integration', () => {
 
   describe('deliverPackets', () => {
     it('updates session status and queues notifications', async () => {
-      const mockEqSession = jest.fn().mockResolvedValue({ error: null });
-      const mockUpdateSession = jest.fn().mockReturnValue({ eq: mockEqSession });
+      const mockEqSession = vi.fn().mockResolvedValue({ error: null });
+      const mockUpdateSession = vi.fn().mockReturnValue({ eq: mockEqSession });
       
-      const mockInsertNotif = jest.fn().mockResolvedValue({ error: null });
+      const mockInsertNotif = vi.fn().mockResolvedValue({ error: null });
 
-      (supabase.from as jest.Mock).mockImplementation((table: string) => {
+      (supabase.from as any).mockImplementation((table: string) => {
         if (table === 'sessions') return { update: mockUpdateSession };
         if (table === 'notification_queue') return { insert: mockInsertNotif };
         return {};

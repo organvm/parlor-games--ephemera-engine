@@ -1,7 +1,9 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { testClient } from './setup';
+import { testClient, checkSupabaseReachability } from './setup';
 
-describe('Role Assignments & Character Preferences RLS', () => {
+const isDBReachable = await checkSupabaseReachability();
+
+describe.skipIf(!isDBReachable)('Role Assignments & Character Preferences RLS', () => {
   const hostEmail = `host_ra_${Date.now()}@example.com`;
   const guestEmail = `guest_ra_${Date.now()}@example.com`;
   const otherGuestEmail = `guest_other_ra_${Date.now()}@example.com`;

@@ -1,0 +1,135 @@
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { MurderMysteryData } from '../types/murder-mystery';
+
+interface RevealScreenProps {
+  scenario: MurderMysteryData;
+  onBack: () => void;
+}
+
+export const RevealScreen: React.FC<RevealScreenProps> = ({
+  scenario,
+  onBack
+}) => {
+  const victim = scenario.characters.find(c => c.is_victim);
+  const murderer = scenario.characters.find(c => c.is_murderer);
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={onBack} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="#fcd34d" />
+        </TouchableOpacity>
+        <Text style={styles.title}>The Reveal</Text>
+        <View style={{ width: 24 }} />
+      </View>
+
+      <ScrollView style={styles.content} contentContainerStyle={{ padding: 20 }}>
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>The Culprit</Text>
+          <Text style={styles.culpritName}>{murderer?.name || 'Unknown'}</Text>
+          <Text style={styles.detailText}><Text style={styles.label}>Victim:</Text> {victim?.name || 'Unknown'}</Text>
+          <Text style={styles.detailText}><Text style={styles.label}>Weapon:</Text> {scenario.crime.weapon}</Text>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>The Motive</Text>
+          <Text style={styles.motiveText}>{scenario.crime.motive}</Text>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Timeline of Events</Text>
+          {scenario.timeline.map((event, index) => (
+            <View key={index} style={styles.timelineEvent}>
+              <Text style={styles.timeText}>{event.time}</Text>
+              <Text style={styles.eventDesc}>{event.description}</Text>
+            </View>
+          ))}
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Red Herrings</Text>
+          <Text style={styles.motiveText}>
+            (Ensure players understand that other motives were distractions...)
+          </Text>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#111827',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#1f2937',
+  },
+  backButton: {
+    padding: 4,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#f3f4f6',
+  },
+  content: {
+    flex: 1,
+  },
+  card: {
+    backgroundColor: '#1f2937',
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 20,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fcd34d',
+    marginBottom: 12,
+  },
+  culpritName: {
+    fontSize: 28,
+    fontWeight: '900',
+    color: '#ef4444',
+    marginBottom: 16,
+  },
+  label: {
+    fontWeight: 'bold',
+    color: '#9ca3af',
+  },
+  detailText: {
+    fontSize: 16,
+    color: '#e5e7eb',
+    marginBottom: 8,
+  },
+  motiveText: {
+    fontSize: 16,
+    color: '#e5e7eb',
+    lineHeight: 24,
+  },
+  timelineEvent: {
+    flexDirection: 'row',
+    marginBottom: 16,
+  },
+  timeText: {
+    width: 80,
+    fontWeight: 'bold',
+    color: '#9ca3af',
+    fontSize: 14,
+  },
+  eventDesc: {
+    flex: 1,
+    color: '#e5e7eb',
+    fontSize: 14,
+    lineHeight: 20,
+  }
+});

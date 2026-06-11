@@ -1,5 +1,6 @@
 import { validateScenario } from '../../src/features/murder-mystery/utils/scenarioValidation';
-import { MurderMysteryData } from '../../src/features/murder-mystery/types/murder-mystery';
+import { MurderMysteryData } from '../../src/features/murder-mystery/types/scenario';
+import { describe, it, expect } from 'vitest';
 
 describe('scenarioValidation', () => {
   const createValidScenario = (): MurderMysteryData => ({

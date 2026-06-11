@@ -1,7 +1,9 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { testClient } from './setup';
+import { testClient, checkSupabaseReachability } from './setup';
 
-describe('RLS Policies', () => {
+const isDBReachable = await checkSupabaseReachability();
+
+describe.skipIf(!isDBReachable)('RLS Policies', () => {
   const hostEmail = `rls_host_${Date.now()}@example.com`;
   const guestEmail = `rls_guest_${Date.now()}@example.com`;
   let sessionId: string;

@@ -1,7 +1,9 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { testClient } from './setup';
+import { testClient, checkSupabaseReachability } from './setup';
 
-describe('Storage Buckets RLS', () => {
+const isDBReachable = await checkSupabaseReachability();
+
+describe.skipIf(!isDBReachable)('Storage Buckets RLS', () => {
   const hostEmail = `host_storage_${Date.now()}@example.com`;
   const guestEmail = `guest_storage_${Date.now()}@example.com`;
   const otherGuestEmail = `other_storage_${Date.now()}@example.com`;

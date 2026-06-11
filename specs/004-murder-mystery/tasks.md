@@ -105,9 +105,9 @@
   - Act III view: "Begin Accusations" button, submission count, "The Reveal" button, awards voting trigger
   - Emergency reference overlay (full-screen, read-only, all session data)
   - 30-second undo toast for accidental phase advances
-- [ ] T031 [US3] Create ClueDistributionScreen (tab/overlay) in `src/features/murder-mystery/screens/ClueDistributionScreen.tsx` — full clue list with tier recommendations, reorder support, distributed/pending sections
-- [ ] T032 [US3] Create RevealScreen in `src/features/murder-mystery/screens/RevealScreen.tsx` — full solution display: culprit, weapon, motive, complete timeline, red herring explanations, "who was closest"
-- [ ] T033 [US3] Write integration test in `tests/integration/gameNightDashboard.test.ts` — offline operation, act transitions, clue distribution, data persistence across app backgrounding
+- [x] T031 [US3] Create ClueDistributionScreen (tab/overlay) in `src/features/murder-mystery/screens/ClueDistributionScreen.tsx` — full clue list with tier recommendations, reorder support, distributed/pending sections
+- [x] T032 [US3] Create RevealScreen in `src/features/murder-mystery/screens/RevealScreen.tsx` — full solution display: culprit, weapon, motive, complete timeline, red herring explanations, "who was closest"
+- [x] T033 [US3] Write integration test in `tests/integration/gameNightDashboard.test.ts` — offline operation, act transitions, clue distribution, data persistence across app backgrounding
 - [ ] T034 [US3] Write E2E test in `tests/e2e/offlineGameNight.test.ts` — Maestro/Detox test: airplane mode, full 3-act walkthrough, reconnect, verify sync
 
 **Checkpoint**: Host can run a complete game night offline with all phase controls
@@ -122,13 +122,13 @@
 
 ### Implementation
 
-- [ ] T035 [P] [US4] Create `useAccusations` hook in `src/features/murder-mystery/hooks/useAccusations.ts` — submit accusation (offline-first), sealed state, reveal trigger, accusation list retrieval
-- [ ] T036 [P] [US4] Create `useAwards` hook in `src/features/murder-mystery/hooks/useAwards.ts` — vote submission (offline-first), self-vote prevention, results aggregation
-- [ ] T037 [P] [US4] Create AccusationBlock component in `src/features/murder-mystery/components/AccusationBlock.tsx` — accusation display card with accuser, target, reasoning (used in reveal and Dossier)
-- [ ] T038 [P] [US4] Create AwardCategoryCard component in `src/features/murder-mystery/components/AwardCategoryCard.tsx` — voting card per category with nominee list, single-select
-- [ ] T039 [US4] Create AccusationFormScreen in `src/features/murder-mystery/screens/AccusationFormScreen.tsx` — character selector dropdown, method text input, motive text input, submit button, "sealed" confirmation
-- [ ] T040 [US4] Create AwardsVotingScreen in `src/features/murder-mystery/screens/AwardsVotingScreen.tsx` — 5 award categories, nominee list per category (excludes self), submit all votes
-- [ ] T041 [US4] Implement API endpoints: POST `/sessions/{id}/accusations`, POST `/sessions/{id}/awards/vote`, GET `/sessions/{id}/awards/results`
+- [x] T035 [P] [US4] Create `useAccusations` hook in `src/features/murder-mystery/hooks/useAccusations.ts` — submit accusation (offline-first), sealed state, reveal trigger, accusation list retrieval
+- [x] T036 [P] [US4] Create `useAwards` hook in `src/features/murder-mystery/hooks/useAwards.ts` — vote submission (offline-first), self-vote prevention, results aggregation
+- [x] T037 [P] [US4] Create AccusationBlock component in `src/features/murder-mystery/components/AccusationBlock.tsx` — accusation display card with accuser, target, reasoning (used in reveal and Dossier)
+- [x] T038 [P] [US4] Create AwardCategoryCard component in `src/features/murder-mystery/components/AwardCategoryCard.tsx` — voting card per category with nominee list, single-select
+- [x] T039 [US4] Create AccusationFormScreen in `src/features/murder-mystery/screens/AccusationFormScreen.tsx` — character selector dropdown, method text input, motive text input, submit button, "sealed" confirmation
+- [x] T040 [US4] Create AwardsVotingScreen in `src/features/murder-mystery/screens/AwardsVotingScreen.tsx` — 5 award categories, nominee list per category (excludes self), submit all votes
+- [x] T041 [US4] Implement API endpoints: POST `/sessions/{id}/accusations`, POST `/sessions/{id}/awards/vote`, GET `/sessions/{id}/awards/results`
 
 **Checkpoint**: Players can submit accusations and vote; host sees results on dashboard
 

@@ -91,8 +91,10 @@ const MOCK_SCENARIO: any = {
   }
 };
 
+import { EphemeraEngineVisualizer } from '../features/murder-mystery/screens/EphemeraEngineVisualizer';
+
 export default function Sandbox() {
-  const [activeTab, setActiveTab] = useState<'components'|'setup'|'review'|'customization'|'packet'|'dashboard'>('components');
+  const [activeTab, setActiveTab] = useState<'ephemera'|'components'|'setup'|'review'|'customization'|'packet'|'dashboard'>('ephemera');
   const [selectedSetting, setSelectedSetting] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   
@@ -109,6 +111,7 @@ export default function Sandbox() {
       <View style={styles.header}>
         <Text style={styles.title}>Component Sandbox</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabBar}>
+          <TouchableOpacity onPress={() => setActiveTab('ephemera')} style={[styles.tab, activeTab === 'ephemera' && styles.activeTab]}><Text style={styles.tabText}>Ephemera Engine</Text></TouchableOpacity>
           <TouchableOpacity onPress={() => setActiveTab('components')} style={[styles.tab, activeTab === 'components' && styles.activeTab]}><Text style={styles.tabText}>Components</Text></TouchableOpacity>
           <TouchableOpacity onPress={() => setActiveTab('setup')} style={[styles.tab, activeTab === 'setup' && styles.activeTab]}><Text style={styles.tabText}>Setup</Text></TouchableOpacity>
           <TouchableOpacity onPress={() => setActiveTab('review')} style={[styles.tab, activeTab === 'review' && styles.activeTab]}><Text style={styles.tabText}>Review</Text></TouchableOpacity>
@@ -119,6 +122,12 @@ export default function Sandbox() {
       </View>
 
       <ScrollView style={styles.content}>
+        {activeTab === 'ephemera' && (
+          <View style={[styles.componentWrapper, { height: 900, padding: 0 }]}>
+            <EphemeraEngineVisualizer scenario={MOCK_SCENARIO} />
+          </View>
+        )}
+
         {activeTab === 'dashboard' && (
           <View style={styles.section}>
             <ThreeActDashboardScreen

@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
-import { testClient } from './setup';
+import { testClient, checkSupabaseReachability } from './setup';
+
+const isDBReachable = await checkSupabaseReachability();
 
 vi.mock('../src/lib/supabase', () => ({
   supabase: testClient
@@ -7,7 +9,7 @@ vi.mock('../src/lib/supabase', () => ({
 
 import { resolveInvitationToken } from '../src/services/deeplink.service';
 
-describe('DeepLink Service', () => {
+describe.skipIf(!isDBReachable)('DeepLink Service', () => {
   let hostId: string;
   let guestId: string;
   let sessionId: string;

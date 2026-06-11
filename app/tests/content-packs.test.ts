@@ -1,7 +1,9 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { testClient } from './setup';
+import { testClient, checkSupabaseReachability } from './setup';
 
-describe('Content Packs & User Purchases RLS', () => {
+const isDBReachable = await checkSupabaseReachability();
+
+describe.skipIf(!isDBReachable)('Content Packs & User Purchases RLS', () => {
   const userEmail = `player_${Date.now()}@example.com`;
   // allow-secret
   const testPassword = 'password123';

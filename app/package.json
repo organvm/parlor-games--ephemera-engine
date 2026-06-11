@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "expo-router/entry",
   "dependencies": {
+    "@expo/vector-icons": "15.1.1",
     "@hookform/resolvers": "5.4.0",
+    "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-community/netinfo": "12.0.1",
     "@react-native-google-signin/google-signin": "16.1.2",
     "@supabase/supabase-js": "2.108.1",
@@ -17,6 +19,7 @@
     "expo-keep-awake": "~56.0.3",
     "expo-linking": "~56.0.14",
     "expo-notifications": "56.0.17",
+    "expo-print": "56.0.4",
     "expo-router": "~56.2.10",
     "expo-secure-store": "~56.0.4",
     "expo-sqlite": "~56.0.5",
@@ -35,9 +38,12 @@
     "zustand": "5.0.14"
   },
   "devDependencies": {
+    "@testing-library/react": "16.3.2",
+    "@testing-library/react-native": "14.0.0",
     "@types/react": "~19.2.2",
     "@vitest/ui": "4.1.8",
     "dotenv": "17.4.2",
+    "jsdom": "29.1.1",
     "typescript": "~6.0.3",
     "vitest": "4.1.8"
   },

@@ -1,7 +1,9 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { testClient } from './setup';
+import { testClient, checkSupabaseReachability } from './setup';
 
-describe('Authentication Flow', () => {
+const isDBReachable = await checkSupabaseReachability();
+
+describe.skipIf(!isDBReachable)('Authentication Flow', () => {
   const testEmail = `test_user_${Date.now()}@example.com`;
   const testPassword = 'TestPassword123!';
 
