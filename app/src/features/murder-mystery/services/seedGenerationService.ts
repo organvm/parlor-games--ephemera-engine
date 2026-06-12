@@ -27,18 +27,15 @@ export class SeedGenerationService {
         },
       });
 
-      if (error) {
-        throw new Error(error.message || 'Failed to generate scenario');
-      }
-
-      if (!data || !data.scenario) {
-        throw new Error('Invalid response from generation service');
+      if (error || !data || !data.scenario) {
+        console.warn('API Generation failed, falling back to curated seed:', error);
+        return await import('../data/curatedSeeds').then(m => m.getCuratedSeed(params.playerCount));
       }
 
       return data.scenario as MurderMysteryData;
     } catch (err: any) {
-      console.error('SeedGenerationService.generateScenario error:', err);
-      throw new Error(err.message || 'An unexpected error occurred during generation');
+      console.warn('SeedGenerationService.generateScenario error, using fallback:', err);
+      return await import('../data/curatedSeeds').then(m => m.getCuratedSeed(params.playerCount));
     }
   }
 

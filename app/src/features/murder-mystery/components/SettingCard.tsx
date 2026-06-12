@@ -22,9 +22,13 @@ export const SettingCard: React.FC<SettingCardProps> = ({
 }) => {
   return (
     <TouchableOpacity 
-      style={[styles.card, selected && styles.cardSelected]} 
+      style={[styles.card, selected && styles.cardSelected, { minHeight: 48 }]} 
       onPress={onSelect}
       activeOpacity={0.8}
+      accessible={true}
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
+      accessibilityLabel={`${title}, Era: ${era}, Location: ${location}. Tension: ${tension}. ${description}`}
     >
       <View style={styles.header}>
         <Text style={styles.title}>{title}</Text>

@@ -1,79 +1,13 @@
 {
-  "session": {
-    "id": "sess-ca-001",
-    "title": "The Sunday Confessions",
-    "date": "2026-03-15",
-    "host": "Eleanor Voss",
-    "location": "The Bramley House, London"
+  "config": {
+    "id": "123",
+    "format": "digital",
+    "layout": "grid"
   },
-  "questionSet": "Ur-Proust 1886",
-  "players": [
-    { "id": "p1", "name": "Eleanor Voss" },
-    { "id": "p2", "name": "James Harrington" },
-    { "id": "p3", "name": "Suki Nakamura" },
-    { "id": "p4", "name": "David Chen" },
-    { "id": "p5", "name": "Anya Petrov" }
+  "entries": [
+    { "id": "1", "questionId": "q1", "playerId": "p1", "answerText": "A1" }
   ],
-  "questions": [
-    { "id": "q1", "text": "What is your idea of perfect happiness?" },
-    { "id": "q2", "text": "What is your greatest fear?" },
-    { "id": "q3", "text": "What is the trait you most deplore in yourself?" },
-    { "id": "q4", "text": "What is the trait you most deplore in others?" },
-    { "id": "q5", "text": "Which living person do you most admire?" },
-    { "id": "q6", "text": "What is your greatest extravagance?" },
-    { "id": "q7", "text": "What do you consider the most overrated virtue?" },
-    { "id": "q8", "text": "On what occasion do you lie?" }
-  ],
-  "answers": [
-    { "playerId": "p1", "questionId": "q1", "text": "A long afternoon in the garden with nowhere to be, the light going gold, a book I've already read but love enough to reread. Happiness is never about arriving — it's about forgetting you were traveling." },
-    { "playerId": "p2", "questionId": "q1", "text": "Being useful. I know that sounds desperately dull, but I mean it. The feeling that something I built or fixed or said actually mattered to someone. That's the closest I get." },
-    { "playerId": "p3", "questionId": "q1", "text": "Sitting in a darkened cinema before the film starts. That moment of pure potential, when the story could go anywhere. I chase that feeling in everything I do." },
-    { "playerId": "p4", "questionId": "q1", "text": "Cooking a meal for people I love while music plays and no one checks the time. The kind of evening where you suddenly realize it's midnight and nobody wants to leave." },
-    { "playerId": "p5", "questionId": "q1", "text": "Running through fresh snow in a city that doesn't know me. Anonymity and beauty at the same time. Perfect happiness is always temporary — that's what makes it perfect." },
-
-    { "playerId": "p1", "questionId": "q2", "text": "Irrelevance. Not death — I've made my peace with that. But the idea of becoming background noise, of speaking and having no one turn their head." },
-    { "playerId": "p2", "questionId": "q2", "text": "That I've already peaked and didn't notice. That the best conversation I'll ever have, the best idea I'll ever contribute, already happened years ago on some Tuesday I can't recall." },
-    { "playerId": "p3", "questionId": "q2", "text": "Blindness. Not metaphorical — actual, literal blindness. I think in images. Take those away and I don't know who I am anymore." },
-    { "playerId": "p4", "questionId": "q2", "text": "Losing my mother's recipe book. It sounds trivial but it's the only thing of hers I have. The pages are stained with decades of oil and turmeric. It's more memoir than cookbook." },
-
-    { "playerId": "p1", "questionId": "q3", "text": "Vanity, though I dress it up as 'attention to detail.' I have spent more hours than I care to admit choosing the right pen for a letter no one will keep." },
-    { "playerId": "p2", "questionId": "q3", "text": "Impatience. I finish other people's sentences. I skip to the last chapter. I once left a wedding during the vows because the officiant was meandering." },
-    { "playerId": "p5", "questionId": "q3", "text": "Coldness. I can walk away from almost anything — relationships, cities, careers — without looking back. People mistake it for strength. It isn't." },
-
-    { "playerId": "p1", "questionId": "q4", "text": "Performative humility. The false 'Oh, it was nothing' from someone who clearly spent weeks on a task. Just own the effort." },
-    { "playerId": "p3", "questionId": "q4", "text": "Cruelty disguised as honesty. 'I'm just being real' is the battle cry of every bully who learned a vocabulary." },
-    { "playerId": "p4", "questionId": "q4", "text": "Incuriosity. Meeting someone who has no questions about the world, who never wonders why the sky is that particular blue at dusk. That absence frightens me." },
-
-    { "playerId": "p2", "questionId": "q5", "text": "My daughter. She's eleven and already braver than I've ever been. She corrected her teacher about climate data last week, with sources. I would have stayed quiet at forty-two." },
-    { "playerId": "p4", "questionId": "q5", "text": "My grandmother, who survived the Cultural Revolution by memorizing poetry. She says the poems kept her sane. She's ninety-three and still recites Li Bai from memory every morning." },
-    { "playerId": "p5", "questionId": "q5", "text": "Ursula K. Le Guin, if she were still alive. Since she isn't — my neighbor Maria, who fostered fourteen children over thirty years and never once called herself a hero." },
-
-    { "playerId": "p1", "questionId": "q6", "text": "First editions. I own a 1925 Gatsby that I've never read because I'm terrified of cracking the spine. The extravagance isn't the money — it's the absurdity of owning a book you won't open." },
-    { "playerId": "p3", "questionId": "q6", "text": "Travel. I'll skip meals for a month to afford a flight somewhere I've never been. My bank account is a horror show but my passport is a novel." },
-
-    { "playerId": "p2", "questionId": "q7", "text": "Loyalty. We treat it as noble but it's really just stubbornness with better PR. Loyalty to a bad idea, a bad leader, a bad relationship — that's not virtue, it's inertia." },
-    { "playerId": "p4", "questionId": "q7", "text": "Patience. Everyone says 'good things come to those who wait,' but in my experience, good things come to those who act while others are still contemplating the menu." },
-
-    { "playerId": "p1", "questionId": "q8", "text": "When someone shows me photos of their children. 'Oh, gorgeous!' I say, every single time, regardless of the evidence." },
-    { "playerId": "p3", "questionId": "q8", "text": "When I'm asked if I'm okay. The true answer is almost never appropriate for the situation." },
-    { "playerId": "p5", "questionId": "q8", "text": "At customs. 'Purpose of visit: tourism.' The truth — I'm running from the person I was in the last city — doesn't fit the form." }
-  ],
-  "completionMatrix": {
-    "p1": ["q1", "q2", "q3", "q4", "q6", "q8"],
-    "p2": ["q1", "q2", "q3", "q5", "q7"],
-    "p3": ["q1", "q2", "q4", "q6", "q8"],
-    "p4": ["q1", "q2", "q4", "q5", "q7"],
-    "p5": ["q1", "q2", "q3", "q5", "q8"]
-  },
-  "player": {
-    "id": "p3",
-    "name": "Suki Nakamura"
-  },
-  "question": {
-    "id": "q1",
-    "text": "What is your idea of perfect happiness?"
-  },
-  "playerAnswer": "Sitting in a darkened cinema before the film starts. That moment of pure potential, when the story could go anywhere. I chase that feeling in everything I do.",
-  "proustAnswer": "My idea of happiness has changed over the years. Once it was to be surrounded by nature and the people I love. Now I think true happiness lies in the life of the mind — in reading, in reflection, in the quiet hour before sleep when the day's impressions arrange themselves into meaning.",
-  "questionLineage": "This question first appeared in an English 'confession album' circa 1860, a parlor game popular among Victorian women. Young Marcel Proust answered a version of it twice — first at age 13 in 1884 ('To live near all those I love, with the beauties of nature') and again at 20 in 1892, where his answer shifted toward intellectual pleasures. The question has appeared in every major adaptation since."
+  "contributions": [
+    { "id": "1", "playerId": "p1", "archetype": "the_confessor" }
+  ]
 }

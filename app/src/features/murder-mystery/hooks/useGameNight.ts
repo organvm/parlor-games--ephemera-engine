@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { MurderMysteryData } from '../types/murder-mystery';
 import { GameNightService } from '../services/gameNightService';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { MMKV } from 'react-native-mmkv';
+
+const storage = new MMKV();
 
 export const useGameNight = (sessionId: string, initialScenario: MurderMysteryData) => {
   const [scenario, setScenario] = useState<MurderMysteryData>(initialScenario);
@@ -10,9 +12,9 @@ export const useGameNight = (sessionId: string, initialScenario: MurderMysteryDa
 
   // Load from local storage on mount if it exists and is newer
   useEffect(() => {
-    const loadLocalData = async () => {
+    const loadLocalData = () => {
       try {
-        const localDataString = await AsyncStorage.getItem(`@murder_mystery_scenario_${sessionId}`);
+        const localDataString = storage.getString(`mm_scenario_${sessionId}`);
         if (localDataString) {
           const localData = JSON.parse(localDataString) as MurderMysteryData;
           

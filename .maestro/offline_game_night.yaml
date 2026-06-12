@@ -1,0 +1,16 @@
+appId: com.organvm.ephemera
+---
+- launchApp
+- tapOn: "Murder Mystery"
+- tapOn: "Resume Game"
+# Turn off network here via maestro specific commands
+- runScript: "scripts/disableNetwork.js"
+- tapOn: "Advance Act"
+- assertVisible: "Act 2"
+# Ensures local MMKV updates the UI instantly even offline
+- assertVisible: "Offline Sync Pending"
+- runScript: "scripts/enableNetwork.js"
+# Wait for background sync
+- extendedWaitUntil:
+    notVisible: "Offline Sync Pending"
+    timeout: 10000

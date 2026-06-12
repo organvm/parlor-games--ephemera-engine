@@ -18,7 +18,7 @@ export const AwardCategoryCard: React.FC<AwardCategoryCardProps> = ({
 }) => {
   return (
     <View style={styles.container}>
-      <Text style={styles.categoryTitle}>{category}</Text>
+      <Text style={styles.categoryTitle} accessibilityRole="header">{category}</Text>
       
       <View style={styles.nomineeList}>
         {nominees.map(nominee => {
@@ -29,9 +29,14 @@ export const AwardCategoryCard: React.FC<AwardCategoryCardProps> = ({
               key={nominee.id}
               style={[
                 styles.nomineeRow,
-                isSelected && styles.nomineeRowSelected
+                isSelected && styles.nomineeRowSelected,
+                { minHeight: 48 }
               ]}
               onPress={() => onSelect(nominee.id)}
+              accessible={true}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: isSelected }}
+              accessibilityLabel={`Nominate ${nominee.name}, ${nominee.occupation}`}
             >
               <Text style={[
                 styles.nomineeName,

@@ -129,13 +129,13 @@ Milieu: ${milieu || 'Any'}
 Tension: ${tension || 'Any'}
 Player Count: ${player_count} (meaning ${player_count} living suspects + 1 victim)`;
 
-    let attempt = 0;
     let generatedScenario = null;
     let lastError = null;
 
-    while (attempt < 3 && !generatedScenario) {
-      attempt++;
+    // Model 1: Anthropic Claude
+    if (!generatedScenario) {
       try {
+        console.log('Attempting generation with Anthropic...');
         const message = await anthropic.messages.create({
           model: "claude-3-5-sonnet-20241022",
           max_tokens: 4000,
@@ -150,36 +150,65 @@ Player Count: ${player_count} (meaning ${player_count} living suspects + 1 victi
         const jsonStart = content.indexOf('{');
         const jsonEnd = content.lastIndexOf('}') + 1;
         
-        if (jsonStart === -1 || jsonEnd === 0) {
-          throw new Error("No JSON object found in response");
+        if (jsonStart !== -1 && jsonEnd !== 0) {
+          const parsed = JSON.parse(content.substring(jsonStart, jsonEnd));
+          generatedScenario = parsed;
+        } else {
+          throw new Error("No JSON object found in Anthropic response");
         }
-
-        const jsonString = content.substring(jsonStart, jsonEnd);
-        const parsed = JSON.parse(jsonString);
-
-        // Basic validation
-        if (!parsed.characters || !Array.isArray(parsed.characters)) throw new Error("Missing characters array");
-        if (!parsed.crime) throw new Error("Missing crime object");
-        
-        const victims = parsed.characters.filter((c: any) => c.is_victim);
-        const murderers = parsed.characters.filter((c: any) => c.is_murderer);
-        
-        if (victims.length !== 1) throw new Error(`Expected exactly 1 victim, got ${victims.length}`);
-        if (murderers.length !== 1) throw new Error(`Expected exactly 1 murderer, got ${murderers.length}`);
-        if (victims[0].id === murderers[0].id) throw new Error("Victim and murderer cannot be the same");
-
-        generatedScenario = parsed;
       } catch (err: any) {
         lastError = err.message;
-        console.error(`Attempt ${attempt} failed:`, err);
+        console.error(`Anthropic attempt failed:`, err);
+      }
+    }
+
+    // Model 2: OpenAI Fallback
+    if (!generatedScenario) {
+      try {
+        console.log('Attempting fallback generation with OpenAI...');
+        const openAiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${Deno.env.get("OPENAI_API_KEY") || ''}` // allow-secret
+          },
+          body: JSON.stringify({
+            model: "gpt-4o",
+            messages: [
+              { role: "system", content: SYSTEM_PROMPT },
+              { role: "user", content: userPrompt }
+            ],
+            temperature: 0.7,
+            response_format: { type: "json_object" }
+          })
+        });
+
+        if (!openAiResponse.ok) {
+          throw new Error(`OpenAI API Error: ${openAiResponse.statusText}`);
+        }
+
+        const data = await openAiResponse.json();
+        const content = data.choices[0]?.message?.content || '';
+        generatedScenario = JSON.parse(content);
+      } catch (err: any) {
+        lastError = err.message;
+        console.error(`OpenAI fallback failed:`, err);
       }
     }
 
     if (!generatedScenario) {
-      return new Response(JSON.stringify({ error: "Failed to generate valid scenario", details: lastError }), {
+      return new Response(JSON.stringify({ error: "Failed to generate valid scenario via multiple APIs", details: lastError }), {
         status: 500,
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
       });
+    }
+
+    // Basic validation
+    if (!generatedScenario.characters || !Array.isArray(generatedScenario.characters)) {
+      return new Response(JSON.stringify({ error: "Missing characters array" }), { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } });
+    }
+    if (!generatedScenario.crime) {
+      return new Response(JSON.stringify({ error: "Missing crime object" }), { status: 500, headers: { 'Access-Control-Allow-Origin': '*' } });
     }
 
     // Log the generation

@@ -55,7 +55,7 @@ export const ThreeActDashboardScreen: React.FC<ThreeActDashboardScreenProps> = (
   };
 
   // Act Views
-  const renderAct1View = () => (
+  const renderAct1View = React.useMemo(() => (
     <View style={styles.actContainer}>
       <Text style={styles.actHeader}>Act I: The Gathering</Text>
       <Text style={styles.actDescription}>
@@ -80,9 +80,12 @@ export const ThreeActDashboardScreen: React.FC<ThreeActDashboardScreenProps> = (
         <Text style={styles.primaryButtonText}>Begin Act II</Text>
       </TouchableOpacity>
     </View>
-  );
+  ), [scenario.characters, isProcessing]);
 
-  const renderAct2View = () => (
+  const distributedCluesCount = getDistributedClues().length;
+  const totalCluesCount = scenario.clues.length;
+
+  const renderAct2View = React.useMemo(() => (
     <View style={styles.actContainer}>
       <Text style={styles.actHeader}>Act II: The Investigation</Text>
       <Text style={styles.actDescription}>
@@ -95,7 +98,7 @@ export const ThreeActDashboardScreen: React.FC<ThreeActDashboardScreenProps> = (
 
       <View style={styles.statsContainer}>
         <View style={styles.statBox}>
-          <Text style={styles.statValue}>{getDistributedClues().length} / {scenario.clues.length}</Text>
+          <Text style={styles.statValue}>{distributedCluesCount} / {totalCluesCount}</Text>
           <Text style={styles.statLabel}>Clues Found</Text>
         </View>
       </View>
@@ -115,9 +118,11 @@ export const ThreeActDashboardScreen: React.FC<ThreeActDashboardScreenProps> = (
         <Text style={styles.primaryButtonText}>Begin Act III</Text>
       </TouchableOpacity>
     </View>
-  );
+  ), [distributedCluesCount, totalCluesCount, onNavigateToClues, isProcessing]);
 
-  const renderAct3View = () => (
+  const accusationsCount = scenario.game_night.accusations?.length || 0;
+
+  const renderAct3View = React.useMemo(() => (
     <View style={styles.actContainer}>
       <Text style={styles.actHeader}>Act III: The Accusation</Text>
       <Text style={styles.actDescription}>
@@ -130,7 +135,7 @@ export const ThreeActDashboardScreen: React.FC<ThreeActDashboardScreenProps> = (
 
       <View style={styles.statsContainer}>
         <View style={styles.statBox}>
-          <Text style={styles.statValue}>{scenario.game_night.accusations?.length || 0}</Text>
+          <Text style={styles.statValue}>{accusationsCount}</Text>
           <Text style={styles.statLabel}>Submissions</Text>
         </View>
       </View>
@@ -142,7 +147,7 @@ export const ThreeActDashboardScreen: React.FC<ThreeActDashboardScreenProps> = (
         <Text style={styles.primaryButtonText}>The Reveal</Text>
       </TouchableOpacity>
     </View>
-  );
+  ), [accusationsCount, onBeginAccusations, onNavigateToReveal]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -156,9 +161,9 @@ export const ThreeActDashboardScreen: React.FC<ThreeActDashboardScreenProps> = (
       <ActProgressIndicator currentAct={displayAct} />
 
       <ScrollView style={styles.scrollContent} contentContainerStyle={{ padding: 20 }}>
-        {displayAct === 1 && renderAct1View()}
-        {displayAct === 2 && renderAct2View()}
-        {displayAct === 3 && renderAct3View()}
+        {displayAct === 1 && renderAct1View}
+        {displayAct === 2 && renderAct2View}
+        {displayAct === 3 && renderAct3View}
       </ScrollView>
 
       {undoToastVisible && (

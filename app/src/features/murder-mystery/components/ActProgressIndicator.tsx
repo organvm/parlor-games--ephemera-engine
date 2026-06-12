@@ -9,7 +9,13 @@ export const ActProgressIndicator: React.FC<ActProgressIndicatorProps> = ({ curr
   const acts = [1, 2, 3];
 
   return (
-    <View style={styles.container}>
+    <View 
+      style={styles.container}
+      accessible={true}
+      accessibilityRole="progressbar"
+      accessibilityValue={{ min: 1, max: 3, now: currentAct }}
+      accessibilityLabel={`Act ${currentAct} of 3`}
+    >
       {acts.map((act, index) => {
         const isCompleted = currentAct > act;
         const isActive = currentAct === act;

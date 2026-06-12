@@ -1,39 +1,54 @@
 import { supabase } from '../../../lib/supabase';
 import { MurderMysteryData, Character } from '../types/murder-mystery';
+import { MMKV } from 'react-native-mmkv';
+
+const storage = new MMKV();
 
 export class CharacterService {
   /**
-   * Assigns characters to participants. Can be manual or auto.
+   * Assigns multiple users (by SessionParticipation.id) to characters.
    */
   static async assignCharacters(
     sessionId: string,
     scenario: MurderMysteryData,
-    assignments: Record<string, string> // characterId -> participantId
+    assignments: Record<string, string>
   ): Promise<MurderMysteryData> {
-    const updatedCharacters = scenario.characters.map(char => ({
-      ...char,
-      assigned_to: assignments[char.id] || char.assigned_to
-    }));
+    const updatedCharacters = scenario.characters.map(char => {
+      if (assignments[char.id] !== undefined) {
+        return { ...char, assigned_to: assignments[char.id] };
+      }
+      return char;
+    });
 
     const updatedScenario: MurderMysteryData = {
       ...scenario,
       characters: updatedCharacters
     };
 
-    const { error } = await supabase
-      .from('sessions')
-      .update({ config: updatedScenario as any })
-      .eq('id', sessionId);
+    // Optimistic local save
+    const storageKey = `mm_scenario_${sessionId}`;
+    storage.set(storageKey, JSON.stringify(updatedScenario));
 
-    if (error) {
-      throw new Error(`Failed to assign characters: ${error.message}`);
+    // Try to sync with Supabase
+    try {
+      const { error } = await supabase
+        .from('sessions')
+        .update({ config: updatedScenario as any })
+        .eq('id', sessionId);
+
+      if (error) {
+        console.warn(`Failed to sync character assignments to Supabase: ${error.message}`);
+      }
+    } catch (err) {
+      console.warn('Network error while syncing character assignments', err);
     }
 
     return updatedScenario;
   }
 
   /**
-   * Auto-assigns characters based on participant count.
+   * Auto-assigns characters to participants.
+   * Simple logic: assigns in order.
    */
   static autoAssign(
     scenario: MurderMysteryData,
@@ -42,54 +57,38 @@ export class CharacterService {
     const assignments: Record<string, string> = {};
     const unassignedChars = scenario.characters.filter(c => !c.assigned_to);
     
-    // Shuffle arrays
-    const shuffledParticipants = [...participantIds].sort(() => 0.5 - Math.random());
-    const shuffledChars = [...unassignedChars].sort(() => 0.5 - Math.random());
-
-    for (let i = 0; i < Math.min(shuffledParticipants.length, shuffledChars.length); i++) {
-      assignments[shuffledChars[i].id] = shuffledParticipants[i];
+    // Assign up to the number of participants or characters
+    const count = Math.min(unassignedChars.length, participantIds.length);
+    for (let i = 0; i < count; i++) {
+      assignments[unassignedChars[i].id] = participantIds[i];
     }
-
+    
     return assignments;
   }
 
   /**
-   * Delivers character packets by triggering notifications and updating game state.
+   * Delivers character packets to all assigned players via notifications.
    */
   static async deliverPackets(
     sessionId: string,
     scenario: MurderMysteryData
   ): Promise<void> {
-    // 1. Mark characters as delivered in state (optional, could just be a status update on session)
-    const { error: sessionError } = await supabase
-      .from('sessions')
-      .update({ status: 'ACTIVE' }) // Move from SETUP to ACTIVE
-      .eq('id', sessionId);
-
-    if (sessionError) {
-      throw new Error(`Failed to update session status: ${sessionError.message}`);
-    }
-
-    // 2. Queue notifications for each assigned participant
-    const assignedCharacters = scenario.characters.filter(c => c.assigned_to);
-    
-    const notifications = assignedCharacters.map(char => ({
-      user_id: char.assigned_to,
-      type: 'CHARACTER_PACKET',
-      title: 'Your Character Packet is Ready!',
-      body: `You have been cast as ${char.name}. Open your secure briefing now.`,
-      data: { session_id: sessionId, character_id: char.id },
-      status: 'PENDING'
-    }));
+    const notifications = scenario.characters
+      .filter(c => c.assigned_to)
+      .map(char => ({
+        user_id: char.assigned_to,
+        type: 'CHARACTER_DELIVERY',
+        title: `Your Character Packet: ${char.name}`,
+        body: `You are playing ${char.name}. Open your packet to review your background and objectives.`,
+        data: { session_id: sessionId, character_id: char.id },
+        status: 'PENDING'
+      }));
 
     if (notifications.length > 0) {
-      const { error: notifyError } = await supabase
-        .from('notification_queue')
-        .insert(notifications);
-
-      if (notifyError) {
-        console.error('Failed to queue notifications:', notifyError);
-        // We don't throw here to avoid failing the whole transaction if only notifs fail
+      const { error } = await supabase.from('notification_queue').insert(notifications);
+      if (error) {
+        console.error('Failed to deliver character packets:', error.message);
+        throw new Error(`Failed to deliver character packets: ${error.message}`);
       }
     }
   }

@@ -14,7 +14,12 @@ export const AccusationBlock: React.FC<AccusationBlockProps> = ({
   targetName = 'Unknown Target',
 }) => {
   return (
-    <View style={styles.container}>
+    <View 
+      style={[styles.container, { minHeight: 48 }]}
+      accessible={true}
+      accessibilityRole="text"
+      accessibilityLabel={`${accuserName} accuses ${targetName}. Method: ${accusation.method}. Motive: ${accusation.motive}.`}
+    >
       <Text style={styles.header}>
         <Text style={styles.accuser}>{accuserName}</Text> accuses <Text style={styles.target}>{targetName}</Text>
       </Text>

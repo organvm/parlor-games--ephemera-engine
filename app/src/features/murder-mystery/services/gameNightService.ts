@@ -1,18 +1,20 @@
 import { supabase } from '../../../lib/supabase';
 import { MurderMysteryData, GameNightState } from '../types/murder-mystery';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { MMKV } from 'react-native-mmkv';
+
+const storage = new MMKV();
 
 export class GameNightService {
   /**
    * Advances the game to the next Act.
-   * Uses offline-first writes: saves to AsyncStorage first, then attempts to sync with Supabase.
+   * Uses offline-first writes: saves to MMKV first, then attempts to sync with Supabase.
    */
   static async advanceAct(
     sessionId: string,
     scenario: MurderMysteryData,
     newAct: number
   ): Promise<MurderMysteryData> {
-    const actTimestamp = { act: newAct, timestamp: new Date().toISOString() };
+    const actTimestamp = { act: newAct, started_at: new Date().toISOString() };
     
     // Ensure game_night object exists
     const currentGameNight = scenario.game_night || {
@@ -37,8 +39,8 @@ export class GameNightService {
     };
 
     // Offline-first: save locally
-    const storageKey = `@murder_mystery_scenario_${sessionId}`;
-    await AsyncStorage.setItem(storageKey, JSON.stringify(updatedScenario));
+    const storageKey = `mm_scenario_${sessionId}`;
+    storage.set(storageKey, JSON.stringify(updatedScenario));
 
     // Try to sync with Supabase
     try {

@@ -1,0 +1,21 @@
+appId: com.organvm.ephemera
+---
+- launchApp
+- tapOn: "Murder Mystery"
+- tapOn: "Create New Game"
+- assertVisible: "Host Setup"
+- tapOn: "Generate Scenario"
+- assertVisible: "Review Scenario"
+- tapOn: "Approve"
+- assertVisible: "Assign Characters"
+- tapOn: "Auto-Assign"
+- tapOn: "Start Act 1"
+- assertVisible: "Act 1"
+- tapOn: "Distribute Clue"
+- tapOn: "Advance Act"
+- assertVisible: "Act 2"
+- tapOn: "Make Accusation"
+- assertVisible: "Reveal"
+- tapOn: "Write Epilogues"
+- assertVisible: "The Sealed Envelopes"
+- tapOn: "Seal & Schedule Delivery"

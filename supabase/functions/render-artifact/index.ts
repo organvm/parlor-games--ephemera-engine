@@ -46,9 +46,35 @@ serve(async (req) => {
       throw uploadError;
     }
 
-    // Update session or send distribution (T045, T053)
-    // E.g., record artifact in the session config or another table
-    // For T045 / T053: we would trigger email/push notifications here.
+    // Process specific artifact types
+    if (artifact_type === 'mm_dossier') {
+      const data = artifactPayload.data;
+      console.log(`Generated dossier for ${data.title} with outcome: ${data.outcome.murderer} murdered ${data.outcome.victim}`);
+    }
+
+    // Distribute artifact (T045: Implement artifact distribution)
+    // Fetch participants for this session to distribute the artifact to
+    const { data: participants, error: pError } = await supabase
+      .from('session_participations')
+      .select('user_id')
+      .eq('session_id', sessionId);
+
+    if (pError) {
+      console.error('Failed to fetch participants for distribution', pError);
+    } else if (participants && participants.length > 0) {
+      const { data: publicUrlData } = supabase.storage.from('ephemera').getPublicUrl(mockPdfPath);
+      
+      const notifications = participants.map((p: any) => ({
+        user_id: p.user_id,
+        type: 'ARTIFACT_DELIVERY',
+        title: `New Artifact: ${artifact_type}`,
+        body: `Your post-game artifact is ready to view.`,
+        data: { session_id: sessionId, artifact_type, url: publicUrlData.publicUrl },
+        status: 'PENDING'
+      }));
+
+      await supabase.from('notification_queue').insert(notifications);
+    }
 
     return new Response(JSON.stringify({ 
       success: true, 

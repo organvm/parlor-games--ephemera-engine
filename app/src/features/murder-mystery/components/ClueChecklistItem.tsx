@@ -21,9 +21,13 @@ export const ClueChecklistItem: React.FC<ClueChecklistItemProps> = ({
 }) => {
   return (
     <TouchableOpacity
-      style={[styles.container, isFound && styles.containerFound]}
+      style={[styles.container, isFound && styles.containerFound, { minHeight: 48 }]}
       onPress={() => onToggleFound(clueId)}
       activeOpacity={0.7}
+      accessible={true}
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked: isFound }}
+      accessibilityLabel={`${title}. Type: ${type}. ${isFound ? (foundBy ? `Found by ${foundBy}` : 'Found') : 'Not found'}`}
     >
       <View style={styles.contentRow}>
         <View style={styles.iconContainer}>

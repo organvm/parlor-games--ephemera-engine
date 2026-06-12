@@ -16,9 +16,12 @@ export function useSettingSeed(sessionId: string) {
         sessionId,
       });
       setGeneratedScenario(scenario);
+      if (scenario.setting_seed.source === 'curated') {
+        setError('Our mystery writers (AI) are currently overwhelmed. We have provided a classic curated mystery for you to play instead.');
+      }
       return scenario;
     } catch (err: any) {
-      setError(err.message || 'Failed to generate scenario');
+      setError('Failed to generate scenario and no fallbacks were available.');
       throw err;
     } finally {
       setIsGenerating(false);

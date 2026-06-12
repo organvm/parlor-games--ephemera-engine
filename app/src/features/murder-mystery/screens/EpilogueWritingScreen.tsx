@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, SafeAr
 import { Ionicons } from '@expo/vector-icons';
 import { MurderMysteryData, SealedEnvelope } from '../types/murder-mystery';
 import { supabase } from '../../../lib/supabase';
+import { ArtifactDataAssemblyService } from '../services/artifactDataAssemblyService';
 
 interface EpilogueWritingScreenProps {
   sessionId: string;
@@ -52,6 +53,21 @@ export const EpilogueWritingScreen: React.FC<EpilogueWritingScreenProps> = ({
       if (error) throw error;
       
       Alert.alert('Saved', 'Epilogues have been sealed and scheduled for delivery.');
+
+      // Trigger mm_dossier artifact generation (T044)
+      try {
+        const payload = ArtifactDataAssemblyService.assembleDossierPayload(sessionId, updatedScenario);
+        const { error: invokeError } = await supabase.functions.invoke('render-artifact', {
+          body: { sessionId, artifactPayload: payload }
+        });
+        
+        if (invokeError) {
+          console.error('Failed to trigger dossier artifact generation:', invokeError);
+        }
+      } catch (artifactErr) {
+        console.error('Artifact generation error:', artifactErr);
+      }
+      
     } catch (e) {
       console.error('Failed to save epilogues', e);
       Alert.alert('Error', 'Failed to save epilogues.');

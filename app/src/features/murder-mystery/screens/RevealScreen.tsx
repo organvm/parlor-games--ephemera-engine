@@ -40,9 +40,9 @@ export const RevealScreen: React.FC<RevealScreenProps> = ({
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Timeline of Events</Text>
-          {scenario.timeline.map((event, index) => (
+          {scenario.crime?.timeline?.map((event, index) => (
             <View key={index} style={styles.timelineEvent}>
-              <Text style={styles.timeText}>{event.time}</Text>
+              <Text style={styles.timeText}>Event {event.order}</Text>
               <Text style={styles.eventDesc}>{event.description}</Text>
             </View>
           ))}

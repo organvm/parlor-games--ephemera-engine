@@ -1,6 +1,8 @@
 import { supabase } from '../../../lib/supabase';
 import { MurderMysteryData, GameNightState } from '../types/murder-mystery';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { MMKV } from 'react-native-mmkv';
+
+const storage = new MMKV();
 
 export class ClueService {
   /**
@@ -38,9 +40,9 @@ export class ClueService {
       game_night: updatedGameNight
     };
 
-    // Offline-first
-    const storageKey = `@murder_mystery_scenario_${sessionId}`;
-    await AsyncStorage.setItem(storageKey, JSON.stringify(updatedScenario));
+    // Optimistic local save
+    const storageKey = `mm_scenario_${sessionId}`;
+    storage.set(storageKey, JSON.stringify(updatedScenario));
 
     // Try to sync
     try {

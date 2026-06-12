@@ -10,6 +10,7 @@ type QueuedAction = {
   type: 'CONTRIBUTION_SUBMIT' | 'RSVP_SUBMIT' | 'MM_SYNC_CONFIG';
   payload: any;
   timestamp: number;
+  retryCount?: number;
 };
 
 export const syncQueue = {
@@ -44,8 +45,11 @@ export const syncQueue = {
     const queue = syncQueue.getQueue();
     if (queue.length === 0) return;
 
+    let updatedQueue = [...queue];
+
     // Process queue
-    for (const action of queue) {
+    for (let i = 0; i < updatedQueue.length; i++) {
+      const action = updatedQueue[i];
       try {
         if (action.type === 'CONTRIBUTION_SUBMIT') {
           await supabase.from('contributions').upsert(action.payload, { onConflict: 'session_id,participant_id' });
@@ -62,7 +66,23 @@ export const syncQueue = {
         syncQueue.clearAction(action.id);
       } catch (e) {
         console.error('Failed to sync action', action, e);
-        // We leave it in the queue for the next retry
+        
+        // Exponential backoff logic (1s, 2s, 4s... max 60s)
+        const retryCount = action.retryCount || 0;
+        const nextDelay = Math.min(60000, 1000 * Math.pow(2, retryCount));
+        
+        // Update retry count in storage
+        const currentQueue = syncQueue.getQueue();
+        const actionIndex = currentQueue.findIndex(a => a.id === action.id);
+        if (actionIndex !== -1) {
+          currentQueue[actionIndex].retryCount = retryCount + 1;
+          storage.set(QUEUE_KEY, JSON.stringify(currentQueue));
+        }
+
+        // Schedule next sync attempt based on backoff
+        setTimeout(() => {
+          syncQueue.attemptSync();
+        }, nextDelay);
       }
     }
   }

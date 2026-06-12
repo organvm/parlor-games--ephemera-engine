@@ -25,7 +25,13 @@ export const CharacterEntry: React.FC<CharacterEntryProps> = ({
   const Container = onPress ? TouchableOpacity : View;
 
   return (
-    <Container style={styles.card} onPress={onPress}>
+    <Container 
+      style={[styles.card, { minHeight: 48 }]} 
+      onPress={onPress}
+      accessible={true}
+      accessibilityRole={onPress ? 'button' : 'text'}
+      accessibilityLabel={`Character: ${character.name}. Occupation: ${character.occupation}. ${assignedGuestName ? `Played by ${assignedGuestName}.` : ''} ${character.personality}`}
+    >
       <View style={styles.header}>
         <View style={styles.mugshot}>
           <Text style={styles.mugshotText}>{initials}</Text>
