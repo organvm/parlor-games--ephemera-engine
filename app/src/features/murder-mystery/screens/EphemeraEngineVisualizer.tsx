@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { MurderMysteryData } from '../types/murder-mystery';
-import { murderMysteryArtifactService } from '../services/murderMysteryArtifactService';
+import { ephemeraPrintService } from '../services/ephemeraPrintService';
 
 interface EphemeraEngineVisualizerProps {
   scenario: MurderMysteryData;
@@ -13,217 +13,31 @@ interface EphemeraEngineVisualizerProps {
 export const EphemeraEngineVisualizer: React.FC<EphemeraEngineVisualizerProps> = ({ scenario }) => {
   const [activeArtifact, setActiveArtifact] = useState<'dossier' | 'menu' | 'envelope' | 'report'>('dossier');
   
-  const dossierData = murderMysteryArtifactService.assembleDossierData(scenario);
-  const menuData = murderMysteryArtifactService.assembleMenuData(scenario);
-  const reportData = murderMysteryArtifactService.assembleFinalReportData(scenario);
-  // Pick the first character's envelope for visualization
-  const characterId = scenario.characters[0]?.id;
-  const envelopeData = characterId ? murderMysteryArtifactService.assembleSealedEnvelopeData(scenario, characterId) : null;
-
   const generateHTML = (artifactType: string) => {
-    // Generate beautiful HTML for PDF printing based on the artifact type
-    if (artifactType === 'dossier') {
-      return `
-        <html>
-          <head>
-            <style>
-              body { font-family: 'Courier New', Courier, monospace; padding: 40px; background-color: #fdfbf7; color: #1a1a1a; }
-              .header { text-align: center; border-bottom: 2px solid #1a1a1a; padding-bottom: 20px; margin-bottom: 30px; }
-              .title { font-size: 32px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
-              .stamp { color: #8b0000; font-size: 24px; font-weight: bold; border: 3px solid #8b0000; padding: 10px; display: inline-block; transform: rotate(-5deg); margin: 20px 0; }
-              .section { margin-bottom: 30px; }
-              .section-title { font-size: 20px; font-weight: bold; background-color: #1a1a1a; color: white; padding: 5px 10px; display: inline-block; margin-bottom: 15px; }
-              .content { line-height: 1.6; }
-              .character-box { border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; background-color: white; }
-            </style>
-          </head>
-          <body>
-            <div class="header">
-              <div class="title">${dossierData.title}</div>
-              <div class="stamp">TOP SECRET // CONFIDENTIAL</div>
-            </div>
-            
-            <div class="section">
-              <div class="section-title">CASE OVERVIEW: THE CRIME</div>
-              <div class="content">
-                <strong>Victim:</strong> ${dossierData.crime.victim}<br/>
-                <strong>Method:</strong> ${dossierData.crime.method}<br/>
-                <strong>Location:</strong> ${dossierData.crime.location}<br/><br/>
-                <em>${dossierData.crime.description}</em>
-              </div>
-            </div>
-
-            <div class="section">
-              <div class="section-title">SETTING BRIEFING</div>
-              <div class="content">
-                <strong>Era:</strong> ${dossierData.setting.era}<br/>
-                <strong>Locale:</strong> ${dossierData.setting.location}<br/>
-              </div>
-            </div>
-
-            <div class="section">
-              <div class="section-title">PERSONS OF INTEREST</div>
-              ${dossierData.characters.map(c => `
-                <div class="character-box">
-                  <strong>${c.name} (${c.archetype})</strong><br/>
-                  <em>Motive: ${c.motive}</em><br/><br/>
-                  Public Info: ${c.public_knowledge}
-                </div>
-              `).join('')}
-            </div>
-          </body>
-        </html>
-      `;
+    let data;
+    switch(artifactType) {
+      case 'dossier':
+        data = murderMysteryArtifactService.assembleDossierData(scenario);
+        break;
+      case 'menu':
+        data = murderMysteryArtifactService.assembleMenuData(scenario);
+        break;
+      case 'envelope':
+        const characterId = scenario.characters[0]?.id;
+        data = characterId ? murderMysteryArtifactService.assembleSealedEnvelopeData(scenario, characterId) : null;
+        break;
+      case 'report':
+        data = murderMysteryArtifactService.assembleFinalReportData(scenario);
+        break;
+      default:
+        data = {};
     }
-    
-    if (artifactType === 'menu') {
-      return `
-        <html>
-          <head>
-            <style>
-              body { font-family: 'Georgia', serif; padding: 60px; background-color: #faf9f6; text-align: center; color: #2c3e50; }
-              .border { border: 4px double #2c3e50; padding: 40px; min-height: 800px; }
-              .title { font-size: 48px; font-weight: normal; font-style: italic; margin-bottom: 40px; }
-              .subtitle { font-size: 20px; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 60px; }
-              .course { margin-bottom: 40px; }
-              .course-title { font-size: 14px; text-transform: uppercase; letter-spacing: 2px; border-bottom: 1px solid #2c3e50; display: inline-block; padding-bottom: 5px; margin-bottom: 20px; }
-              .dish { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
-              .contributor { font-size: 14px; font-style: italic; color: #7f8c8d; }
-            </style>
-          </head>
-          <body>
-            <div class="border">
-              <div class="title">${menuData.title}</div>
-              <div class="subtitle">An Evening to Remember</div>
-              
-              ${menuData.recipes?.length ? menuData.recipes.map((r, i) => `
-                <div class="course">
-                  <div class="course-title">Course ${i + 1}</div>
-                  <div class="dish">${r.recipe}</div>
-                  <div class="contributor">Prepared by ${r.contributor}</div>
-                </div>
-              `).join('') : '<div class="course"><div class="dish">A surprise awaits...</div></div>'}
-            </div>
-          </body>
-        </html>
-      `;
-    }
-
-    if (artifactType === 'envelope' && envelopeData) {
-      return `
-        <html>
-          <head>
-            <style>
-              body { font-family: 'Times New Roman', Times, serif; padding: 40px; background-color: #e8dcc4; color: #3d2b1f; }
-              .wax-seal { text-align: center; color: #8b0000; font-size: 60px; margin-bottom: 40px; }
-              .warning { text-align: center; font-weight: bold; font-size: 20px; text-transform: uppercase; border: 2px solid #3d2b1f; padding: 15px; margin-bottom: 50px; }
-              .content { font-size: 18px; line-height: 1.8; text-align: justify; }
-              .salutation { font-size: 24px; font-style: italic; margin-bottom: 30px; }
-            </style>
-          </head>
-          <body>
-            <div class="wax-seal">♚</div>
-            <div class="warning">Do Not Open Until Act 3</div>
-            
-            <div class="salutation">${envelopeData.title}</div>
-            <div class="content">
-              ${envelopeData.envelope.content}
-              <br/><br/>
-              <strong>Condition:</strong> ${envelopeData.envelope.condition}
-            </div>
-          </body>
-        </html>
-      `;
-    }
-    
-    if (artifactType === 'report') {
-      return `
-        <html>
-          <head>
-            <style>
-              body { font-family: 'Courier New', Courier, monospace; padding: 40px; background-color: #fdfbf7; color: #1a1a1a; }
-              .header { text-align: center; border-bottom: 2px solid #1a1a1a; padding-bottom: 20px; margin-bottom: 30px; }
-              .title { font-size: 32px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
-              .section { margin-bottom: 30px; }
-              .section-title { font-size: 20px; font-weight: bold; background-color: #1a1a1a; color: white; padding: 5px 10px; display: inline-block; margin-bottom: 15px; }
-              .content { line-height: 1.6; }
-              .winner-box { border: 2px solid #d4af37; padding: 15px; margin-bottom: 15px; background-color: #fff9e6; text-align: center; }
-              .winner-category { font-size: 18px; font-weight: bold; color: #8b6508; }
-              .winner-name { font-size: 24px; margin-top: 10px; }
-              .winner-votes { font-size: 14px; color: #666; margin-top: 5px; }
-              .accusation-box { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
-            </style>
-          </head>
-          <body>
-            <div class="header">
-              <div class="title">${reportData.title}</div>
-            </div>
-            
-            <div class="section">
-              <div class="section-title">THE TRUTH REVEALED</div>
-              <div class="content">
-                <strong>The Murderer:</strong> ${reportData.characters.find(c => c.is_murderer)?.name || 'Unknown'}<br/>
-                <strong>The Motive:</strong> ${reportData.crime.motive}<br/>
-              </div>
-            </div>
-
-            <div class="section">
-              <div class="section-title">AWARDS & HONORS</div>
-              ${reportData.awards.length > 0 ? reportData.awards.map((a: any) => `
-                <div class="winner-box">
-                  <div class="winner-category">${a.category}</div>
-                  <div class="winner-name">${a.winner}</div>
-                  <div class="winner-votes">with ${a.votes} votes</div>
-                </div>
-              `).join('') : '<div class="content">No awards recorded.</div>'}
-            </div>
-
-            <div class="section">
-              <div class="section-title">ACCUSATIONS RENDERED</div>
-              ${reportData.accusations.length > 0 ? reportData.accusations.map((acc: any) => {
-                const accuserName = reportData.characters.find(c => c.assigned_to === acc.player_id)?.name || 'Someone';
-                const accusedName = reportData.characters.find(c => c.id === acc.accused_character_id)?.name || 'Someone';
-                return `
-                <div class="accusation-box">
-                  <strong>${accuserName}</strong> accused <strong>${accusedName}</strong><br/>
-                  <em>Method:</em> ${acc.method}<br/>
-                  <em>Motive:</em> ${acc.motive}
-                </div>
-              `}).join('') : '<div class="content">No accusations recorded.</div>'}
-            </div>
-          </body>
-        </html>
-      `;
-    }
-    
-    return '<html><body>Error generating PDF</body></html>';
+    return ephemeraPrintService.generateHTML(artifactType, data);
   };
 
   const printArtifact = async () => {
-    try {
-      const html = generateHTML(activeArtifact);
-      
-      if (Platform.OS === 'web') {
-        await Print.printAsync({ html });
-        return;
-      }
-
-      const { uri } = await Print.printToFileAsync({ html });
-      const canShare = await Sharing.isAvailableAsync();
-      
-      if (canShare) {
-        await Sharing.shareAsync(uri, {
-          UTI: '.pdf',
-          mimeType: 'application/pdf',
-          dialogTitle: 'Share or Save Generated Ephemera'
-        });
-      } else {
-        alert(`PDF saved to: ${uri}`);
-      }
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-      alert('Failed to generate PDF. Check console.');
-    }
+    const html = generateHTML(activeArtifact);
+    await ephemeraPrintService.printHtmlAsync(html);
   };
 
   return (

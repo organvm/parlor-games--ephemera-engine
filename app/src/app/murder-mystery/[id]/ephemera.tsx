@@ -1,22 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, ActivityIndicator, Text } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSession } from '../../../hooks/use-session';
-import { EphemeraEngineVisualizer } from '../../../features/murder-mystery/screens/EphemeraEngineVisualizer';
+import { useAuth } from '../../../hooks/use-auth';
+import { FinalReportScreen } from '../../../features/murder-mystery/screens/FinalReportScreen';
 import { MurderMysteryData } from '../../../features/murder-mystery/types/murder-mystery';
 
 export default function MurderMysteryEphemera() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
   const { getSession } = useSession();
+  const { session: authSession } = useAuth();
+  
   const [scenario, setScenario] = useState<MurderMysteryData | null>(null);
+  const [hostId, setHostId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchSessionData = async () => {
       if (id) {
         const session = await getSession(id);
-        if (session && session.config) {
-          setScenario(session.config as MurderMysteryData);
+        if (session) {
+          setHostId(session.host_id);
+          if (session.config) {
+            setScenario(session.config as MurderMysteryData);
+          }
         }
       }
       setLoading(false);
@@ -24,7 +32,7 @@ export default function MurderMysteryEphemera() {
     fetchSessionData();
   }, [id]);
 
-  if (loading) {
+  if (loading || !authSession) {
     return <View style={styles.centered}><ActivityIndicator size="large" /></View>;
   }
 
@@ -32,9 +40,15 @@ export default function MurderMysteryEphemera() {
     return <View style={styles.centered}><Text>Scenario not found</Text></View>;
   }
 
+  const isHost = authSession.user.id === hostId;
+
   return (
     <View style={styles.container}>
-      <EphemeraEngineVisualizer scenario={scenario} />
+      <FinalReportScreen 
+        scenario={scenario} 
+        isHost={isHost}
+        onExit={() => router.replace('/')}
+      />
     </View>
   );
 }
