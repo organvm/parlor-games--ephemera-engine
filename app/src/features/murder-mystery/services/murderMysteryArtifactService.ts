@@ -65,5 +65,40 @@ export const murderMysteryArtifactService = {
       awards: [],
       envelope
     };
+  },
+
+  assembleFinalReportData: (scenario: MurderMysteryData): ArtifactPayload => {
+    // Tally awards to find winners
+    const awardVotes = scenario.game_night?.award_votes || [];
+    const voteTallies: Record<string, Record<string, number>> = {};
+    
+    awardVotes.forEach(vote => {
+      if (!voteTallies[vote.category]) {
+        voteTallies[vote.category] = {};
+      }
+      voteTallies[vote.category][vote.nominee_character_id] = (voteTallies[vote.category][vote.nominee_character_id] || 0) + 1;
+    });
+
+    const calculatedAwards = Object.keys(voteTallies).map(category => {
+      const nominees = voteTallies[category];
+      const winnerId = Object.keys(nominees).reduce((a, b) => nominees[a] > nominees[b] ? a : b);
+      const winnerChar = scenario.characters.find(c => c.id === winnerId);
+      return {
+        category,
+        winner: winnerChar?.name || 'Unknown',
+        votes: nominees[winnerId]
+      };
+    });
+
+    return {
+      artifact_type: 'mm_final_report',
+      title: 'The Ephemera Post-Mortem',
+      setting: scenario.setting_seed,
+      characters: scenario.characters,
+      crime: scenario.crime,
+      clues: scenario.clues,
+      accusations: scenario.game_night?.accusations || [],
+      awards: calculatedAwards
+    };
   }
 };

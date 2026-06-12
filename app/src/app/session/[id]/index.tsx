@@ -65,6 +65,24 @@ export default function SessionDetail() {
             <Text style={styles.primaryButtonText}>Start Inviting</Text>
           </TouchableOpacity>
         )}
+
+        {session.state === 'INVITING' && (
+          <TouchableOpacity 
+            style={[styles.primaryButton, styles.successButton]}
+            onPress={() => handleUpdateState('ACTIVE')}
+          >
+            <Text style={styles.primaryButtonText}>Start Game</Text>
+          </TouchableOpacity>
+        )}
+
+        {session.state === 'ACTIVE' && (
+          <TouchableOpacity 
+            style={[styles.primaryButton, styles.successButton]}
+            onPress={() => router.push(`/murder-mystery/${session.id}/play`)}
+          >
+            <Text style={styles.primaryButtonText}>Enter Game</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </ScrollView>
   );

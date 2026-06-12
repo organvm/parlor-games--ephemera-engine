@@ -11,10 +11,11 @@ interface EphemeraEngineVisualizerProps {
 }
 
 export const EphemeraEngineVisualizer: React.FC<EphemeraEngineVisualizerProps> = ({ scenario }) => {
-  const [activeArtifact, setActiveArtifact] = useState<'dossier' | 'menu' | 'envelope'>('dossier');
+  const [activeArtifact, setActiveArtifact] = useState<'dossier' | 'menu' | 'envelope' | 'report'>('dossier');
   
   const dossierData = murderMysteryArtifactService.assembleDossierData(scenario);
   const menuData = murderMysteryArtifactService.assembleMenuData(scenario);
+  const reportData = murderMysteryArtifactService.assembleFinalReportData(scenario);
   // Pick the first character's envelope for visualization
   const characterId = scenario.characters[0]?.id;
   const envelopeData = characterId ? murderMysteryArtifactService.assembleSealedEnvelopeData(scenario, characterId) : null;
@@ -135,6 +136,66 @@ export const EphemeraEngineVisualizer: React.FC<EphemeraEngineVisualizerProps> =
       `;
     }
     
+    if (artifactType === 'report') {
+      return `
+        <html>
+          <head>
+            <style>
+              body { font-family: 'Courier New', Courier, monospace; padding: 40px; background-color: #fdfbf7; color: #1a1a1a; }
+              .header { text-align: center; border-bottom: 2px solid #1a1a1a; padding-bottom: 20px; margin-bottom: 30px; }
+              .title { font-size: 32px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
+              .section { margin-bottom: 30px; }
+              .section-title { font-size: 20px; font-weight: bold; background-color: #1a1a1a; color: white; padding: 5px 10px; display: inline-block; margin-bottom: 15px; }
+              .content { line-height: 1.6; }
+              .winner-box { border: 2px solid #d4af37; padding: 15px; margin-bottom: 15px; background-color: #fff9e6; text-align: center; }
+              .winner-category { font-size: 18px; font-weight: bold; color: #8b6508; }
+              .winner-name { font-size: 24px; margin-top: 10px; }
+              .winner-votes { font-size: 14px; color: #666; margin-top: 5px; }
+              .accusation-box { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <div class="title">${reportData.title}</div>
+            </div>
+            
+            <div class="section">
+              <div class="section-title">THE TRUTH REVEALED</div>
+              <div class="content">
+                <strong>The Murderer:</strong> ${reportData.characters.find(c => c.is_murderer)?.name || 'Unknown'}<br/>
+                <strong>The Motive:</strong> ${reportData.crime.motive}<br/>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="section-title">AWARDS & HONORS</div>
+              ${reportData.awards.length > 0 ? reportData.awards.map((a: any) => `
+                <div class="winner-box">
+                  <div class="winner-category">${a.category}</div>
+                  <div class="winner-name">${a.winner}</div>
+                  <div class="winner-votes">with ${a.votes} votes</div>
+                </div>
+              `).join('') : '<div class="content">No awards recorded.</div>'}
+            </div>
+
+            <div class="section">
+              <div class="section-title">ACCUSATIONS RENDERED</div>
+              ${reportData.accusations.length > 0 ? reportData.accusations.map((acc: any) => {
+                const accuserName = reportData.characters.find(c => c.assigned_to === acc.player_id)?.name || 'Someone';
+                const accusedName = reportData.characters.find(c => c.id === acc.accused_character_id)?.name || 'Someone';
+                return `
+                <div class="accusation-box">
+                  <strong>${accuserName}</strong> accused <strong>${accusedName}</strong><br/>
+                  <em>Method:</em> ${acc.method}<br/>
+                  <em>Motive:</em> ${acc.motive}
+                </div>
+              `}).join('') : '<div class="content">No accusations recorded.</div>'}
+            </div>
+          </body>
+        </html>
+      `;
+    }
+    
     return '<html><body>Error generating PDF</body></html>';
   };
 
@@ -195,6 +256,14 @@ export const EphemeraEngineVisualizer: React.FC<EphemeraEngineVisualizerProps> =
           <Text style={[styles.menuText, activeArtifact === 'envelope' && styles.menuTextActive]}>Sealed Envelopes</Text>
         </TouchableOpacity>
 
+        <TouchableOpacity 
+          style={[styles.menuItem, activeArtifact === 'report' && styles.menuItemActive]}
+          onPress={() => setActiveArtifact('report')}
+        >
+          <Ionicons name="document-text-outline" size={20} color={activeArtifact === 'report' ? '#4338CA' : '#666'} />
+          <Text style={[styles.menuText, activeArtifact === 'report' && styles.menuTextActive]}>Final Report</Text>
+        </TouchableOpacity>
+
         <TouchableOpacity style={styles.printButton} onPress={printArtifact}>
           <Ionicons name="print-outline" size={20} color="#FFF" />
           <Text style={styles.printButtonText}>Generate PDF</Text>
@@ -207,6 +276,7 @@ export const EphemeraEngineVisualizer: React.FC<EphemeraEngineVisualizerProps> =
             {activeArtifact === 'dossier' && 'Dossier Preview'}
             {activeArtifact === 'menu' && 'Menu Preview'}
             {activeArtifact === 'envelope' && 'Envelope Preview'}
+            {activeArtifact === 'report' && 'Final Report Preview'}
           </Text>
         </View>
         
