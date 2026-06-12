@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
 import { MurderMysteryData } from '../types/murder-mystery';
 import { murderMysteryArtifactService } from '../services/murderMysteryArtifactService';
 
@@ -140,9 +141,24 @@ export const EphemeraEngineVisualizer: React.FC<EphemeraEngineVisualizerProps> =
   const printArtifact = async () => {
     try {
       const html = generateHTML(activeArtifact);
-      await Print.printAsync({
-        html,
-      });
+      
+      if (Platform.OS === 'web') {
+        await Print.printAsync({ html });
+        return;
+      }
+
+      const { uri } = await Print.printToFileAsync({ html });
+      const canShare = await Sharing.isAvailableAsync();
+      
+      if (canShare) {
+        await Sharing.shareAsync(uri, {
+          UTI: '.pdf',
+          mimeType: 'application/pdf',
+          dialogTitle: 'Share or Save Generated Ephemera'
+        });
+      } else {
+        alert(`PDF saved to: ${uri}`);
+      }
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert('Failed to generate PDF. Check console.');

@@ -9,6 +9,8 @@ import { ScenarioSetupScreen } from '../features/murder-mystery/screens/Scenario
 import { ScenarioReviewScreen } from '../features/murder-mystery/screens/ScenarioReviewScreen';
 import { CharacterPacketScreen } from '../features/murder-mystery/screens/CharacterPacketScreen';
 import { ThreeActDashboardScreen } from '../features/murder-mystery/screens/ThreeActDashboardScreen';
+import { AccusationFormScreen } from '../features/murder-mystery/screens/AccusationFormScreen';
+import { AwardsVotingScreen } from '../features/murder-mystery/screens/AwardsVotingScreen';
 
 // Mock data for sandbox
 const MOCK_SESSION = {
@@ -94,7 +96,7 @@ const MOCK_SCENARIO: any = {
 import { EphemeraEngineVisualizer } from '../features/murder-mystery/screens/EphemeraEngineVisualizer';
 
 export default function Sandbox() {
-  const [activeTab, setActiveTab] = useState<'ephemera'|'components'|'setup'|'review'|'customization'|'packet'|'dashboard'>('ephemera');
+  const [activeTab, setActiveTab] = useState<'ephemera'|'components'|'setup'|'review'|'customization'|'packet'|'dashboard'|'phase6'>('phase6');
   const [selectedSetting, setSelectedSetting] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   
@@ -118,6 +120,7 @@ export default function Sandbox() {
           <TouchableOpacity onPress={() => setActiveTab('customization')} style={[styles.tab, activeTab === 'customization' && styles.activeTab]}><Text style={styles.tabText}>Customization</Text></TouchableOpacity>
           <TouchableOpacity onPress={() => setActiveTab('packet')} style={[styles.tab, activeTab === 'packet' && styles.activeTab]}><Text style={styles.tabText}>Packet</Text></TouchableOpacity>
           <TouchableOpacity onPress={() => setActiveTab('dashboard')} style={[styles.tab, activeTab === 'dashboard' && styles.activeTab]}><Text style={styles.tabText}>Dashboard</Text></TouchableOpacity>
+          <TouchableOpacity onPress={() => setActiveTab('phase6')} style={[styles.tab, activeTab === 'phase6' && styles.activeTab]}><Text style={styles.tabText}>Phase 6</Text></TouchableOpacity>
         </ScrollView>
       </View>
 
@@ -135,8 +138,40 @@ export default function Sandbox() {
               initialScenario={MOCK_SCENARIO}
               onNavigateToClues={() => console.log('Navigate to clues')}
               onNavigateToReveal={() => console.log('Navigate to reveal')}
+              onBeginAccusations={() => setActiveTab('phase6')}
             />
           </View>
+        )}
+
+        {activeTab === 'phase6' && (
+          <>
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Accusation Submission</Text>
+              <View style={[styles.componentWrapper, { height: 600, padding: 0 }]}>
+                <AccusationFormScreen 
+                  sessionId="sandbox-session"
+                  scenario={MOCK_SCENARIO}
+                  currentPlayerId="player-1"
+                  onBack={() => alert('Back pressed')}
+                  onSubmitSuccess={() => alert('Accusation sealed!')}
+                />
+              </View>
+            </View>
+
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Awards Voting</Text>
+              <View style={[styles.componentWrapper, { height: 600, padding: 0 }]}>
+                <AwardsVotingScreen 
+                  sessionId="sandbox-session"
+                  scenario={MOCK_SCENARIO}
+                  currentPlayerId="player-1"
+                  currentPlayerCharacterId="c1"
+                  onBack={() => alert('Back pressed')}
+                  onSubmitSuccess={() => alert('Votes submitted!')}
+                />
+              </View>
+            </View>
+          </>
         )}
 
         {activeTab === 'packet' && (

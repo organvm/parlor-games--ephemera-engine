@@ -12,13 +12,15 @@ interface ThreeActDashboardScreenProps {
   initialScenario: MurderMysteryData;
   onNavigateToClues: () => void;
   onNavigateToReveal: () => void;
+  onBeginAccusations: () => void;
 }
 
 export const ThreeActDashboardScreen: React.FC<ThreeActDashboardScreenProps> = ({
   sessionId,
   initialScenario,
   onNavigateToClues,
-  onNavigateToReveal
+  onNavigateToReveal,
+  onBeginAccusations
 }) => {
   // Ambient mode wake lock
   useKeepAwake();
@@ -122,7 +124,7 @@ export const ThreeActDashboardScreen: React.FC<ThreeActDashboardScreenProps> = (
         All evidence is laid bare. Guests must lock in their final accusations and vote for awards.
       </Text>
       
-      <TouchableOpacity style={styles.actionButton}>
+      <TouchableOpacity style={styles.actionButton} onPress={onBeginAccusations}>
         <Text style={styles.actionButtonText}>Begin Accusations</Text>
       </TouchableOpacity>
 
